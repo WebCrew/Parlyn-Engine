@@ -1,0 +1,25 @@
+{
+  "name": "parlyn-engine",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Parlyn Engine - open-source 2.5D-first game engine editor",
+  "main": "src/main/main.js",
+  "license": "MIT",
+  "scripts": {
+    "build:renderer": "esbuild src/renderer/app.mjs --bundle --outfile=src/renderer/dist/app.js --format=iife --platform=browser --target=chrome120 --sourcemap",
+    "build:renderer:release": "esbuild src/renderer/app.mjs --bundle --outfile=src/renderer/dist/app.js --format=iife --platform=browser --target=chrome120 --minify",
+    "dev": "npm run build:renderer && electron .",
+    "start": "npm run dev",
+    "check": "node scripts/check.cjs"
+  },
+  "dependencies": {
+    "three": "0.185.0"
+  },
+  "devDependencies": {
+    "electron": "^43.0.0",
+    "esbuild": "^0.25.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parlyn Engine</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">
+      <img src="../../assets/branding/parlyn-logo-dark.svg" alt="Parlyn Engine" class="brand-logo">
+      <span class="brand-version">0.4.0 GitHub Preview</span>
+    </div>
+    <nav class="top-actions">
+      <button id="new-project">New Project</button>
+      <button id="open-project">Open Project</button>
+      <span class="toolbar-divider"></span>
+      <button id="new-scene">New Scene</button>
+      <button id="open-scene">Open Scene</button>
+      <button id="save-scene">Save</button>
+      <span class="toolbar-divider"></span>
+      <button id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
+      <button id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
+      <button id="play" class="primary">▶ Play</button>
+    </nav>
+  </header>
+
+  <main class="workspace">
+    <aside class="panel hierarchy-panel">
+      <div class="project-strip">
+        <span>Project</span>
+        <strong id="project-name">Loose Scene</strong>
+      </div>
+      <div class="panel-title">
+        <strong>Hierarchy</strong>
+        <div class="panel-actions">
+          <button id="delete-node" class="icon-button" title="Delete selected node" disabled>−</button>
+          <button id="add-node" class="icon-button" title="Add node">+</button>
+        </div>
+      </div>
+      <div id="hierarchy" class="hierarchy"></div>
+    </aside>
+
+    <section class="center">
+      <div class="viewport-toolbar">
+        <span class="mode-badge">2.5D First</span>
+        <button id="view-25" class="active">2.5D View</button>
+        <button id="view-3d">3D View</button>
+        <span class="toolbar-spacer"></span>
+        <span class="hint">LMB select · RMB orbit · MMB pan · wheel zoom</span>
+      </div>
+      <div id="viewport" class="viewport"></div>
+      <section class="assets panel">
+        <div class="panel-title">
+          <div><strong>Assets</strong><span id="asset-count" class="panel-subtitle">No project</span></div>
+          <button id="import-asset">Import Assets</button>
+        </div>
+        <div id="asset-grid" class="asset-grid"></div>
+      </section>
+    </section>
+
+    <aside class="panel inspector-panel">
+      <div class="panel-title"><strong>Inspector</strong><span id="selected-type" class="type-chip">None</span></div>
+      <div id="inspector-empty" class="empty-state">Select a scene object.</div>
+      <div id="inspector" hidden>
+        <section class="inspector-section">
+          <label>Name<input id="name" type="text"></label>
+        </section>
+        <section class="inspector-section">
+          <h2>Transform</h2>
+          <div class="field-caption">Position</div>
+          <div class="vector-row three"><label>X<input id="px" type="number" step="0.1"></label><label>Y<input id="py" type="number" step="0.1"></label><label>Z<input id="pz" type="number" step="0.1"></label></div>
+          <div id="rotation-3d-wrap"><div class="field-caption">Rotation °</div><div class="vector-row three"><label>X<input id="rx" type="number" step="1"></label><label>Y<input id="ry" type="number" step="1"></label><label>Z<input id="rz" type="number" step="1"></label></div></div>
+          <div id="rotation-25-wrap"><div class="field-caption">Rotation °</div><label>Angle<input id="r25" type="number" step="1"></label></div>
+          <div class="field-caption">Scale</div>
+          <div class="vector-row three"><label>X<input id="sx" type="number" step="0.1"></label><label>Y<input id="sy" type="number" step="0.1"></label><label id="sz-wrap">Z<input id="sz" type="number" step="0.1"></label></div>
+        </section>
+        <section id="depth-section" class="inspector-section">
+          <h2>2.5D Depth</h2>
+          <label>Layer<select id="depth-layer"><option value="background">Background</option><option value="gameplay">Gameplay</option><option value="foreground">Foreground</option></select></label>
+        </section>
+        <section id="light-section" class="inspector-section" hidden>
+          <h2>Light</h2>
+          <label>Kind<select id="light-kind"><option value="directional">Directional</option><option value="point">Point</option></select></label>
+          <label>Color<input id="light-color" type="color" value="#ffffff"></label>
+          <label>Intensity<input id="light-intensity" type="number" step="0.1" min="0"></label>
+        </section>
+        <section id="camera-section" class="inspector-section" hidden>
+          <h2>Camera</h2>
+          <label>Field of view<input id="camera-fov" type="number" step="1" min="1" max="179"></label>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="add-dialog" class="node-dialog">
+    <div class="dialog-head"><strong>Add Node</strong><span>Choose a first-class Parlyn scene object.</span></div>
+    <div class="node-options four">
+      <button id="add-sprite" class="node-option"><span>▱</span><strong>2.5D Sprite</strong><small>Plane with depth metadata</small></button>
+      <button id="add-billboard" class="node-option"><span>◩</span><strong>2.5D Billboard</strong><small>Faces the editor camera</small></button>
+      <button id="add-mesh" class="node-option"><span>◆</span><strong>3D Mesh</strong><small>Hybrid-scene geometry</small></button>
+      <button id="add-light" class="node-option"><span>☼</span><strong>3D Light</strong><small>Directional or point light</small></button>
+      <button id="add-camera" class="node-option"><span>▣</span><strong>3D Camera</strong><small>Scene camera foundation</small></button>
+    </div>
+    <div class="dialog-actions"><button id="cancel-add">Cancel</button></div>
+  </dialog>
+
+  <dialog id="project-dialog" class="node-dialog small-dialog">
+    <div class="dialog-head"><strong>Create Parlyn Project</strong><span>Parlyn will create scenes, assets and internal metadata folders.</span></div>
+    <div class="dialog-body"><label>Project name<input id="project-input" type="text" value="My Parlyn Project"></label></div>
+    <div class="dialog-actions"><button id="cancel-project">Cancel</button><button id="confirm-project" class="primary">Choose Folder & Create</button></div>
+  </dialog>
+
+  <footer class="status-bar"><span>Parlyn Engine v0.4.0 · GitHub Preview</span><span id="status">Starting renderer…</span></footer>
+  <script src="./dist/app.js"></script>
+</body>
+</html>

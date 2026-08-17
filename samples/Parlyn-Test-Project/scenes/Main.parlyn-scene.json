@@ -1,0 +1,79 @@
+{
+  "format": "parlyn-scene",
+  "version": 2,
+  "name": "Parlyn Test Scene",
+  "root": {
+    "id": "sample-root",
+    "name": "Parlyn Test Scene",
+    "type": "SceneRoot",
+    "enabled": true,
+    "metadata": {},
+    "children": [
+      {
+        "id": "sample-background",
+        "name": "Background Layer",
+        "type": "Sprite2_5D",
+        "enabled": true,
+        "metadata": { "width": 5.2, "height": 2.8, "color": 2704211, "opacity": 0.92 },
+        "children": [],
+        "position": { "x": -1.4, "y": 1, "z": -2.4 },
+        "rotation": 0,
+        "scale": { "x": 1.2, "y": 1.2 },
+        "depthLayer": "background"
+      },
+      {
+        "id": "sample-billboard",
+        "name": "Billboard Dummy",
+        "type": "Billboard2_5D",
+        "enabled": true,
+        "metadata": { "width": 1.4, "height": 2.4, "color": 7911679, "opacity": 0.98 },
+        "children": [],
+        "position": { "x": -0.5, "y": -0.35, "z": 0.9 },
+        "rotation": 0,
+        "scale": { "x": 0.7, "y": 0.9 },
+        "depthLayer": "gameplay"
+      },
+      {
+        "id": "sample-mesh",
+        "name": "3D Dummy",
+        "type": "Mesh3D",
+        "enabled": true,
+        "metadata": {},
+        "children": [],
+        "position": { "x": 2, "y": -0.75, "z": 0.4 },
+        "rotation": { "x": 0, "y": 25, "z": 0 },
+        "scale": { "x": 1, "y": 1, "z": 1 }
+      },
+      {
+        "id": "sample-light",
+        "name": "Key Light",
+        "type": "Light3D",
+        "enabled": true,
+        "metadata": {},
+        "children": [],
+        "position": { "x": 5, "y": 8, "z": 5 },
+        "rotation": { "x": 0, "y": 0, "z": 0 },
+        "scale": { "x": 1, "y": 1, "z": 1 },
+        "lightKind": "directional",
+        "color": "#ffffff",
+        "intensity": 2.4,
+        "castShadow": true
+      },
+      {
+        "id": "sample-camera",
+        "name": "Gameplay Camera",
+        "type": "Camera3D",
+        "enabled": true,
+        "metadata": {},
+        "children": [],
+        "position": { "x": 0, "y": 2.2, "z": 9 },
+        "rotation": { "x": -8, "y": 0, "z": 0 },
+        "scale": { "x": 1, "y": 1, "z": 1 },
+        "fov": 50,
+        "near": 0.05,
+        "far": 1000,
+        "primary": true
+      }
+    ]
+  }
+}

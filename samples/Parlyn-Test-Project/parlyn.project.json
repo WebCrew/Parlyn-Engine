@@ -1,0 +1,8 @@
+{
+  "format": "parlyn-project",
+  "version": 1,
+  "name": "Parlyn Test Project",
+  "startupScene": "scenes/Main.parlyn-scene.json",
+  "createdAt": "2026-08-17T00:00:00.000Z",
+  "updatedAt": "2026-08-17T00:00:00.000Z"
+}
