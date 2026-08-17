@@ -213,6 +213,10 @@ Parlyn is intended to remain **free to use, free to modify and royalty-free** un
 
 The project may be supported voluntarily through donations and sponsorships. Optional ecosystem services, such as a future asset marketplace, may later help fund development without putting the engine itself behind a paywall.
 
+Your support helps us continue developing Parlyn Engine as a free and open-source project. With your permission, supporters and sponsors may be acknowledged on a dedicated page, while major sponsors may also be featured at the end of this README.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A66XI3A)
+
 ## Contributing
 
 Parlyn is public and open source, but core development is intentionally maintainer-led while the architecture is young.
