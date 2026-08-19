@@ -1,6 +1,6 @@
-# Publishing Parlyn v0.4.0 on GitHub
+# Publishing Parlyn v0.5.0 on GitHub
 
-This repository is prepared as the first public Parlyn Engine preview.
+This repository is prepared for the Parlyn Engine v0.5.0 GitHub Preview update.
 
 ## Before the first push
 
@@ -32,10 +32,10 @@ npm run dev
 
 ## Suggested first release title
 
-`Parlyn Engine v0.4.0 — GitHub Preview`
+`Parlyn Engine v0.5.0 — GitHub Preview`
 
 ## Suggested release summary
 
-Parlyn Engine v0.4.0 is the first public preview of our independent 2.5D-first game engine. It includes an interactive hybrid 2.5D/3D editor, Parlyn-owned scene/node architecture, scene persistence, undo/redo, a first project-folder model, basic asset importing and first-class Sprite2_5D, Billboard2_5D, Mesh3D, Light3D and Camera3D nodes.
+Parlyn Engine v0.5.0 adds direct viewport transform gizmos and the first Parlyn module lifecycle foundation to the existing independent 2.5D-first editor. Move, Rotate and Scale now work directly in the viewport with live Inspector updates and Undo/Redo integration. A first module registry, module browser and developer example establish the extension model without locking Parlyn into mandatory workflows.
 
 This is an early foundation release. Project and scene formats may still change while the engine architecture stabilizes.

@@ -15,7 +15,10 @@ const required = [
   'src/renderer/app.mjs',
   'src/engine/project/ProjectDocument.mjs',
   'src/engine/render/RendererBackend.mjs',
-  'src/engine/render/ThreeRenderer.mjs'
+  'src/engine/render/ThreeRenderer.mjs',
+  'src/engine/modules/ModuleRegistry.mjs',
+  'src/modules/example/ExampleModule.mjs',
+  'docs/MODULE-SYSTEM.md'
 ];
 
 for (const rel of required) {
@@ -24,7 +27,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.4.0') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {

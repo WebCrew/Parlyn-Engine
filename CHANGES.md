@@ -1,44 +1,35 @@
-# Changelog
+# Parlyn Engine Changes
 
-## 0.4.0 — GitHub Preview
+## v0.5.0 — Transform Tools & Module Foundation
 
-First public-facing Parlyn milestone.
+### Editor
 
-### Added
+- Added viewport Move, Rotate and Scale gizmos.
+- Added W / E / R shortcuts and Select mode (Q / Esc).
+- Gizmo changes update the Inspector live.
+- Gizmo operations participate in the existing Undo / Redo history.
+- Added 2.5D-aware transform constraints for rotation and scale.
 
-- final Parlyn logo integrated into the editor
-- both light- and dark-background logo SVGs in `assets/branding/`
-- first folder-based project model with `parlyn.project.json`
-- project creation/opening using native Electron dialogs
-- project-local `scenes/`, `assets/` and `.parlyn/` structure
-- project-aware scene saving
-- first multi-file asset import/storage workflow
-- live Asset panel listing imported project assets
-- `Billboard2_5D` scene node behavior
-- `Light3D` node
-- `Camera3D` node
-- renderer representation for light and camera nodes
-- project format documentation
-- public roadmap
-- GitHub CI foundation
-- release-oriented minified renderer build
+### Modules
 
-### Preserved from 0.3.0
+- Added the first Parlyn `ModuleRegistry`.
+- Added validated module manifests and unique IDs.
+- Added activate/deactivate lifecycle hooks.
+- Added module state-change events.
+- Added a Modules browser to the editor.
+- Added a deliberately small official Example Module for lifecycle testing.
+- Added `docs/MODULE-SYSTEM.md`.
 
-- scene save/open
-- add/remove nodes
-- undo/redo
-- hierarchy and viewport selection
-- transform inspector
-- 2.5D/3D editor camera presets
-- renderer abstraction
+### Philosophy / roadmap
 
-## 0.3.0
+- Added developer freedom as an explicit architecture principle.
+- Official Parlyn systems are defined as optional starting points, never mandatory workflows.
+- Added future official Audio, Lighting, Navigation, Settings, Quest, Character Creator, Intro/Cutscene, Credits and AI assistance directions to the roadmap.
 
-- persistent scene save/open
-- add/remove node workflow
-- undo/redo history foundation
+## v0.4.0 — First GitHub Preview
 
-## 0.2.1
-
-- first successfully tested interactive Parlyn viewport prototype
+- Public project structure and branding.
+- Project-folder model and scene persistence.
+- Asset import/storage foundation.
+- `Sprite2_5D`, `Billboard2_5D`, `Mesh3D`, `Light3D`, and `Camera3D` scene nodes.
+- Sample project and public documentation.

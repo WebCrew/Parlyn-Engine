@@ -10,7 +10,7 @@
 
 Parlyn treats sprites, billboards, layered depth, lighting and real 3D geometry as parts of the same scene workflow. 2.5D is not a secondary editor mode: it is a first-class engine concept.
 
-> **Current status:** v0.4.0 GitHub Preview — early engine/editor foundation. APIs and project formats may still change.
+> **Current status:** v0.5.0 GitHub Preview — early engine/editor foundation. APIs and project formats may still change.
 
 ## Why Parlyn?
 
@@ -36,6 +36,8 @@ The long-term direction includes:
 - 2.5D and 3D editor camera presets
 - hierarchy selection and viewport ray-cast selection
 - transform inspector
+- viewport Move / Rotate / Scale gizmos with W / E / R shortcuts
+- live Inspector synchronization during gizmo edits
 - editor camera orbit, pan and zoom
 - undo/redo history foundation
 - native scene open/save dialogs
@@ -85,6 +87,19 @@ Initial accepted file types include:
 - WAV / OGG / MP3
 
 This is the **storage/import foundation**, not yet a complete runtime importer. Loading textures, models and audio into runtime nodes is a later milestone.
+
+
+## Module foundation
+
+v0.5.0 introduces the first Parlyn module registry and lifecycle. Modules can be registered with validated metadata and enabled or disabled through the editor. The bundled Example Module exists only to test this lifecycle; larger gameplay systems are not being pretended into existence before their foundations are ready.
+
+Parlyn's long-term rule is simple:
+
+> **Parlyn gives you a strong starting point, not a fixed path.**
+
+Official Parlyn systems will be maintained options, not mandatory workflows. Developers remain free to replace them with their own solutions or compatible community modules.
+
+See [`docs/MODULE-SYSTEM.md`](docs/MODULE-SYSTEM.md).
 
 ## Architecture
 
@@ -180,7 +195,11 @@ npm run build:renderer:release
 
 ## Editor controls
 
-- **Left mouse:** select
+- **Left mouse:** select / manipulate active gizmo
+- **Q / Esc:** Select tool
+- **W:** Move tool
+- **E:** Rotate tool
+- **R:** Scale tool
 - **Right mouse drag:** orbit editor camera
 - **Middle mouse drag:** pan
 - **Mouse wheel:** zoom
@@ -194,14 +213,14 @@ npm run build:renderer:release
 
 The next engine milestones are intentionally foundation-heavy:
 
-1. transform gizmos
-2. runtime/play-mode separation
-3. real image/model asset loaders
-4. Parlyn material system for sprites and meshes
-5. normal-map aware 2.5D lighting
-6. camera-node preview/runtime use
-7. collision and physics abstraction
-8. project scene browser and multiple scenes
+1. runtime/play-mode separation
+2. real image/model asset loaders
+3. Parlyn material system for sprites and meshes
+4. normal-map aware 2.5D lighting
+5. camera-node preview/runtime use
+6. collision and physics abstraction
+7. project scene browser and multiple scenes
+8. external module package and permission model
 9. packaging and distributable desktop builds
 10. first compact Parlyn showcase project
 
