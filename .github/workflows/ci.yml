@@ -2,7 +2,7 @@ name: Parlyn CI
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ main ]
   pull_request:
 
 jobs:
@@ -20,9 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Structural and syntax checks
         run: npm run check
