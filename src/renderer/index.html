@@ -10,7 +10,7 @@
   <header class="app-bar">
     <div class="brand">
       <img src="../../assets/branding/parlyn-logo-dark.svg" alt="Parlyn Engine" class="brand-logo">
-      <span class="brand-version">0.4.0 GitHub Preview</span>
+      <span class="brand-version">0.5.0 GitHub Preview</span>
     </div>
     <nav class="top-actions">
       <button id="new-project">New Project</button>
@@ -22,6 +22,7 @@
       <span class="toolbar-divider"></span>
       <button id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
       <button id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
+      <button id="modules" title="Parlyn modules">Modules</button>
       <button id="play" class="primary">▶ Play</button>
     </nav>
   </header>
@@ -45,10 +46,17 @@
     <section class="center">
       <div class="viewport-toolbar">
         <span class="mode-badge">2.5D First</span>
+        <div class="tool-group" aria-label="Transform tools">
+          <button id="tool-select" class="tool-button active" title="Select (Q / Esc)">Select</button>
+          <button id="tool-move" class="tool-button" title="Move (W)">Move</button>
+          <button id="tool-rotate" class="tool-button" title="Rotate (E)">Rotate</button>
+          <button id="tool-scale" class="tool-button" title="Scale (R)">Scale</button>
+        </div>
+        <span class="toolbar-divider"></span>
         <button id="view-25" class="active">2.5D View</button>
         <button id="view-3d">3D View</button>
         <span class="toolbar-spacer"></span>
-        <span class="hint">LMB select · RMB orbit · MMB pan · wheel zoom</span>
+        <span class="hint">LMB select/gizmo · RMB orbit · MMB pan · wheel zoom</span>
       </div>
       <div id="viewport" class="viewport"></div>
       <section class="assets panel">
@@ -112,7 +120,15 @@
     <div class="dialog-actions"><button id="cancel-project">Cancel</button><button id="confirm-project" class="primary">Choose Folder & Create</button></div>
   </dialog>
 
-  <footer class="status-bar"><span>Parlyn Engine v0.4.0 · GitHub Preview</span><span id="status">Starting renderer…</span></footer>
+
+  <dialog id="module-dialog" class="node-dialog module-dialog">
+    <div class="dialog-head"><strong>Parlyn Modules</strong><span>Official and third-party modules use the same lifecycle foundation. Dynamic external loading comes later.</span></div>
+    <div id="module-list" class="module-list"></div>
+    <div class="module-note"><strong>Developer freedom:</strong> Parlyn modules are options, not required workflows. Official modules may always be replaced by custom solutions.</div>
+    <div class="dialog-actions"><button id="close-modules">Close</button></div>
+  </dialog>
+
+  <footer class="status-bar"><span>Parlyn Engine v0.5.0 · GitHub Preview</span><span id="status">Starting renderer…</span></footer>
   <script src="./dist/app.js"></script>
 </body>
 </html>
