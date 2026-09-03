@@ -24,7 +24,7 @@ Parlyn code talks to a RendererBackend contract. THREE.js can be replaced or com
 
 ## Desktop application and service boundary
 
-Parlyn is distributed as an installable desktop engine. The editor owns local authoring and must remain usable without an account or network connection. A future launcher owns engine installation, updates and authentication for optional online services.
+Parlyn is distributed as an installable desktop engine. The editor owns local authoring and must remain usable without an account or network connection. A future launcher owns engine installation, updates and authentication for optional online services. `https://parlyn.org` is the canonical public and service origin; endpoint families are defined centrally and versioned rather than duplicated throughout the editor.
 
 Long-lived credentials must not cross automatically from the launcher into the editor. The editor receives only short-lived, narrowly scoped authorization when an online feature requires it. Projects, scenes, assets and the reserved `.parlyn/` directory must never contain account tokens.
 
