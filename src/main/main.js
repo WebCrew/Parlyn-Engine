@@ -1,6 +1,7 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const fs = require('fs/promises');
 const path = require('path');
+const { resolveProjectPath } = require('./projectPaths');
 
 let activeProjectRoot = null;
 
@@ -13,8 +14,26 @@ function slug(value, fallback = 'parlyn-project') {
   return safeName(value, fallback).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || fallback;
 }
 
-async function readJson(filePath) {
-  return JSON.parse(await fs.readFile(filePath, 'utf8'));
+async function readJson(filePath, label = 'JSON document') {
+  let source;
+  try {
+    source = await fs.readFile(filePath, 'utf8');
+  } catch (error) {
+    throw new Error(`Could not read ${label}: ${filePath}`, { cause:error });
+  }
+  try {
+    return JSON.parse(source);
+  } catch (error) {
+    throw new Error(`${label} contains invalid JSON: ${filePath}`, { cause:error });
+  }
+}
+
+function validateProjectManifest(project) {
+  if (!project || project.format !== 'parlyn-project') throw new Error('The selected folder is not a Parlyn project.');
+  if (Number(project.version) !== 1) throw new Error(`Unsupported Parlyn project version: ${project.version}`);
+  resolveProjectPath('.', project.startupScene, 'Startup scene');
+  resolveProjectPath('.', project.world, 'World document');
+  return project;
 }
 
 async function listAssets(projectRoot) {
@@ -56,6 +75,7 @@ ipcMain.handle('parlyn:scene:save-as', async (_event, payload) => {
   const defaultName = `${slug(payload?.name || 'scene','scene')}.parlyn-scene.json`;
   const result = await dialog.showSaveDialog({ title:'Save Parlyn Scene', defaultPath:defaultName, filters:[{ name:'Parlyn Scene', extensions:['json'] }] });
   if (result.canceled || !result.filePath) return { canceled:true };
+  if (payload?.scene?.format !== 'parlyn-scene') throw new Error('Invalid Parlyn scene document.');
   await fs.writeFile(result.filePath, JSON.stringify(payload.scene,null,2),'utf8');
   return { canceled:false, filePath:result.filePath };
 });
@@ -96,27 +116,26 @@ ipcMain.handle('parlyn:project:open', async () => {
   if (choose.canceled || !choose.filePaths[0]) return { canceled:true };
   const projectRoot=choose.filePaths[0];
   const projectFile=path.join(projectRoot,'parlyn.project.json');
-  const project=await readJson(projectFile);
-  if (project.format !== 'parlyn-project') throw new Error('The selected folder is not a Parlyn project.');
+  const project=validateProjectManifest(await readJson(projectFile, 'Parlyn project file'));
+  const scenePath=resolveProjectPath(projectRoot,project.startupScene,'Startup scene');
+  const worldPath=resolveProjectPath(projectRoot,project.world,'World document');
+  const scene=await readJson(scenePath,'Startup scene');
+  const world=await readJson(worldPath,'World document');
+  if (scene?.format !== 'parlyn-scene') throw new Error('The startup scene is not a Parlyn scene document.');
+  if (world?.format !== 'parlyn-world') throw new Error('The world file is not a Parlyn world document.');
   activeProjectRoot=projectRoot;
-  let scene=null;
-  let world=null;
-  try { scene=await readJson(path.join(projectRoot,...project.startupScene.split('/'))); } catch {}
-  if (project.world) {
-    try { world=await readJson(path.join(projectRoot,...project.world.split('/'))); } catch {}
-  }
   return { canceled:false, projectRoot, project, scene, world, assets:await listAssets(projectRoot) };
 });
 
 ipcMain.handle('parlyn:project:save-scene', async (_event, payload) => {
   if (!activeProjectRoot) return { ok:false, reason:'no-project' };
   const relativePath=payload?.relativePath || 'scenes/Main.parlyn-scene.json';
-  const target=path.resolve(activeProjectRoot, ...relativePath.split('/'));
-  if (!target.startsWith(path.resolve(activeProjectRoot)+path.sep)) throw new Error('Invalid project scene path.');
+  const target=resolveProjectPath(activeProjectRoot,relativePath,'Project scene path');
+  if (payload?.scene?.format !== 'parlyn-scene') throw new Error('Invalid Parlyn scene document.');
   await fs.mkdir(path.dirname(target),{ recursive:true });
   await fs.writeFile(target,JSON.stringify(payload.scene,null,2),'utf8');
   const projectFile=path.join(activeProjectRoot,'parlyn.project.json');
-  const project=await readJson(projectFile);
+  const project=validateProjectManifest(await readJson(projectFile,'Parlyn project file'));
   project.updatedAt=new Date().toISOString();
   await fs.writeFile(projectFile,JSON.stringify(project,null,2),'utf8');
   return { ok:true, filePath:target, relativePath };
@@ -125,8 +144,7 @@ ipcMain.handle('parlyn:project:save-scene', async (_event, payload) => {
 ipcMain.handle('parlyn:project:save-world', async (_event, payload) => {
   if (!activeProjectRoot) return { ok:false, reason:'no-project' };
   const relativePath=payload?.relativePath || 'worlds/Main.parlyn-world.json';
-  const target=path.resolve(activeProjectRoot, ...relativePath.split('/'));
-  if (!target.startsWith(path.resolve(activeProjectRoot)+path.sep)) throw new Error('Invalid project world path.');
+  const target=resolveProjectPath(activeProjectRoot,relativePath,'Project world path');
   if (payload?.world?.format !== 'parlyn-world') throw new Error('Invalid Parlyn world document.');
   await fs.mkdir(path.dirname(target),{ recursive:true });
   await fs.writeFile(target,JSON.stringify(payload.world,null,2),'utf8');
