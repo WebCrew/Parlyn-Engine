@@ -10,6 +10,7 @@ const required = [
   'assets/branding/parlyn-logo-dark.svg',
   'assets/branding/parlyn-logo-light.svg',
   'src/main/main.js',
+  'src/main/projectPaths.js',
   'src/main/preload.js',
   'src/renderer/index.html',
   'src/renderer/app.mjs',
@@ -23,7 +24,8 @@ const required = [
   'docs/MODULE-SYSTEM.md',
   'docs/SMART-SYSTEMS.md',
   'docs/AUTHENTICATION.md',
-  'scripts/check-smart-systems.mjs'
+  'scripts/check-smart-systems.mjs',
+  'scripts/check-core-persistence.mjs'
 ];
 
 for (const rel of required) {
@@ -48,5 +50,6 @@ for (const file of codeFiles) {
 }
 
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-smart-systems.mjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-persistence.mjs')], { stdio: 'inherit' });
 
 console.log(`Parlyn structure check passed (${codeFiles.length} JavaScript modules checked).`);
