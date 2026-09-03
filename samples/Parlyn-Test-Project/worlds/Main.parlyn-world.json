@@ -1,0 +1,50 @@
+{
+  "format": "parlyn-world",
+  "version": 1,
+  "name": "Forest Path Proof",
+  "seed": "parlyn-forest-proof-v1",
+  "capsules": [
+    {
+      "id": "forest-gate",
+      "name": "Forest Gate",
+      "scene": "scenes/ForestGate.parlyn-scene.json",
+      "anchors": [{ "id": "path-east", "position": { "x": 12, "y": 0, "z": 0 } }]
+    },
+    {
+      "id": "old-clearing",
+      "name": "Old Clearing",
+      "scene": "scenes/OldClearing.parlyn-scene.json",
+      "anchors": [{ "id": "path-west", "position": { "x": -10, "y": 0, "z": 1 } }]
+    }
+  ],
+  "ways": [
+    {
+      "id": "old-forest-path",
+      "from": { "capsule": "forest-gate", "anchor": "path-east" },
+      "to": { "capsule": "old-clearing", "anchor": "path-west" },
+      "seed": 24517,
+      "profile": "forest"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "split-oak",
+      "capsule": "old-clearing",
+      "position": { "x": 3, "y": 0, "z": -2 },
+      "memoryKey": "landmark.split-oak"
+    }
+  ],
+  "encounters": [
+    {
+      "id": "forest-path-first",
+      "way": "old-forest-path",
+      "seed": 731,
+      "memoryKey": "encounter.forest-path-first",
+      "variants": ["quiet-crossing", "fallen-cart", "travelling-merchant"]
+    }
+  ],
+  "memory": {
+    "landmark.split-oak": { "discovered": false },
+    "encounter.forest-path-first": { "resolved": false }
+  }
+}

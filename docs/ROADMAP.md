@@ -97,6 +97,34 @@ These are intended as maintained starting points, **not mandatory workflows**.
 - generated cache
 - pluggable importer API
 
+## Desktop distribution and optional account services
+
+- installable Parlyn Launcher and version manager
+- packaged desktop editor builds; Parlyn is not a browser application
+- offline access to installed editor versions and local projects
+- optional account sign-in using OAuth 2.0 / OpenID Connect with PKCE
+- short-lived scoped service tokens and operating-system-protected refresh credentials
+- marketplace, user library, team and cloud services kept separate from local project ownership
+- credential isolation between launcher, editor and third-party modules
+
+See [`AUTHENTICATION.md`](AUTHENTICATION.md).
+
+## Parlyn Smart Systems
+
+Committed direction, delivered in stages:
+
+- Parlyn Ways
+- Scene Capsules
+- World Memory
+- Adaptive Simulation
+- Encounter Layers
+- Parlyn Horizon
+- Parlyn Voice
+
+The first proof milestone is two authored Scene Capsules connected by a deterministic forest path, with one stable landmark and one reproducible encounter. Data foundations come before generation UI, and unfinished systems must not be presented as available.
+
+See [`SMART-SYSTEMS.md`](SMART-SYSTEMS.md).
+
 ## Later
 
 - animation workflows

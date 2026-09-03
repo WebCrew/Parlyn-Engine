@@ -3,6 +3,7 @@ export class ProjectDocument {
     name = 'Parlyn Project',
     version = 1,
     startupScene = 'scenes/Main.parlyn-scene.json',
+    world = 'worlds/Main.parlyn-world.json',
     createdAt = new Date().toISOString(),
     updatedAt = new Date().toISOString()
   } = {}) {
@@ -10,6 +11,7 @@ export class ProjectDocument {
     this.version = version;
     this.name = name;
     this.startupScene = startupScene;
+    this.world = world;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
@@ -24,6 +26,7 @@ export class ProjectDocument {
       version: this.version,
       name: this.name,
       startupScene: this.startupScene,
+      world: this.world,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

@@ -6,6 +6,7 @@ Parlyn v0.4 introduces the first project-folder convention.
 Project Root/
 ├── parlyn.project.json
 ├── scenes/
+├── worlds/
 ├── assets/
 └── .parlyn/
 ```
@@ -21,13 +22,18 @@ Example:
   "format": "parlyn-project",
   "version": 1,
   "name": "Example Project",
-  "startupScene": "scenes/Main.parlyn-scene.json"
+  "startupScene": "scenes/Main.parlyn-scene.json",
+  "world": "worlds/Main.parlyn-world.json"
 }
 ```
 
 ## `scenes/`
 
 Contains Parlyn-owned scene documents. Scene data is currently JSON while the format is young and intentionally easy to inspect.
+
+## `worlds/`
+
+Contains versioned `parlyn-world` documents for Scene Capsules, Parlyn Ways, stable landmarks, deterministic encounters and World Memory. See [`SMART-SYSTEMS.md`](SMART-SYSTEMS.md).
 
 ## `assets/`
 
