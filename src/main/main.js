@@ -80,9 +80,12 @@ ipcMain.handle('parlyn:project:create', async (_event, payload) => {
   }
   await fs.mkdir(path.join(projectRoot,'scenes'),{ recursive:true });
   await fs.mkdir(path.join(projectRoot,'assets'),{ recursive:true });
+  await fs.mkdir(path.join(projectRoot,'worlds'),{ recursive:true });
   await fs.mkdir(path.join(projectRoot,'.parlyn'),{ recursive:true });
-  const project={ format:'parlyn-project', version:1, name, startupScene:'scenes/Main.parlyn-scene.json', createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
+  const project={ format:'parlyn-project', version:1, name, startupScene:'scenes/Main.parlyn-scene.json', world:'worlds/Main.parlyn-world.json', createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
+  const world={ format:'parlyn-world', version:1, name:`${name} World`, seed:slug(name), capsules:[], ways:[], landmarks:[], encounters:[], memory:{} };
   await fs.writeFile(path.join(projectRoot,'parlyn.project.json'),JSON.stringify(project,null,2),'utf8');
+  await fs.writeFile(path.join(projectRoot,'worlds','Main.parlyn-world.json'),JSON.stringify(world,null,2),'utf8');
   if (payload?.scene) await fs.writeFile(path.join(projectRoot,'scenes','Main.parlyn-scene.json'),JSON.stringify(payload.scene,null,2),'utf8');
   activeProjectRoot=projectRoot;
   return { canceled:false, projectRoot, project, assets:await listAssets(projectRoot) };
