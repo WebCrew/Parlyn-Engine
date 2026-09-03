@@ -14,11 +14,16 @@ const required = [
   'src/renderer/index.html',
   'src/renderer/app.mjs',
   'src/engine/project/ProjectDocument.mjs',
+  'src/engine/world/WorldDocument.mjs',
+  'src/engine/world/DeterministicEncounter.mjs',
   'src/engine/render/RendererBackend.mjs',
   'src/engine/render/ThreeRenderer.mjs',
   'src/engine/modules/ModuleRegistry.mjs',
   'src/modules/example/ExampleModule.mjs',
-  'docs/MODULE-SYSTEM.md'
+  'docs/MODULE-SYSTEM.md',
+  'docs/SMART-SYSTEMS.md',
+  'docs/AUTHENTICATION.md',
+  'scripts/check-smart-systems.mjs'
 ];
 
 for (const rel of required) {
@@ -41,5 +46,7 @@ const codeFiles = walk(path.join(root, 'src')).filter((file) => /\.(mjs|js)$/.te
 for (const file of codeFiles) {
   cp.execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' });
 }
+
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-smart-systems.mjs')], { stdio: 'inherit' });
 
 console.log(`Parlyn structure check passed (${codeFiles.length} JavaScript modules checked).`);
