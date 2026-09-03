@@ -1,5 +1,15 @@
 # Parlyn Engine Changes
 
+## Unreleased — Foundation Stabilization
+
+- Added versioned Parlyn world data, World Memory and deterministic encounter foundations.
+- Connected world documents to project creation, loading and saving.
+- Added honest Foundation/Planned UI status for all Parlyn Smart Systems.
+- Defined desktop account architecture and `parlyn.org` as the canonical service origin.
+- Reorganized the roadmap into ordered development phases.
+- Added a binding foundation-first development policy and separate Idea Pool.
+
+
 ## v0.5.0 — Transform Tools & Module Foundation
 
 ### Editor
