@@ -7,6 +7,13 @@ function requireId(value, label) {
   return value;
 }
 
+function requireRelativePath(value, label) {
+  if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} requires a path.`);
+  if (value.includes('\\') || value.startsWith('/') || /^[a-z]:/i.test(value)) throw new Error(`${label} must be relative and use forward slashes.`);
+  if (value.split('/').some((part) => !part || part === '.' || part === '..')) throw new Error(`${label} contains an invalid segment.`);
+  return value;
+}
+
 function requirePoint(value, label) {
   if (!value || !['x', 'y', 'z'].every((axis) => Number.isFinite(value[axis]))) {
     throw new TypeError(`${label} requires finite x, y and z coordinates.`);
@@ -38,6 +45,7 @@ export class WorldDocument {
     this.version = 1;
     this.name = String(name);
     this.seed = String(seed);
+    if (!Array.isArray(capsules) || !Array.isArray(ways) || !Array.isArray(landmarks) || !Array.isArray(encounters)) throw new TypeError('World collections must be arrays.');
     this.capsules = structuredClone(capsules);
     this.ways = structuredClone(ways);
     this.landmarks = structuredClone(landmarks);
@@ -53,9 +61,7 @@ export class WorldDocument {
     uniqueById(this.encounters, 'encounter');
 
     for (const capsule of this.capsules) {
-      if (typeof capsule.scene !== 'string' || !capsule.scene.trim()) {
-        throw new TypeError(`Scene Capsule ${capsule.id} requires a scene path.`);
-      }
+      capsule.scene = requireRelativePath(capsule.scene, `Scene Capsule ${capsule.id}`);
       for (const anchor of capsule.anchors ?? []) {
         requireId(anchor.id, `Anchor in ${capsule.id}`);
         anchor.position = requirePoint(anchor.position, `Anchor ${anchor.id}`);
