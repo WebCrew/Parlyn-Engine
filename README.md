@@ -12,6 +12,10 @@ Parlyn treats sprites, billboards, layered depth, lighting and real 3D geometry 
 
 > **Current status:** v0.5.0 GitHub Preview — early engine/editor foundation. APIs and project formats may still change.
 
+Parlyn is an installable desktop engine, not a browser application. Local editing and locally owned projects will remain available offline. A future account and launcher will serve optional updates, marketplace, library, team and cloud features; see [`docs/AUTHENTICATION.md`](docs/AUTHENTICATION.md).
+
+The committed, staged direction for large 2.5D-first worlds is documented as **Parlyn Smart Systems**, including Parlyn Ways, Scene Capsules, World Memory, Adaptive Simulation, Encounter Layers, Parlyn Horizon and Parlyn Voice. These are planned systems, not claims about the current preview; see [`docs/SMART-SYSTEMS.md`](docs/SMART-SYSTEMS.md).
+
 ## Why Parlyn?
 
 Parlyn is being built around a simple idea: developers should be able to use the production advantages of 2.5D without giving up modern presentation or the freedom to mix in 3D.
