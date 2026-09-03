@@ -88,7 +88,7 @@ ipcMain.handle('parlyn:project:create', async (_event, payload) => {
   await fs.writeFile(path.join(projectRoot,'worlds','Main.parlyn-world.json'),JSON.stringify(world,null,2),'utf8');
   if (payload?.scene) await fs.writeFile(path.join(projectRoot,'scenes','Main.parlyn-scene.json'),JSON.stringify(payload.scene,null,2),'utf8');
   activeProjectRoot=projectRoot;
-  return { canceled:false, projectRoot, project, assets:await listAssets(projectRoot) };
+  return { canceled:false, projectRoot, project, world, assets:await listAssets(projectRoot) };
 });
 
 ipcMain.handle('parlyn:project:open', async () => {
@@ -100,8 +100,12 @@ ipcMain.handle('parlyn:project:open', async () => {
   if (project.format !== 'parlyn-project') throw new Error('The selected folder is not a Parlyn project.');
   activeProjectRoot=projectRoot;
   let scene=null;
+  let world=null;
   try { scene=await readJson(path.join(projectRoot,...project.startupScene.split('/'))); } catch {}
-  return { canceled:false, projectRoot, project, scene, assets:await listAssets(projectRoot) };
+  if (project.world) {
+    try { world=await readJson(path.join(projectRoot,...project.world.split('/'))); } catch {}
+  }
+  return { canceled:false, projectRoot, project, scene, world, assets:await listAssets(projectRoot) };
 });
 
 ipcMain.handle('parlyn:project:save-scene', async (_event, payload) => {
@@ -115,6 +119,17 @@ ipcMain.handle('parlyn:project:save-scene', async (_event, payload) => {
   const project=await readJson(projectFile);
   project.updatedAt=new Date().toISOString();
   await fs.writeFile(projectFile,JSON.stringify(project,null,2),'utf8');
+  return { ok:true, filePath:target, relativePath };
+});
+
+ipcMain.handle('parlyn:project:save-world', async (_event, payload) => {
+  if (!activeProjectRoot) return { ok:false, reason:'no-project' };
+  const relativePath=payload?.relativePath || 'worlds/Main.parlyn-world.json';
+  const target=path.resolve(activeProjectRoot, ...relativePath.split('/'));
+  if (!target.startsWith(path.resolve(activeProjectRoot)+path.sep)) throw new Error('Invalid project world path.');
+  if (payload?.world?.format !== 'parlyn-world') throw new Error('Invalid Parlyn world document.');
+  await fs.mkdir(path.dirname(target),{ recursive:true });
+  await fs.writeFile(target,JSON.stringify(payload.world,null,2),'utf8');
   return { ok:true, filePath:target, relativePath };
 });
 
