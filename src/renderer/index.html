@@ -22,6 +22,7 @@
       <span class="toolbar-divider"></span>
       <button id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
       <button id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
+      <button id="smart-systems" title="Parlyn Smart Systems">World</button>
       <button id="modules" title="Parlyn modules">Modules</button>
       <button id="play" class="primary">▶ Play</button>
     </nav>
@@ -120,6 +121,13 @@
     <div class="dialog-actions"><button id="cancel-project">Cancel</button><button id="confirm-project" class="primary">Choose Folder & Create</button></div>
   </dialog>
 
+
+  <dialog id="smart-dialog" class="node-dialog smart-dialog">
+    <div class="dialog-head"><strong>Parlyn Smart Systems</strong><span id="smart-world-name">No world loaded</span><small id="smart-world-seed"></small></div>
+    <div id="smart-list" class="smart-list"></div>
+    <div class="module-note"><strong>Data foundation:</strong> This view shows real versioned world data. Visual Ways generation and Horizon transitions follow in later stages.</div>
+    <div class="dialog-actions"><button id="save-world" disabled>Save World</button><button id="close-smart">Close</button></div>
+  </dialog>
 
   <dialog id="module-dialog" class="node-dialog module-dialog">
     <div class="dialog-head"><strong>Parlyn Modules</strong><span>Official and third-party modules use the same lifecycle foundation. Dynamic external loading comes later.</span></div>
