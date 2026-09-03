@@ -43,6 +43,27 @@ Contains source assets imported by the developer. External asset formats are not
 
 Reserved for generated caches, import metadata and other project-local internal data. Developers should not rely on its contents as a public API.
 
-## Compatibility
+## Compatibility contract v1
 
-Both the project format and scene format are versioned. Future migrations should be explicit rather than silently interpreting incompatible data.
+Every persisted Parlyn document declares a `format` and numeric `version`.
+
+| Document | Current version | Read compatibility |
+|---|---:|---|
+| `parlyn-project` | 1 | version 1 |
+| `parlyn-scene` | 2 | versions 1 and 2; version 1 is upgraded in memory and saved as version 2 |
+| `parlyn-world` | 1 | version 1 |
+
+Unknown future versions are rejected with an explicit error. Parlyn must never silently interpret an unsupported document as the current format.
+
+Project references such as `startupScene` and `world` are project-relative paths using forward slashes. Absolute paths, empty segments, backslashes and parent traversal (`..`) are invalid.
+
+## Persistence invariants
+
+- Project, scene and world documents survive a load/save roundtrip without losing supported data.
+- Scene node IDs are unique inside a scene document.
+- A scene root uses the `SceneRoot` type.
+- World collections are arrays and their stable IDs are unique.
+- Scene and world references cannot escape the selected project directory.
+- Missing, unreadable and malformed required documents produce an explicit error rather than opening a partial project.
+
+Future format migrations must be deliberate, tested and documented here.

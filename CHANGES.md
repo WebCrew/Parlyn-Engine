@@ -8,6 +8,12 @@
 - Defined desktop account architecture and `parlyn.org` as the canonical service origin.
 - Reorganized the roadmap into ordered development phases.
 - Added a binding foundation-first development policy and separate Idea Pool.
+- Added the Core Data & Persistence Contract v1.
+- Reject unsupported project, scene and world versions explicitly.
+- Validate project-relative paths and block traversal outside the project root.
+- Detect duplicate scene node IDs and invalid scene roots.
+- Replace silent project-loading failures with actionable errors.
+- Add automated project, scene and world roundtrip/error-case checks.
 
 
 ## v0.5.0 — Transform Tools & Module Foundation
