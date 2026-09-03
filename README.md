@@ -228,7 +228,7 @@ The next engine milestones are intentionally foundation-heavy:
 9. packaging and distributable desktop builds
 10. first compact Parlyn showcase project
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+See [`docs/ROADMAP.md`](docs/ROADMAP.md). Development follows the binding foundation-first scope rule in [`docs/DEVELOPMENT-POLICY.md`](docs/DEVELOPMENT-POLICY.md); new ideas remain in [`docs/IDEA-POOL.md`](docs/IDEA-POOL.md) until a formal planning review.
 
 ## Funding philosophy
 
