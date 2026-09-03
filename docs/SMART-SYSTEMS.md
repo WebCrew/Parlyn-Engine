@@ -59,4 +59,4 @@ A provider-independent dialogue, voice-generation and localization pipeline. Gen
 - **Viewport:** capsule bounds, route corridor, Horizon zones and encounter previews.
 - **Modules/Settings:** optional providers and permissions, including Parlyn Voice.
 
-The initial UI exposes only data backed by a working model. Placeholder controls must not imply that generation, simulation or voice services are complete.
+The Smart Systems overview reserves a visible place for every named system. Status badges distinguish **Foundation** systems backed by versioned data from **Planned** systems that are not operational yet. Placeholder surfaces remain informational and disabled; they must never imply that generation, simulation or voice services are complete.
