@@ -2,6 +2,21 @@
 
 Parlyn is an installable desktop engine, not a browser application. The editor and local projects must remain usable offline. A Parlyn account authenticates optional online services; it must never become a gate for opening the engine or a locally owned project.
 
+## Canonical service origin
+
+`https://parlyn.org` is and remains Parlyn's canonical public home. Public website, account, launcher, marketplace and service URLs must be derived from this origin rather than scattered hard-coded hosts.
+
+Planned URL families:
+
+- `https://parlyn.org/` — public Parlyn website
+- `https://parlyn.org/account/` — user-facing account area
+- `https://parlyn.org/store/` — Asset Store
+- `https://parlyn.org/api/v1/` — versioned service API base
+- `https://parlyn.org/oauth/` — authorization endpoints
+- `https://parlyn.org/downloads/` — launcher and engine distribution metadata
+
+These paths reserve an architectural convention; their presence in documentation does not claim that the services are already deployed. Runtime code should read service endpoints from one validated configuration source, with production defaulting to `https://parlyn.org`.
+
 ## Component boundary
 
 ```text
@@ -22,7 +37,7 @@ The launcher and editor are separate trust domains. The editor must not receive 
 ## Planned sign-in flow
 
 1. The launcher starts an OAuth 2.0 / OpenID Connect authorization-code flow with PKCE.
-2. Authentication happens in the system browser. Parlyn never receives the user's password.
+2. Authentication happens in the system browser on the canonical `https://parlyn.org` origin. Parlyn never receives the user's password.
 3. The identity service redirects to a registered loopback callback or verified `parlyn://` application link.
 4. The launcher validates state, PKCE and the returned authorization response.
 5. Access tokens are short-lived and scoped to the requested Parlyn service.
