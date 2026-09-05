@@ -24,8 +24,13 @@ const required = [
   'docs/MODULE-SYSTEM.md',
   'docs/SMART-SYSTEMS.md',
   'docs/AUTHENTICATION.md',
+  'docs/WINDOWS-DISTRIBUTION.md',
+  'build/icon.ico',
+  '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
-  'scripts/check-core-persistence.mjs'
+  'scripts/check-core-persistence.mjs',
+  'scripts/check-windows-distribution.cjs',
+  'scripts/verify-windows-artifacts.ps1'
 ];
 
 for (const rel of required) {
@@ -51,5 +56,6 @@ for (const file of codeFiles) {
 
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-smart-systems.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-persistence.mjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-windows-distribution.cjs')], { stdio: 'inherit' });
 
 console.log(`Parlyn structure check passed (${codeFiles.length} JavaScript modules checked).`);

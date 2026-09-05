@@ -3,11 +3,14 @@
   "version": "0.5.0",
   "private": true,
   "description": "Parlyn Engine - open-source 2.5D-first game engine editor",
+  "author": "Parlyn Engine contributors",
   "main": "src/main/main.js",
   "license": "MIT",
   "scripts": {
     "build:renderer": "esbuild src/renderer/app.mjs --bundle --outfile=src/renderer/dist/app.js --format=iife --platform=browser --target=chrome120 --sourcemap",
     "build:renderer:release": "esbuild src/renderer/app.mjs --bundle --outfile=src/renderer/dist/app.js --format=iife --platform=browser --target=chrome120 --minify",
+    "build:windows": "npm run check && npm run build:renderer:release && electron-builder --win nsis",
+    "build:windows:dir": "npm run check && npm run build:renderer:release && electron-builder --win dir",
     "dev": "npm run build:renderer && electron .",
     "start": "npm run dev",
     "check": "node scripts/check.cjs"
@@ -17,9 +20,62 @@
   },
   "devDependencies": {
     "electron": "^43.0.0",
+    "electron-builder": "^26.15.3",
     "esbuild": "^0.28.2"
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "build": {
+    "appId": "org.parlyn.engine",
+    "productName": "Parlyn Engine",
+    "copyright": "Copyright © 2026 Parlyn Engine contributors",
+    "asar": true,
+    "directories": {
+      "buildResources": "build",
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "LICENSE",
+      "!src/renderer/**/*.map"
+    ],
+    "extraResources": [
+      {
+        "from": "samples/Parlyn-Test-Project",
+        "to": "samples/Parlyn-Test-Project"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "Parlyn-Engine-Setup-${version}-${arch}.${ext}",
+      "executableName": "Parlyn Engine",
+      "requestedExecutionLevel": "asInvoker",
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Parlyn Engine",
+      "uninstallDisplayName": "Parlyn Engine ${version}",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "license": "LICENSE"
+    }
   }
 }

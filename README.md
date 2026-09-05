@@ -197,6 +197,31 @@ Create a minified renderer bundle:
 npm run build:renderer:release
 ```
 
+### Windows installer
+
+Parlyn now has a reproducible 64-bit Windows NSIS packaging foundation:
+
+```powershell
+npm ci
+npm run build:windows
+```
+
+This produces `release/Parlyn-Engine-Setup-<version>-x64.exe`. An unsigned
+artifact is a packaging preflight only and does **not** resolve Windows Smart
+App Control. A distributable test build requires a publicly trusted Authenticode
+identity supplied through the controlled signing boundary.
+
+See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
+verification and the maintainer acceptance test.
+
+### Code signing policy
+
+Free code signing provided by [SignPath.io](https://signpath.io/), certificate
+by [SignPath Foundation](https://signpath.org/).
+
+Parlyn's signing roles, privacy statement and controlled release procedure are
+documented in [`docs/CODE-SIGNING-POLICY.md`](docs/CODE-SIGNING-POLICY.md).
+
 ## Editor controls
 
 - **Left mouse:** select / manipulate active gizmo
@@ -225,7 +250,7 @@ The next engine milestones are intentionally foundation-heavy:
 6. collision and physics abstraction
 7. project scene browser and multiple scenes
 8. external module package and permission model
-9. packaging and distributable desktop builds
+9. complete and verify signed Windows distribution
 10. first compact Parlyn showcase project
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md). Development follows the binding foundation-first scope rule in [`docs/DEVELOPMENT-POLICY.md`](docs/DEVELOPMENT-POLICY.md); new ideas remain in [`docs/IDEA-POOL.md`](docs/IDEA-POOL.md) until a formal planning review.

@@ -5,6 +5,8 @@ const { resolveProjectPath } = require('./projectPaths');
 
 let activeProjectRoot = null;
 
+app.setAppUserModelId('org.parlyn.engine');
+
 function safeName(value, fallback = 'Parlyn-Project') {
   const cleaned = String(value || fallback).trim().replace(/[<>:"/\\|?*\x00-\x1F]/g, '-').replace(/\s+/g, ' ').replace(/[. ]+$/g, '');
   return cleaned || fallback;

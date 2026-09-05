@@ -2,6 +2,11 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Added a reproducible 64-bit Windows NSIS installer foundation.
+- Added branded Windows executable and installer metadata.
+- Added a manual Windows build workflow with a strict trusted-signing gate.
+- Added automated Windows distribution configuration and Authenticode artifact checks.
+- Documented the Smart App Control maintainer acceptance path for Issue #12.
 - Added versioned Parlyn world data, World Memory and deterministic encounter foundations.
 - Connected world documents to project creation, loading and saving.
 - Added honest Foundation/Planned UI status for all Parlyn Smart Systems.
