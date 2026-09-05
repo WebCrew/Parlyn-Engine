@@ -2,14 +2,6 @@ name: Windows Installer
 
 on:
   pull_request:
-    paths:
-      - package.json
-      - package-lock.json
-      - src/**
-      - build/**
-      - scripts/**
-      - .github/workflows/windows-installer.yml
-      - .github/workflows/publish-unsigned-preview.yml
   workflow_dispatch:
     inputs:
       require_signing:
