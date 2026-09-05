@@ -1,0 +1,91 @@
+name: Publish unsigned Windows preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-unsigned-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.repository == 'WebCrew/Parlyn-Engine'
+    runs-on: windows-latest
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+      GH_TOKEN: ${{ github.token }}
+      PREVIEW_TAG: v0.5.0-preview.1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build unsigned Windows preview
+        run: npm run build:windows
+
+      - name: Verify packaging and write checksum
+        shell: pwsh
+        run: |
+          ./scripts/verify-windows-artifacts.ps1 `
+            -ArtifactDirectory release `
+            -RequireSignature:$false
+
+          $installer = Get-ChildItem -LiteralPath release -File -Filter "Parlyn-Engine-Setup-*.exe"
+          if ($installer.Count -ne 1) {
+            throw "Expected exactly one Parlyn installer."
+          }
+
+          $hash = Get-FileHash -LiteralPath $installer[0].FullName -Algorithm SHA256
+          "$($hash.Hash.ToLower())  $($installer[0].Name)" |
+            Set-Content -LiteralPath release/SHA256SUMS.txt -Encoding utf8
+
+      - name: Prepare release notes
+        shell: pwsh
+        run: |
+          @"
+          # Parlyn Engine v0.5.0 Preview 1
+
+          This is the first packaged Windows preview of Parlyn Engine.
+
+          **Important:** This preview is unsigned and may be blocked by Windows
+          Smart App Control. It is published to document and validate the packaged
+          application while Parlyn applies for trusted Open Source code signing.
+          It must not be described as a trusted or signed release.
+
+          Free code signing provided by SignPath.io, certificate by SignPath Foundation.
+
+          The repository contains the reproducible build workflow, public code
+          signing policy and SHA-256 verification procedure. After SignPath
+          approval, this preview will be superseded by a verified signed build.
+          "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
+
+      - name: Publish GitHub pre-release
+        shell: pwsh
+        run: |
+          if (gh release view "$env:PREVIEW_TAG" --repo "$env:GITHUB_REPOSITORY" 2>$null) {
+            throw "Release $env:PREVIEW_TAG already exists; refusing to overwrite it."
+          }
+
+          $installer = Get-ChildItem -LiteralPath release -File -Filter "Parlyn-Engine-Setup-*.exe"
+          gh release create "$env:PREVIEW_TAG" `
+            --repo "$env:GITHUB_REPOSITORY" `
+            --target "$env:GITHUB_SHA" `
+            --title "Parlyn Engine v0.5.0 Preview 1 (unsigned)" `
+            --notes-file release/PREVIEW-NOTES.md `
+            --prerelease `
+            "$($installer[0].FullName)" `
+            "release/latest.yml" `
+            "release/SHA256SUMS.txt"
