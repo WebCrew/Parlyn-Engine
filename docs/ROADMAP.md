@@ -139,9 +139,16 @@ See [`SMART-SYSTEMS.md`](SMART-SYSTEMS.md).
 
 ## Phase 8 — Desktop distribution and accounts
 
-**Status: Architecture only**
+**Status: Architecture; installer foundation active as a blocker exception**
 
-- packaged desktop editor builds;
+Issue #12 prevents the project owner from testing the active foundation while
+Windows Smart App Control remains enabled. The development policy therefore
+permits a narrowly scoped distribution exception: build, package, sign and
+verify the current editor without activating launcher, account or ecosystem
+work.
+
+- reproducible packaged Windows editor and NSIS installer foundation;
+- trusted Authenticode signing integration and maintainer acceptance test;
 - installable launcher and version manager;
 - offline access to installed versions and local projects;
 - optional account sign-in using OAuth 2.0/OpenID Connect with PKCE;
@@ -150,6 +157,8 @@ See [`SMART-SYSTEMS.md`](SMART-SYSTEMS.md).
 - strict credential separation between launcher, editor and modules.
 
 See [`AUTHENTICATION.md`](AUTHENTICATION.md).
+See [`WINDOWS-DISTRIBUTION.md`](WINDOWS-DISTRIBUTION.md) for the limited active
+exception and its completion criteria.
 
 ## Phase 9 — Online ecosystem
 

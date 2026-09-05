@@ -1,0 +1,87 @@
+name: Windows Installer
+
+on:
+  pull_request:
+    paths:
+      - package.json
+      - package-lock.json
+      - src/**
+      - build/**
+      - scripts/**
+      - .github/workflows/windows-installer.yml
+  workflow_dispatch:
+    inputs:
+      require_signing:
+        description: Require trusted Authenticode signatures
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+      CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+      WINDOWS_EXPECTED_PUBLISHER: ${{ secrets.WINDOWS_EXPECTED_PUBLISHER }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Require configured signing identity
+        if: ${{ inputs.require_signing }}
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:CSC_LINK)) {
+            throw "WINDOWS_CSC_LINK is not configured. Refusing to label an unsigned build as signed."
+          }
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_EXPECTED_PUBLISHER)) {
+            throw "WINDOWS_EXPECTED_PUBLISHER is not configured."
+          }
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build Windows installer
+        run: npm run build:windows
+
+      - name: Verify Windows artifacts
+        shell: pwsh
+        run: |
+          $requireSignature = "${{ inputs.require_signing }}" -eq "true"
+          ./scripts/verify-windows-artifacts.ps1 `
+            -ArtifactDirectory release `
+            -RequireSignature:$requireSignature `
+            -ExpectedPublisher "$env:WINDOWS_EXPECTED_PUBLISHER"
+
+      - name: Upload signed installer
+        if: ${{ inputs.require_signing }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: parlyn-windows-installer-signed
+          path: |
+            release/Parlyn-Engine-Setup-*.exe
+            release/latest.yml
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload unsigned packaging preflight
+        if: ${{ !inputs.require_signing }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: parlyn-windows-installer-unsigned-preflight
+          path: |
+            release/Parlyn-Engine-Setup-*.exe
+            release/latest.yml
+          if-no-files-found: error
+          retention-days: 7
