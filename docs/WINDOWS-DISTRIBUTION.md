@@ -51,36 +51,40 @@ resolve Smart App Control and must not be described as a trusted release.
 
 ## Trusted signing boundary
 
-Parlyn uses electron-builder's standard Windows signing environment variables:
+Parlyn's release workflow uses SignPath's GitHub integration. GitHub Actions
+builds an explicitly unsigned package on a GitHub-hosted Windows runner and
+uploads it as a workflow artifact. SignPath verifies that origin, signs the
+configured Parlyn executables and returns the signed artifact to the same
+workflow for verification.
 
 ```text
-CSC_LINK
-CSC_KEY_PASSWORD
+SIGNPATH_API_TOKEN                 protected GitHub Actions secret
+SIGNPATH_ORGANIZATION_ID           GitHub Actions variable
+SIGNPATH_PROJECT_SLUG              GitHub Actions variable
+SIGNPATH_SIGNING_POLICY_SLUG       GitHub Actions variable
+WINDOWS_EXPECTED_PUBLISHER         protected GitHub Actions secret
 ```
 
-`CSC_LINK` must refer to a valid, publicly trusted code-signing identity made
-available by the maintainer or the controlled CI environment. The password and
-certificate material must never be committed, written into project files or
-printed in build logs.
+The token must belong to a SignPath submitter permitted by Parlyn's release
+signing policy. Signing keys remain in SignPath's HSM and are never exported to
+the repository or GitHub runner. Every release signing request requires manual
+approval in accordance with the Parlyn
+[Code signing policy](CODE-SIGNING-POLICY.md).
 
-The manual GitHub Actions workflow maps protected repository secrets to those
-variables:
+Before enabling the signed workflow, the maintainer must:
 
-```text
-WINDOWS_CSC_LINK
-WINDOWS_CSC_KEY_PASSWORD
-WINDOWS_EXPECTED_PUBLISHER
-```
+- receive approval for Parlyn from SignPath Foundation;
+- install the SignPath GitHub App for this repository;
+- create and link the SignPath project, artifact configuration and release
+  signing policy;
+- configure the secret and variables listed above;
+- set `WINDOWS_EXPECTED_PUBLISHER` to the exact certificate subject returned by
+  the approved SignPath configuration.
 
 The default workflow refuses to build when trusted signing is required but no
-signing identity or expected publisher is configured. It may be run with
+SignPath configuration or expected publisher is configured. It may be run with
 `require_signing` disabled only to inspect the packaging pipeline; that artifact
 is not suitable for the Smart App Control acceptance test.
-
-Cloud-HSM signing services require a dedicated electron-builder signing hook
-instead of an exportable certificate. That integration will be added only after
-the maintainer selects and verifies a service; provider credentials do not
-belong in the general installer configuration.
 
 ## Verification
 

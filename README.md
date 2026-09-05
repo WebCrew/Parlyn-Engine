@@ -214,6 +214,14 @@ identity supplied through the controlled signing boundary.
 See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
+### Code signing policy
+
+Free code signing provided by [SignPath.io](https://signpath.io/), certificate
+by [SignPath Foundation](https://signpath.org/).
+
+Parlyn's signing roles, privacy statement and controlled release procedure are
+documented in [`docs/CODE-SIGNING-POLICY.md`](docs/CODE-SIGNING-POLICY.md).
+
 ## Editor controls
 
 - **Left mouse:** select / manipulate active gizmo

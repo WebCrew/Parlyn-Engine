@@ -18,15 +18,15 @@ on:
         default: true
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
   build:
     runs-on: windows-latest
     env:
-      CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
-      CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
       WINDOWS_EXPECTED_PUBLISHER: ${{ secrets.WINDOWS_EXPECTED_PUBLISHER }}
+      CSC_IDENTITY_AUTO_DISCOVERY: false
 
     steps:
       - name: Checkout
@@ -38,12 +38,21 @@ jobs:
           node-version: 24.x
           cache: npm
 
-      - name: Require configured signing identity
+      - name: Require configured SignPath identity
         if: ${{ inputs.require_signing }}
         shell: pwsh
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:CSC_LINK)) {
-            throw "WINDOWS_CSC_LINK is not configured. Refusing to label an unsigned build as signed."
+          if ([string]::IsNullOrWhiteSpace("${{ secrets.SIGNPATH_API_TOKEN }}")) {
+            throw "SIGNPATH_API_TOKEN is not configured. Refusing to publish an unsigned build."
+          }
+          if ([string]::IsNullOrWhiteSpace("${{ vars.SIGNPATH_ORGANIZATION_ID }}")) {
+            throw "SIGNPATH_ORGANIZATION_ID is not configured."
+          }
+          if ([string]::IsNullOrWhiteSpace("${{ vars.SIGNPATH_PROJECT_SLUG }}")) {
+            throw "SIGNPATH_PROJECT_SLUG is not configured."
+          }
+          if ([string]::IsNullOrWhiteSpace("${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}")) {
+            throw "SIGNPATH_SIGNING_POLICY_SLUG is not configured."
           }
           if ([string]::IsNullOrWhiteSpace($env:WINDOWS_EXPECTED_PUBLISHER)) {
             throw "WINDOWS_EXPECTED_PUBLISHER is not configured."
@@ -55,23 +64,56 @@ jobs:
       - name: Build Windows installer
         run: npm run build:windows
 
-      - name: Verify Windows artifacts
+      - name: Verify unsigned packaging output
+        if: ${{ !inputs.require_signing }}
         shell: pwsh
         run: |
-          $requireSignature = "${{ inputs.require_signing }}" -eq "true"
           ./scripts/verify-windows-artifacts.ps1 `
             -ArtifactDirectory release `
-            -RequireSignature:$requireSignature `
+            -RequireSignature:$false `
+            -ExpectedPublisher "$env:WINDOWS_EXPECTED_PUBLISHER"
+
+      - name: Upload unsigned artifact for SignPath
+        if: ${{ inputs.require_signing }}
+        id: upload-unsigned-artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: parlyn-windows-installer-signing-input
+          path: |
+            release/Parlyn-Engine-Setup-*.exe
+            release/latest.yml
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Submit SignPath signing request
+        if: ${{ inputs.require_signing }}
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.upload-unsigned-artifact.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed-release
+
+      - name: Verify signed Windows artifacts
+        if: ${{ inputs.require_signing }}
+        shell: pwsh
+        run: |
+          ./scripts/verify-windows-artifacts.ps1 `
+            -ArtifactDirectory signed-release `
+            -RequireSignature `
             -ExpectedPublisher "$env:WINDOWS_EXPECTED_PUBLISHER"
 
       - name: Upload signed installer
         if: ${{ inputs.require_signing }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: parlyn-windows-installer-signed
           path: |
-            release/Parlyn-Engine-Setup-*.exe
-            release/latest.yml
+            signed-release/Parlyn-Engine-Setup-*.exe
+            signed-release/latest.yml
           if-no-files-found: error
           retention-days: 14
 
