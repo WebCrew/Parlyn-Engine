@@ -9,6 +9,7 @@ on:
       - build/**
       - scripts/**
       - .github/workflows/windows-installer.yml
+      - .github/workflows/publish-unsigned-preview.yml
   workflow_dispatch:
     inputs:
       require_signing:
