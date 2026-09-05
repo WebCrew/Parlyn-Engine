@@ -1,4 +1,4 @@
-name: Publish unsigned Windows preview
+name: Publish unsigned Windows beta
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: false
       GH_TOKEN: ${{ github.token }}
-      PREVIEW_TAG: v0.5.0-preview.1
+      PREVIEW_TAG: v0.5.0-beta.1
 
     steps:
       - name: Checkout
@@ -33,7 +33,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Build unsigned Windows preview
+      - name: Build unsigned Windows beta
         run: npm run build:windows
 
       - name: Verify packaging and write checksum
@@ -56,11 +56,13 @@ jobs:
         shell: pwsh
         run: |
           @"
-          # Parlyn Engine v0.5.0 Preview 1
+          # Parlyn Engine v0.5.0 Beta 1
 
-          This is the first packaged Windows preview of Parlyn Engine.
+          This is the first packaged Windows beta of Parlyn Engine. The editor
+          foundation is functional and tested, while the available feature set
+          remains intentionally limited during foundation-first development.
 
-          **Important:** This preview is unsigned and may be blocked by Windows
+          **Important:** This beta is unsigned and may be blocked by Windows
           Smart App Control. It is published to document and validate the packaged
           application while Parlyn applies for trusted Open Source code signing.
           It must not be described as a trusted or signed release.
@@ -69,7 +71,7 @@ jobs:
 
           The repository contains the reproducible build workflow, public code
           signing policy and SHA-256 verification procedure. After SignPath
-          approval, this preview will be superseded by a verified signed build.
+          approval, this beta will be superseded by a verified signed build.
           "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
 
       - name: Publish GitHub pre-release
@@ -83,7 +85,7 @@ jobs:
           gh release create "$env:PREVIEW_TAG" `
             --repo "$env:GITHUB_REPOSITORY" `
             --target "$env:GITHUB_SHA" `
-            --title "Parlyn Engine v0.5.0 Preview 1 (unsigned)" `
+            --title "Parlyn Engine v0.5.0 Beta 1 (unsigned)" `
             --notes-file release/PREVIEW-NOTES.md `
             --prerelease `
             "$($installer[0].FullName)" `
