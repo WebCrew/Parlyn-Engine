@@ -34,13 +34,13 @@ Already present:
 - Move, Rotate and Scale gizmos;
 - Undo/Redo foundation;
 - constrained Electron preload bridge;
+- trusted editor-only IPC and navigation boundaries;
+- visible, actionable errors for project, scene, world and asset operations;
 - automated structural, Smart Systems and CodeQL checks.
 
 Completion gate:
 
-- replace silent failures with useful errors;
-- protect critical filesystem and IPC boundaries;
-- expand automated tests for core invariants beyond the persistence contract;
+- expand automated tests for remaining node, history and editor invariants;
 - synchronize README, changelog and technical documentation;
 - complete a repeatable maintainer test pass.
 

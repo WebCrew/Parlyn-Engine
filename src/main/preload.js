@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('parlynHost', {
-  version:'0.4.0',
+  version:require('../../package.json').version,
   platform:process.platform,
   saveSceneAs:(payload)=>ipcRenderer.invoke('parlyn:scene:save-as',payload),
   openScene:()=>ipcRenderer.invoke('parlyn:scene:open'),
