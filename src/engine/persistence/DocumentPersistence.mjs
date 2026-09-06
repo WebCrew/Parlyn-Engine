@@ -8,34 +8,47 @@ const DOCUMENT_READERS = new Map([
   [WorldDocument.FORMAT, (data) => WorldDocument.fromJSON(data)]
 ]);
 
-function requirePlainJson(value, path = 'document', ancestors = new Set()) {
-  if (value === null || typeof value === 'string' || typeof value === 'boolean') return;
-  if (typeof value === 'number') {
-    if (!Number.isFinite(value)) throw new TypeError(`${path} contains a non-finite number.`);
-    return;
-  }
-  if (typeof value !== 'object') throw new TypeError(`${path} contains a value that JSON cannot preserve.`);
-  if (ancestors.has(value)) throw new TypeError(`${path} contains a circular reference.`);
+function requirePlainJson(value, path = 'document') {
+  const ancestors = new Set();
+  const pending = [{ value, path, exit:false }];
+  while (pending.length) {
+    const current = pending.pop();
+    if (current.exit) {
+      ancestors.delete(current.value);
+      continue;
+    }
+    const item = current.value;
+    if (item === null || typeof item === 'string' || typeof item === 'boolean') continue;
+    if (typeof item === 'number') {
+      if (!Number.isFinite(item)) throw new TypeError(`${current.path} contains a non-finite number.`);
+      continue;
+    }
+    if (typeof item !== 'object') throw new TypeError(`${current.path} contains a value that JSON cannot preserve.`);
+    if (ancestors.has(item)) throw new TypeError(`${current.path} contains a circular reference.`);
+    const prototype = Object.getPrototypeOf(item);
+    if (!Array.isArray(item) && prototype !== Object.prototype && prototype !== null) {
+      throw new TypeError(`${current.path} must contain only plain JSON objects and arrays.`);
+    }
 
-  const prototype = Object.getPrototypeOf(value);
-  if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
-    throw new TypeError(`${path} must contain only plain JSON objects and arrays.`);
-  }
-
-  ancestors.add(value);
-  if (Array.isArray(value)) {
-    value.forEach((item, index) => requirePlainJson(item, `${path}[${index}]`, ancestors));
-  } else {
-    for (const key of Reflect.ownKeys(value)) {
-      if (typeof key !== 'string') throw new TypeError(`${path} contains a symbol key that JSON cannot preserve.`);
-      const descriptor = Object.getOwnPropertyDescriptor(value, key);
-      if (!descriptor?.enumerable || descriptor.get || descriptor.set) {
-        throw new TypeError(`${path}.${key} is not a plain JSON property.`);
+    ancestors.add(item);
+    pending.push({ value:item, path:current.path, exit:true });
+    if (Array.isArray(item)) {
+      for (let index = item.length - 1; index >= 0; index -= 1) {
+        pending.push({ value:item[index], path:`${current.path}[${index}]`, exit:false });
       }
-      requirePlainJson(value[key], `${path}.${key}`, ancestors);
+    } else {
+      const keys = Reflect.ownKeys(item);
+      for (let index = keys.length - 1; index >= 0; index -= 1) {
+        const key = keys[index];
+        if (typeof key !== 'string') throw new TypeError(`${current.path} contains a symbol key that JSON cannot preserve.`);
+        const descriptor = Object.getOwnPropertyDescriptor(item, key);
+        if (!descriptor?.enumerable || descriptor.get || descriptor.set) {
+          throw new TypeError(`${current.path}.${key} is not a plain JSON property.`);
+        }
+        pending.push({ value:item[key], path:`${current.path}.${key}`, exit:false });
+      }
     }
   }
-  ancestors.delete(value);
 }
 
 export function normalizeDocument(data, expectedFormat = null) {

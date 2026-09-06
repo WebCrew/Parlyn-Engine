@@ -33,6 +33,12 @@
 - Replaced status-only operation failures with a visible error dialog.
 - Included branding assets in packaged builds and removed broken-image fallback text from the editor toolbar.
 - Added automated desktop trust-boundary and UI error-contract checks.
+- Prevented Node self-parenting and ancestor cycles during reparenting.
+- Switched Node traversal to stable iterative pre-order traversal.
+- Added strict History limits, labels, snapshot isolation and redo-branch rules.
+- Bounded loaded scenes to 10,000 nodes and 256 hierarchy levels.
+- Reworked plain-JSON validation to avoid recursive call-stack exhaustion.
+- Added automated Node hierarchy and Undo/Redo invariant checks.
 
 
 ## v0.5.0 — Transform Tools & Module Foundation

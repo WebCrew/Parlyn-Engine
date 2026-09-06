@@ -1,8 +1,11 @@
 export class Node {
   constructor({ id = crypto.randomUUID(), name = 'Node', type = 'Node' } = {}) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
+    for (const [value, label] of [[id, 'Node id'], [name, 'Node name'], [type, 'Node type']]) {
+      if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} must be a non-empty string.`);
+    }
+    this.id = id.trim();
+    this.name = name.trim();
+    this.type = type.trim();
     this.parent = null;
     this.children = [];
     this.enabled = true;
@@ -11,6 +14,10 @@ export class Node {
 
   addChild(node) {
     if (!(node instanceof Node)) throw new TypeError('Child must be a Parlyn Node.');
+    if (node === this) throw new Error('A node cannot be its own child.');
+    for (let ancestor = this; ancestor; ancestor = ancestor.parent) {
+      if (ancestor === node) throw new Error('A node cannot be parented below one of its descendants.');
+    }
     if (node.parent) node.parent.removeChild(node);
     node.parent = this;
     this.children.push(node);
@@ -26,8 +33,13 @@ export class Node {
   }
 
   walk(visitor) {
-    visitor(this);
-    this.children.forEach((child) => child.walk(visitor));
+    if (typeof visitor !== 'function') throw new TypeError('Node visitor must be a function.');
+    const pending = [this];
+    while (pending.length) {
+      const node = pending.pop();
+      visitor(node);
+      for (let index = node.children.length - 1; index >= 0; index -= 1) pending.push(node.children[index]);
+    }
   }
 
   toJSON() {

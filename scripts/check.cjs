@@ -32,6 +32,7 @@ const required = [
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
   'scripts/check-core-persistence.mjs',
+  'scripts/check-core-invariants.mjs',
   'scripts/check-desktop-boundaries.cjs',
   'scripts/check-windows-distribution.cjs',
   'scripts/verify-windows-artifacts.ps1'
@@ -60,6 +61,7 @@ for (const file of codeFiles) {
 
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-smart-systems.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-persistence.mjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-invariants.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-desktop-boundaries.cjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-windows-distribution.cjs')], { stdio: 'inherit' });
 

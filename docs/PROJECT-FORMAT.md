@@ -62,6 +62,7 @@ Project references such as `startupScene` and `world` are project-relative paths
 - Project, scene and world documents survive a load/save roundtrip without losing supported data.
 - Scene node IDs are unique inside a scene document.
 - A scene root uses the `SceneRoot` type.
+- Scene documents contain at most 10,000 nodes and 256 child levels; larger documents are rejected explicitly.
 - World collections are arrays and their stable IDs are unique.
 - Scene and world references cannot escape the selected project directory.
 - Missing, unreadable and malformed required documents produce an explicit error rather than opening a partial project.

@@ -44,6 +44,7 @@ The long-term direction includes:
 - live Inspector synchronization during gizmo edits
 - editor camera orbit, pan and zoom
 - undo/redo history foundation
+- cycle-safe scene hierarchy and isolated, bounded Undo/Redo snapshots
 - native scene open/save dialogs
 - visible error dialogs for failed project, scene, world and asset operations
 - final Parlyn visual identity and branding
@@ -193,6 +194,8 @@ Run structural checks:
 ```bash
 npm run check
 ```
+
+The check suite covers persistence, Node hierarchy, Undo/Redo, desktop trust boundaries, Smart Systems data and Windows distribution configuration.
 
 A bundled test project is available under `samples/Parlyn-Test-Project`. Use **Open Project** and select that folder to exercise the current project, scene, node and asset foundations without preparing your own test content first.
 

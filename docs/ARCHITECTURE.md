@@ -29,6 +29,10 @@ Project-relative paths are checked both lexically and against resolved filesyste
 
 Planned specializations include Sprite2_5D, Billboard2_5D, ParallaxLayer, Mesh3D, Camera and Light.
 
+Node identity fields are non-empty engine-owned strings. Reparenting rejects self-parenting and ancestor cycles before changing either hierarchy. Traversal uses an iterative, stable pre-order so deeply nested runtime trees do not depend on the JavaScript call stack.
+
+Persisted scenes are bounded to 10,000 nodes and 256 hierarchy levels. These are protective document limits, not editor viewport or world-size limits. Undo/Redo likewise owns cloned snapshots, requires meaningful labels and enforces a positive configured history limit.
+
 ## Renderer rule
 
 Parlyn code talks to a RendererBackend contract. THREE.js can be replaced or complemented later without changing the project format or editor concepts.
