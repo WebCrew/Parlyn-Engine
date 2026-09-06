@@ -20,8 +20,9 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
     await fs.mkdir(path.join(temporaryRoot, 'scenes'));
     const scenePath = path.join(temporaryRoot, 'scenes', 'Main.parlyn-scene.json');
     await fs.writeFile(scenePath, '{}', 'utf8');
-    assert.equal(await resolveExistingProjectPath(temporaryRoot, 'scenes/Main.parlyn-scene.json'), scenePath);
-    assert.equal(await resolveWritableProjectPath(temporaryRoot, 'scenes/Main.parlyn-scene.json'), scenePath);
+    const realScenePath = await fs.realpath(scenePath);
+    assert.equal(await resolveExistingProjectPath(temporaryRoot, 'scenes/Main.parlyn-scene.json'), realScenePath);
+    assert.equal(await resolveWritableProjectPath(temporaryRoot, 'scenes/Main.parlyn-scene.json'), realScenePath);
 
     try {
       await fs.symlink(outsideRoot, path.join(temporaryRoot, 'escaped'), 'dir');
