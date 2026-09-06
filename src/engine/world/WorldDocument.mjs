@@ -1,4 +1,11 @@
 const ID_PATTERN = /^[a-z0-9][a-z0-9._-]*$/;
+const FORMAT = 'parlyn-world';
+const VERSION = 1;
+
+function requireText(value, label) {
+  if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} must be a non-empty string.`);
+  return value.trim();
+}
 
 function requireId(value, label) {
   if (typeof value !== 'string' || !ID_PATTERN.test(value)) {
@@ -24,6 +31,7 @@ function requirePoint(value, label) {
 function uniqueById(items, label) {
   const ids = new Set();
   for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) throw new TypeError(`${label} entries must be objects.`);
     requireId(item.id, label);
     if (ids.has(item.id)) throw new Error(`Duplicate ${label} id: ${item.id}`);
     ids.add(item.id);
@@ -32,6 +40,9 @@ function uniqueById(items, label) {
 }
 
 export class WorldDocument {
+  static FORMAT = FORMAT;
+  static VERSION = VERSION;
+
   constructor({
     name = 'Main World',
     seed = 'parlyn-world',
@@ -41,10 +52,10 @@ export class WorldDocument {
     encounters = [],
     memory = {}
   } = {}) {
-    this.format = 'parlyn-world';
-    this.version = 1;
-    this.name = String(name);
-    this.seed = String(seed);
+    this.format = FORMAT;
+    this.version = VERSION;
+    this.name = requireText(name, 'World name');
+    this.seed = requireText(seed, 'World seed');
     if (!Array.isArray(capsules) || !Array.isArray(ways) || !Array.isArray(landmarks) || !Array.isArray(encounters)) throw new TypeError('World collections must be arrays.');
     this.capsules = structuredClone(capsules);
     this.ways = structuredClone(ways);
@@ -62,8 +73,12 @@ export class WorldDocument {
 
     for (const capsule of this.capsules) {
       capsule.scene = requireRelativePath(capsule.scene, `Scene Capsule ${capsule.id}`);
+      if (capsule.anchors !== undefined && !Array.isArray(capsule.anchors)) throw new TypeError(`Scene Capsule ${capsule.id} anchors must be an array.`);
+      const anchorIds = new Set();
       for (const anchor of capsule.anchors ?? []) {
         requireId(anchor.id, `Anchor in ${capsule.id}`);
+        if (anchorIds.has(anchor.id)) throw new Error(`Duplicate anchor id in ${capsule.id}: ${anchor.id}`);
+        anchorIds.add(anchor.id);
         anchor.position = requirePoint(anchor.position, `Anchor ${anchor.id}`);
       }
     }
@@ -120,8 +135,11 @@ export class WorldDocument {
   }
 
   static fromJSON(data) {
-    if (!data || data.format !== 'parlyn-world') throw new Error('Not a Parlyn world file.');
-    if (Number(data.version) !== 1) throw new Error(`Unsupported Parlyn world version: ${data.version}`);
+    if (!data || data.format !== FORMAT) throw new Error('Not a Parlyn world file.');
+    if (data.version !== VERSION) throw new Error(`Unsupported Parlyn world version: ${data.version}`);
+    for (const field of ['name', 'seed', 'capsules', 'ways', 'landmarks', 'encounters', 'memory']) {
+      if (!Object.hasOwn(data, field)) throw new Error(`Parlyn world file is missing ${field}.`);
+    }
     return new WorldDocument(data);
   }
 }

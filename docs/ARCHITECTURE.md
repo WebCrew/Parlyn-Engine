@@ -9,6 +9,12 @@ Parlyn separates four concerns:
 
 The engine model must never require Electron. Renderer-specific objects must not leak into serialized Parlyn scene data.
 
+## Persistence boundary
+
+Project, scene and world documents pass through the engine-owned persistence layer before Electron reads or writes them. The layer validates format/version compatibility, normalizes supported data and rejects values that plain JSON cannot preserve. The desktop host writes validated documents through a temporary sibling file and atomic rename so a failed save does not truncate the last valid document.
+
+Scripting and Visual Scripting are not part of this foundation step. Their future data formats must build on this boundary through explicit, versioned engine schemas rather than editor-specific objects.
+
 ## Node family
 
 - Node

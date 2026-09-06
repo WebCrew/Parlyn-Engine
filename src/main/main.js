@@ -4,6 +4,8 @@ const path = require('path');
 const { resolveProjectPath } = require('./projectPaths');
 
 let activeProjectRoot = null;
+const persistence = import('../engine/persistence/DocumentPersistence.mjs');
+const documentFiles = import('./documentFiles.mjs');
 
 app.setAppUserModelId('org.parlyn.engine');
 
@@ -16,26 +18,14 @@ function slug(value, fallback = 'parlyn-project') {
   return safeName(value, fallback).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || fallback;
 }
 
-async function readJson(filePath, label = 'JSON document') {
-  let source;
-  try {
-    source = await fs.readFile(filePath, 'utf8');
-  } catch (error) {
-    throw new Error(`Could not read ${label}: ${filePath}`, { cause:error });
-  }
-  try {
-    return JSON.parse(source);
-  } catch (error) {
-    throw new Error(`${label} contains invalid JSON: ${filePath}`, { cause:error });
-  }
+async function readDocument(filePath, expectedFormat, label = 'Parlyn document') {
+  const { readDocumentFile } = await documentFiles;
+  return readDocumentFile(filePath, expectedFormat, label);
 }
 
-function validateProjectManifest(project) {
-  if (!project || project.format !== 'parlyn-project') throw new Error('The selected folder is not a Parlyn project.');
-  if (Number(project.version) !== 1) throw new Error(`Unsupported Parlyn project version: ${project.version}`);
-  resolveProjectPath('.', project.startupScene, 'Startup scene');
-  resolveProjectPath('.', project.world, 'World document');
-  return project;
+async function writeDocumentAtomic(filePath, document, expectedFormat, label = 'Parlyn document') {
+  const { writeDocumentFileAtomic } = await documentFiles;
+  return writeDocumentFileAtomic(filePath, document, expectedFormat, label);
 }
 
 async function listAssets(projectRoot) {
@@ -77,8 +67,7 @@ ipcMain.handle('parlyn:scene:save-as', async (_event, payload) => {
   const defaultName = `${slug(payload?.name || 'scene','scene')}.parlyn-scene.json`;
   const result = await dialog.showSaveDialog({ title:'Save Parlyn Scene', defaultPath:defaultName, filters:[{ name:'Parlyn Scene', extensions:['json'] }] });
   if (result.canceled || !result.filePath) return { canceled:true };
-  if (payload?.scene?.format !== 'parlyn-scene') throw new Error('Invalid Parlyn scene document.');
-  await fs.writeFile(result.filePath, JSON.stringify(payload.scene,null,2),'utf8');
+  await writeDocumentAtomic(result.filePath, payload?.scene, 'parlyn-scene', 'Parlyn scene');
   return { canceled:false, filePath:result.filePath };
 });
 
@@ -86,7 +75,7 @@ ipcMain.handle('parlyn:scene:open', async () => {
   const result = await dialog.showOpenDialog({ title:'Open Parlyn Scene', properties:['openFile'], filters:[{ name:'Parlyn Scene', extensions:['json'] }] });
   if (result.canceled || !result.filePaths[0]) return { canceled:true };
   const filePath=result.filePaths[0];
-  return { canceled:false, filePath, scene:await readJson(filePath) };
+  return { canceled:false, filePath, scene:await readDocument(filePath, 'parlyn-scene', 'Parlyn scene') };
 });
 
 ipcMain.handle('parlyn:project:create', async (_event, payload) => {
@@ -100,15 +89,24 @@ ipcMain.handle('parlyn:project:create', async (_event, payload) => {
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  await fs.mkdir(path.join(projectRoot,'scenes'),{ recursive:true });
-  await fs.mkdir(path.join(projectRoot,'assets'),{ recursive:true });
-  await fs.mkdir(path.join(projectRoot,'worlds'),{ recursive:true });
-  await fs.mkdir(path.join(projectRoot,'.parlyn'),{ recursive:true });
   const project={ format:'parlyn-project', version:1, name, startupScene:'scenes/Main.parlyn-scene.json', world:'worlds/Main.parlyn-world.json', createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
   const world={ format:'parlyn-world', version:1, name:`${name} World`, seed:slug(name), capsules:[], ways:[], landmarks:[], encounters:[], memory:{} };
-  await fs.writeFile(path.join(projectRoot,'parlyn.project.json'),JSON.stringify(project,null,2),'utf8');
-  await fs.writeFile(path.join(projectRoot,'worlds','Main.parlyn-world.json'),JSON.stringify(world,null,2),'utf8');
-  if (payload?.scene) await fs.writeFile(path.join(projectRoot,'scenes','Main.parlyn-scene.json'),JSON.stringify(payload.scene,null,2),'utf8');
+  const { normalizeDocument } = await persistence;
+  const normalizedProject = normalizeDocument(project, 'parlyn-project');
+  const normalizedWorld = normalizeDocument(world, 'parlyn-world');
+  const normalizedScene = payload?.scene ? normalizeDocument(payload.scene, 'parlyn-scene') : null;
+  try {
+    await fs.mkdir(path.join(projectRoot,'scenes'),{ recursive:true });
+    await fs.mkdir(path.join(projectRoot,'assets'),{ recursive:true });
+    await fs.mkdir(path.join(projectRoot,'worlds'),{ recursive:true });
+    await fs.mkdir(path.join(projectRoot,'.parlyn'),{ recursive:true });
+    await writeDocumentAtomic(path.join(projectRoot,'parlyn.project.json'), normalizedProject, 'parlyn-project', 'Parlyn project file');
+    await writeDocumentAtomic(path.join(projectRoot,'worlds','Main.parlyn-world.json'), normalizedWorld, 'parlyn-world', 'Parlyn world');
+    if (normalizedScene) await writeDocumentAtomic(path.join(projectRoot,'scenes','Main.parlyn-scene.json'), normalizedScene, 'parlyn-scene', 'Parlyn scene');
+  } catch (error) {
+    await fs.rm(projectRoot, { recursive:true, force:true }).catch(() => {});
+    throw error;
+  }
   activeProjectRoot=projectRoot;
   return { canceled:false, projectRoot, project, world, assets:await listAssets(projectRoot) };
 });
@@ -118,13 +116,11 @@ ipcMain.handle('parlyn:project:open', async () => {
   if (choose.canceled || !choose.filePaths[0]) return { canceled:true };
   const projectRoot=choose.filePaths[0];
   const projectFile=path.join(projectRoot,'parlyn.project.json');
-  const project=validateProjectManifest(await readJson(projectFile, 'Parlyn project file'));
+  const project=await readDocument(projectFile, 'parlyn-project', 'Parlyn project file');
   const scenePath=resolveProjectPath(projectRoot,project.startupScene,'Startup scene');
   const worldPath=resolveProjectPath(projectRoot,project.world,'World document');
-  const scene=await readJson(scenePath,'Startup scene');
-  const world=await readJson(worldPath,'World document');
-  if (scene?.format !== 'parlyn-scene') throw new Error('The startup scene is not a Parlyn scene document.');
-  if (world?.format !== 'parlyn-world') throw new Error('The world file is not a Parlyn world document.');
+  const scene=await readDocument(scenePath, 'parlyn-scene', 'Startup scene');
+  const world=await readDocument(worldPath, 'parlyn-world', 'World document');
   activeProjectRoot=projectRoot;
   return { canceled:false, projectRoot, project, scene, world, assets:await listAssets(projectRoot) };
 });
@@ -133,13 +129,11 @@ ipcMain.handle('parlyn:project:save-scene', async (_event, payload) => {
   if (!activeProjectRoot) return { ok:false, reason:'no-project' };
   const relativePath=payload?.relativePath || 'scenes/Main.parlyn-scene.json';
   const target=resolveProjectPath(activeProjectRoot,relativePath,'Project scene path');
-  if (payload?.scene?.format !== 'parlyn-scene') throw new Error('Invalid Parlyn scene document.');
-  await fs.mkdir(path.dirname(target),{ recursive:true });
-  await fs.writeFile(target,JSON.stringify(payload.scene,null,2),'utf8');
+  await writeDocumentAtomic(target, payload?.scene, 'parlyn-scene', 'Parlyn scene');
   const projectFile=path.join(activeProjectRoot,'parlyn.project.json');
-  const project=validateProjectManifest(await readJson(projectFile,'Parlyn project file'));
+  const project=await readDocument(projectFile, 'parlyn-project', 'Parlyn project file');
   project.updatedAt=new Date().toISOString();
-  await fs.writeFile(projectFile,JSON.stringify(project,null,2),'utf8');
+  await writeDocumentAtomic(projectFile, project, 'parlyn-project', 'Parlyn project file');
   return { ok:true, filePath:target, relativePath };
 });
 
@@ -147,9 +141,11 @@ ipcMain.handle('parlyn:project:save-world', async (_event, payload) => {
   if (!activeProjectRoot) return { ok:false, reason:'no-project' };
   const relativePath=payload?.relativePath || 'worlds/Main.parlyn-world.json';
   const target=resolveProjectPath(activeProjectRoot,relativePath,'Project world path');
-  if (payload?.world?.format !== 'parlyn-world') throw new Error('Invalid Parlyn world document.');
-  await fs.mkdir(path.dirname(target),{ recursive:true });
-  await fs.writeFile(target,JSON.stringify(payload.world,null,2),'utf8');
+  await writeDocumentAtomic(target, payload?.world, 'parlyn-world', 'Parlyn world');
+  const projectFile=path.join(activeProjectRoot,'parlyn.project.json');
+  const project=await readDocument(projectFile, 'parlyn-project', 'Parlyn project file');
+  project.updatedAt=new Date().toISOString();
+  await writeDocumentAtomic(projectFile, project, 'parlyn-project', 'Parlyn project file');
   return { ok:true, filePath:target, relativePath };
 });
 

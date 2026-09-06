@@ -7,12 +7,73 @@ import { Light3D } from '../core/Light3D.mjs';
 const FORMAT = 'parlyn-scene';
 const VERSION = 2;
 const SUPPORTED_VERSIONS = new Set([1, 2]);
+const SUPPORTED_NODE_TYPES = new Set(['SceneRoot', 'Node', 'Node2_5D', 'Sprite2_5D', 'Billboard2_5D', 'Node3D', 'Mesh3D', 'Camera3D', 'Light3D']);
+
+function requireFinite(value, label) {
+  if (!Number.isFinite(value)) throw new TypeError(`${label} must be a finite number.`);
+  return value;
+}
+
+function requireVector(value, axes, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(`${label} must be an object.`);
+  for (const axis of axes) requireFinite(value[axis], `${label}.${axis}`);
+}
 
 function requireNodeData(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new TypeError('Scene node must be an object.');
   for (const field of ['id', 'name', 'type']) {
     if (typeof data[field] !== 'string' || !data[field].trim()) throw new TypeError(`Scene node requires a non-empty ${field}.`);
   }
+  if (!SUPPORTED_NODE_TYPES.has(data.type)) throw new Error(`Unsupported scene node type: ${data.type}`);
+  if (data.enabled !== undefined && typeof data.enabled !== 'boolean') throw new TypeError(`Node ${data.id} enabled must be a boolean.`);
+  if (data.metadata !== undefined && (!data.metadata || typeof data.metadata !== 'object' || Array.isArray(data.metadata))) {
+    throw new TypeError(`Node ${data.id} metadata must be an object.`);
+  }
+
+  if (['Node2_5D', 'Sprite2_5D', 'Billboard2_5D'].includes(data.type)) {
+    requireVector(data.position, ['x', 'y', 'z'], `Node ${data.id} position`);
+    requireFinite(data.rotation, `Node ${data.id} rotation`);
+    requireVector(data.scale, ['x', 'y'], `Node ${data.id} scale`);
+    if (typeof data.depthLayer !== 'string' || !data.depthLayer.trim()) throw new TypeError(`Node ${data.id} depthLayer must be a non-empty string.`);
+  }
+  if (['Node3D', 'Mesh3D', 'Camera3D', 'Light3D'].includes(data.type)) {
+    requireVector(data.position, ['x', 'y', 'z'], `Node ${data.id} position`);
+    requireVector(data.rotation, ['x', 'y', 'z'], `Node ${data.id} rotation`);
+    requireVector(data.scale, ['x', 'y', 'z'], `Node ${data.id} scale`);
+  }
+  if (data.type === 'Camera3D') {
+    for (const field of ['fov', 'near', 'far']) requireFinite(data[field], `Camera ${data.id} ${field}`);
+    if (data.fov <= 0 || data.fov >= 180) throw new RangeError(`Camera ${data.id} fov must be between 0 and 180 degrees.`);
+    if (data.near <= 0 || data.far <= data.near) throw new RangeError(`Camera ${data.id} requires 0 < near < far.`);
+    if (data.primary !== undefined && typeof data.primary !== 'boolean') throw new TypeError(`Camera ${data.id} primary must be a boolean.`);
+  }
+  if (data.type === 'Light3D') {
+    requireFinite(data.intensity, `Light ${data.id} intensity`);
+    if (typeof data.lightKind !== 'string' || !data.lightKind.trim()) throw new TypeError(`Light ${data.id} lightKind must be a non-empty string.`);
+    if ((typeof data.color !== 'string' || !data.color.trim()) && !Number.isInteger(data.color)) throw new TypeError(`Light ${data.id} color must be a string or integer.`);
+    if (data.castShadow !== undefined && typeof data.castShadow !== 'boolean') throw new TypeError(`Light ${data.id} castShadow must be a boolean.`);
+  }
+}
+
+function migrateNodeV1(data) {
+  const node = structuredClone(data);
+  node.enabled ??= true;
+  node.metadata ??= {};
+  node.children ??= [];
+  if (node.type === 'Camera3D') {
+    node.fov ??= 50;
+    node.near ??= 0.05;
+    node.far ??= 1000;
+    node.primary ??= false;
+  }
+  if (node.type === 'Light3D') {
+    node.lightKind ??= 'directional';
+    node.color ??= '#ffffff';
+    node.intensity ??= 2;
+    node.castShadow ??= true;
+  }
+  node.children = node.children.map(migrateNodeV1);
+  return node;
 }
 
 function nodeFromJSON(data, ids) {
@@ -70,10 +131,13 @@ export class SceneDocument {
 
   static fromJSON(data) {
     if (!data || data.format !== FORMAT) throw new Error('Not a Parlyn scene file.');
-    const sourceVersion = Number(data.version ?? 1);
+    for (const field of ['version', 'name', 'root']) {
+      if (!Object.hasOwn(data, field)) throw new Error(`Parlyn scene file is missing ${field}.`);
+    }
+    const sourceVersion = data.version;
     if (!SUPPORTED_VERSIONS.has(sourceVersion)) throw new Error(`Unsupported Parlyn scene version: ${data.version}`);
-    const scene = new SceneDocument(data.name ?? 'Main Scene');
-    const rootData = data.root ?? { id:crypto.randomUUID(), name:scene.name, type:'SceneRoot', children:[] };
+    const scene = new SceneDocument(data.name);
+    const rootData = sourceVersion === 1 ? migrateNodeV1(data.root) : data.root;
     scene.root = nodeFromJSON(rootData, new Set());
     if (scene.root.type !== 'SceneRoot') throw new Error('Parlyn scene root must use type SceneRoot.');
     scene.version = VERSION;

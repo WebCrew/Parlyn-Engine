@@ -65,5 +65,14 @@ Project references such as `startupScene` and `world` are project-relative paths
 - World collections are arrays and their stable IDs are unique.
 - Scene and world references cannot escape the selected project directory.
 - Missing, unreadable and malformed required documents produce an explicit error rather than opening a partial project.
+- Documents are fully normalized and validated before they replace an existing file.
+- Saves use a temporary sibling file followed by an atomic rename. A rejected document never truncates the last valid file.
+- Persisted values must be plain JSON data. Functions, non-finite numbers, custom object prototypes, symbol keys and circular references are rejected because JSON cannot preserve them reliably.
+
+The persistence boundary is shared by loose scenes and project-owned project, scene and world files. Validation therefore does not depend on which editor command initiated the operation.
+
+## Future extension data
+
+This contract does not introduce scripting or Visual Scripting. Future script components and graph documents must declare their own versioned schema when that phase becomes active. The current foundation deliberately preserves valid nested JSON metadata during round trips, so later engine-owned extension data can be introduced without coupling persistence to the editor UI.
 
 Future format migrations must be deliberate, tested and documented here.
