@@ -222,6 +222,9 @@ identity supplied through the controlled signing boundary.
 See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
+The current Phase 1 acceptance candidate uses the repeatable
+[`v0.5.0-beta.2 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.2.md).
+
 ### Code signing policy
 
 Parlyn has applied to the SignPath Foundation Open Source Code Signing program.

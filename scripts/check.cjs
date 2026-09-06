@@ -28,6 +28,7 @@ const required = [
   'docs/SMART-SYSTEMS.md',
   'docs/AUTHENTICATION.md',
   'docs/WINDOWS-DISTRIBUTION.md',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.2.md',
   'build/icon.ico',
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',

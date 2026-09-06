@@ -39,6 +39,8 @@
 - Bounded loaded scenes to 10,000 nodes and 256 hierarchy levels.
 - Reworked plain-JSON validation to avoid recursive call-stack exhaustion.
 - Added automated Node hierarchy and Undo/Redo invariant checks.
+- Added a repeatable Beta 2 maintainer acceptance checklist for the Phase 1 completion gate.
+- Generalized the non-overwriting unsigned preview workflow for an explicit Beta 2 release.
 
 
 ## v0.5.0 — Transform Tools & Module Foundation
