@@ -11,6 +11,7 @@ const required = [
   'assets/branding/parlyn-logo-light.svg',
   'src/main/main.js',
   'src/main/documentFiles.mjs',
+  'src/main/ipcSecurity.js',
   'src/main/projectPaths.js',
   'src/main/preload.js',
   'src/renderer/index.html',
@@ -31,6 +32,7 @@ const required = [
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
   'scripts/check-core-persistence.mjs',
+  'scripts/check-desktop-boundaries.cjs',
   'scripts/check-windows-distribution.cjs',
   'scripts/verify-windows-artifacts.ps1'
 ];
@@ -58,6 +60,7 @@ for (const file of codeFiles) {
 
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-smart-systems.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-persistence.mjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-desktop-boundaries.cjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-windows-distribution.cjs')], { stdio: 'inherit' });
 
 console.log(`Parlyn structure check passed (${codeFiles.length} JavaScript modules checked).`);

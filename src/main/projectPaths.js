@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs/promises');
 
 function validateRelativeProjectPath(value, label = 'Project path') {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} must be a non-empty string.`);
@@ -17,4 +18,32 @@ function resolveProjectPath(projectRoot, relativePath, label = 'Project path') {
   return target;
 }
 
-module.exports = { validateRelativeProjectPath, resolveProjectPath };
+function isInside(root, target) {
+  return target !== root && target.startsWith(root + path.sep);
+}
+
+function isInsideOrEqual(root, target) {
+  return target === root || target.startsWith(root + path.sep);
+}
+
+async function resolveExistingProjectPath(projectRoot, relativePath, label = 'Project path') {
+  const target = resolveProjectPath(projectRoot, relativePath, label);
+  const [realRoot, realTarget] = await Promise.all([fs.realpath(projectRoot), fs.realpath(target)]);
+  if (!isInside(realRoot, realTarget)) throw new Error(`${label} escapes the project root through a symbolic link.`);
+  return realTarget;
+}
+
+async function resolveWritableProjectPath(projectRoot, relativePath, label = 'Project path') {
+  const target = resolveProjectPath(projectRoot, relativePath, label);
+  const [realRoot, realParent] = await Promise.all([fs.realpath(projectRoot), fs.realpath(path.dirname(target))]);
+  if (!isInsideOrEqual(realRoot, realParent)) throw new Error(`${label} escapes the project root through a symbolic link.`);
+  try {
+    const info = await fs.lstat(target);
+    if (info.isSymbolicLink()) throw new Error(`${label} cannot replace a symbolic link.`);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  return path.join(realParent, path.basename(target));
+}
+
+module.exports = { validateRelativeProjectPath, resolveProjectPath, resolveExistingProjectPath, resolveWritableProjectPath };

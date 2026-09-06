@@ -37,6 +37,7 @@
     },
     "files": [
       "src/**/*",
+      "assets/branding/**/*",
       "package.json",
       "LICENSE",
       "!src/renderer/**/*.map"

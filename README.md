@@ -45,6 +45,7 @@ The long-term direction includes:
 - editor camera orbit, pan and zoom
 - undo/redo history foundation
 - native scene open/save dialogs
+- visible error dialogs for failed project, scene, world and asset operations
 - final Parlyn visual identity and branding
 
 ### Scene graph
@@ -80,6 +81,8 @@ My Project/
 Projects can be created and reopened through native desktop dialogs. Scene data remains plain, readable JSON during this early phase.
 
 Project, scene and world files are normalized and validated at the desktop boundary. Valid saves use an atomic replace operation, while malformed files, unsupported versions and values that JSON cannot preserve are rejected with an explicit error instead of silently damaging the previous file.
+
+The desktop host accepts privileged IPC calls only from Parlyn's own editor document. Project paths are checked after symbolic-link resolution so project-owned reads and writes cannot silently escape the selected root.
 
 ### Asset workflow foundation
 

@@ -1,11 +1,15 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const fs = require('fs/promises');
 const path = require('path');
-const { resolveProjectPath } = require('./projectPaths');
+const { pathToFileURL } = require('url');
+const { resolveExistingProjectPath, resolveWritableProjectPath } = require('./projectPaths');
+const { assertTrustedIpcEvent, assertIpcPayload } = require('./ipcSecurity');
 
 let activeProjectRoot = null;
 const persistence = import('../engine/persistence/DocumentPersistence.mjs');
 const documentFiles = import('./documentFiles.mjs');
+const EDITOR_FILE = path.join(__dirname, '..', 'renderer', 'index.html');
+const EDITOR_URL = pathToFileURL(EDITOR_FILE).href;
 
 app.setAppUserModelId('org.parlyn.engine');
 
@@ -30,12 +34,20 @@ async function writeDocumentAtomic(filePath, document, expectedFormat, label = '
 
 async function listAssets(projectRoot) {
   if (!projectRoot) return [];
-  const assetsRoot = path.join(projectRoot, 'assets');
+  let assetsRoot;
+  try {
+    assetsRoot = await resolveExistingProjectPath(projectRoot, 'assets', 'Assets directory');
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
   const result = [];
   async function walk(dir) {
-    let entries = [];
-    try { entries = await fs.readdir(dir, { withFileTypes:true }); } catch { return; }
+    let entries;
+    try { entries = await fs.readdir(dir, { withFileTypes:true }); }
+    catch (error) { if (error.code === 'ENOENT') return; throw error; }
     for (const entry of entries) {
+      if (entry.isSymbolicLink()) continue;
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) await walk(full);
       else result.push({ name:entry.name, relativePath:path.relative(projectRoot, full).replace(/\\/g,'/'), extension:path.extname(entry.name).toLowerCase() });
@@ -60,25 +72,35 @@ function createWindow() {
     }
   });
   win.removeMenu();
-  win.loadFile(path.join(__dirname,'..','renderer','index.html'));
+  win.webContents.setWindowOpenHandler(() => ({ action:'deny' }));
+  win.webContents.on('will-navigate', (event, url) => { if (url !== EDITOR_URL) event.preventDefault(); });
+  win.loadURL(EDITOR_URL);
 }
 
-ipcMain.handle('parlyn:scene:save-as', async (_event, payload) => {
+function secureHandle(channel, handler, { payload = false } = {}) {
+  ipcMain.handle(channel, async (event, value) => {
+    assertTrustedIpcEvent(event, EDITOR_URL);
+    if (payload) assertIpcPayload(value, `${channel} payload`);
+    return handler(value);
+  });
+}
+
+secureHandle('parlyn:scene:save-as', async (payload) => {
   const defaultName = `${slug(payload?.name || 'scene','scene')}.parlyn-scene.json`;
   const result = await dialog.showSaveDialog({ title:'Save Parlyn Scene', defaultPath:defaultName, filters:[{ name:'Parlyn Scene', extensions:['json'] }] });
   if (result.canceled || !result.filePath) return { canceled:true };
   await writeDocumentAtomic(result.filePath, payload?.scene, 'parlyn-scene', 'Parlyn scene');
   return { canceled:false, filePath:result.filePath };
-});
+}, { payload:true });
 
-ipcMain.handle('parlyn:scene:open', async () => {
+secureHandle('parlyn:scene:open', async () => {
   const result = await dialog.showOpenDialog({ title:'Open Parlyn Scene', properties:['openFile'], filters:[{ name:'Parlyn Scene', extensions:['json'] }] });
   if (result.canceled || !result.filePaths[0]) return { canceled:true };
   const filePath=result.filePaths[0];
   return { canceled:false, filePath, scene:await readDocument(filePath, 'parlyn-scene', 'Parlyn scene') };
 });
 
-ipcMain.handle('parlyn:project:create', async (_event, payload) => {
+secureHandle('parlyn:project:create', async (payload) => {
   const choose = await dialog.showOpenDialog({ title:'Choose Parent Folder for Parlyn Project', properties:['openDirectory','createDirectory'] });
   if (choose.canceled || !choose.filePaths[0]) return { canceled:true };
   const name=safeName(payload?.name,'Parlyn Project');
@@ -107,49 +129,49 @@ ipcMain.handle('parlyn:project:create', async (_event, payload) => {
     await fs.rm(projectRoot, { recursive:true, force:true }).catch(() => {});
     throw error;
   }
-  activeProjectRoot=projectRoot;
-  return { canceled:false, projectRoot, project, world, assets:await listAssets(projectRoot) };
-});
+  activeProjectRoot=await fs.realpath(projectRoot);
+  return { canceled:false, projectRoot:activeProjectRoot, project, world, assets:await listAssets(activeProjectRoot) };
+}, { payload:true });
 
-ipcMain.handle('parlyn:project:open', async () => {
+secureHandle('parlyn:project:open', async () => {
   const choose=await dialog.showOpenDialog({ title:'Open Parlyn Project', properties:['openDirectory'] });
   if (choose.canceled || !choose.filePaths[0]) return { canceled:true };
-  const projectRoot=choose.filePaths[0];
-  const projectFile=path.join(projectRoot,'parlyn.project.json');
+  const projectRoot=await fs.realpath(choose.filePaths[0]);
+  const projectFile=await resolveExistingProjectPath(projectRoot,'parlyn.project.json','Parlyn project file');
   const project=await readDocument(projectFile, 'parlyn-project', 'Parlyn project file');
-  const scenePath=resolveProjectPath(projectRoot,project.startupScene,'Startup scene');
-  const worldPath=resolveProjectPath(projectRoot,project.world,'World document');
+  const scenePath=await resolveExistingProjectPath(projectRoot,project.startupScene,'Startup scene');
+  const worldPath=await resolveExistingProjectPath(projectRoot,project.world,'World document');
   const scene=await readDocument(scenePath, 'parlyn-scene', 'Startup scene');
   const world=await readDocument(worldPath, 'parlyn-world', 'World document');
   activeProjectRoot=projectRoot;
   return { canceled:false, projectRoot, project, scene, world, assets:await listAssets(projectRoot) };
 });
 
-ipcMain.handle('parlyn:project:save-scene', async (_event, payload) => {
+secureHandle('parlyn:project:save-scene', async (payload) => {
   if (!activeProjectRoot) return { ok:false, reason:'no-project' };
   const relativePath=payload?.relativePath || 'scenes/Main.parlyn-scene.json';
-  const target=resolveProjectPath(activeProjectRoot,relativePath,'Project scene path');
+  const target=await resolveWritableProjectPath(activeProjectRoot,relativePath,'Project scene path');
   await writeDocumentAtomic(target, payload?.scene, 'parlyn-scene', 'Parlyn scene');
-  const projectFile=path.join(activeProjectRoot,'parlyn.project.json');
+  const projectFile=await resolveWritableProjectPath(activeProjectRoot,'parlyn.project.json','Parlyn project file');
   const project=await readDocument(projectFile, 'parlyn-project', 'Parlyn project file');
   project.updatedAt=new Date().toISOString();
   await writeDocumentAtomic(projectFile, project, 'parlyn-project', 'Parlyn project file');
   return { ok:true, filePath:target, relativePath };
-});
+}, { payload:true });
 
-ipcMain.handle('parlyn:project:save-world', async (_event, payload) => {
+secureHandle('parlyn:project:save-world', async (payload) => {
   if (!activeProjectRoot) return { ok:false, reason:'no-project' };
   const relativePath=payload?.relativePath || 'worlds/Main.parlyn-world.json';
-  const target=resolveProjectPath(activeProjectRoot,relativePath,'Project world path');
+  const target=await resolveWritableProjectPath(activeProjectRoot,relativePath,'Project world path');
   await writeDocumentAtomic(target, payload?.world, 'parlyn-world', 'Parlyn world');
-  const projectFile=path.join(activeProjectRoot,'parlyn.project.json');
+  const projectFile=await resolveWritableProjectPath(activeProjectRoot,'parlyn.project.json','Parlyn project file');
   const project=await readDocument(projectFile, 'parlyn-project', 'Parlyn project file');
   project.updatedAt=new Date().toISOString();
   await writeDocumentAtomic(projectFile, project, 'parlyn-project', 'Parlyn project file');
   return { ok:true, filePath:target, relativePath };
-});
+}, { payload:true });
 
-ipcMain.handle('parlyn:project:import-assets', async () => {
+secureHandle('parlyn:project:import-assets', async () => {
   if (!activeProjectRoot) return { canceled:false, reason:'no-project', assets:[] };
   const choose=await dialog.showOpenDialog({
     title:'Import Assets into Parlyn Project',
@@ -160,14 +182,13 @@ ipcMain.handle('parlyn:project:import-assets', async () => {
     ]
   });
   if (choose.canceled) return { canceled:true, assets:await listAssets(activeProjectRoot) };
-  const assetsRoot=path.join(activeProjectRoot,'assets');
-  await fs.mkdir(assetsRoot,{ recursive:true });
+  const assetsRoot=await resolveExistingProjectPath(activeProjectRoot,'assets','Assets directory');
   for (const source of choose.filePaths) {
     let target=path.join(assetsRoot,path.basename(source));
     let i=1;
     while (true) {
       try { await fs.access(target); const ext=path.extname(source), base=path.basename(source,ext); target=path.join(assetsRoot,`${base}-${i++}${ext}`); }
-      catch { break; }
+      catch (error) { if (error.code === 'ENOENT') break; throw error; }
     }
     await fs.copyFile(source,target);
   }

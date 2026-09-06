@@ -15,6 +15,12 @@ Project, scene and world documents pass through the engine-owned persistence lay
 
 Scripting and Visual Scripting are not part of this foundation step. Their future data formats must build on this boundary through explicit, versioned engine schemas rather than editor-specific objects.
 
+## Desktop trust boundary
+
+The preload bridge exposes a deliberately small set of editor capabilities. The main process accepts those IPC calls only from Parlyn's own local editor document and rejects oversized or malformed payloads before filesystem work begins. Unexpected navigation and renderer-created windows are denied.
+
+Project-relative paths are checked both lexically and against resolved filesystem locations. A project file, scene, world or asset directory may not escape its selected project root through `..`, absolute paths or symbolic links. Expected absence is handled explicitly; unrelated permission and filesystem failures are surfaced to the editor instead of being hidden.
+
 ## Node family
 
 - Node

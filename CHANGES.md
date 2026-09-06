@@ -26,6 +26,13 @@
 - Reject non-finite numbers, non-JSON values and unsupported scene node types before data can be lost.
 - Harden timestamp, transform, camera, light and required-field validation.
 - Test real filesystem round trips, malformed input and rejected-save preservation.
+- Restricted privileged IPC calls to Parlyn's own local editor document.
+- Added renderer payload shape and size limits before filesystem operations.
+- Blocked project-root escapes through symbolic links.
+- Denied unexpected editor navigation and renderer-created windows.
+- Replaced status-only operation failures with a visible error dialog.
+- Included branding assets in packaged builds and removed broken-image fallback text from the editor toolbar.
+- Added automated desktop trust-boundary and UI error-contract checks.
 
 
 ## v0.5.0 — Transform Tools & Module Foundation
