@@ -32,7 +32,8 @@ Already present:
 - explicit format compatibility, scene-v1 migration and automated round-trip checks;
 - hierarchy selection, Inspector and viewport ray casting;
 - Move, Rotate and Scale gizmos;
-- Undo/Redo foundation;
+- cycle-safe Node reparenting and bounded scene loading;
+- validated, isolated and size-bounded Undo/Redo history;
 - constrained Electron preload bridge;
 - trusted editor-only IPC and navigation boundaries;
 - visible, actionable errors for project, scene, world and asset operations;
@@ -40,9 +41,7 @@ Already present:
 
 Completion gate:
 
-- expand automated tests for remaining node, history and editor invariants;
-- synchronize README, changelog and technical documentation;
-- complete a repeatable maintainer test pass.
+- complete a repeatable maintainer test pass and record the result.
 
 ## Phase 2 — Editor foundation
 

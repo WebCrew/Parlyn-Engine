@@ -8,6 +8,8 @@ const FORMAT = 'parlyn-scene';
 const VERSION = 2;
 const SUPPORTED_VERSIONS = new Set([1, 2]);
 const SUPPORTED_NODE_TYPES = new Set(['SceneRoot', 'Node', 'Node2_5D', 'Sprite2_5D', 'Billboard2_5D', 'Node3D', 'Mesh3D', 'Camera3D', 'Light3D']);
+const MAX_SCENE_NODES = 10000;
+const MAX_SCENE_DEPTH = 256;
 
 function requireFinite(value, label) {
   if (!Number.isFinite(value)) throw new TypeError(`${label} must be a finite number.`);
@@ -56,30 +58,43 @@ function requireNodeData(data) {
 }
 
 function migrateNodeV1(data) {
-  const node = structuredClone(data);
-  node.enabled ??= true;
-  node.metadata ??= {};
-  node.children ??= [];
-  if (node.type === 'Camera3D') {
-    node.fov ??= 50;
-    node.near ??= 0.05;
-    node.far ??= 1000;
-    node.primary ??= false;
+  const root = structuredClone(data);
+  const pending = [[root, 0]];
+  let count = 0;
+  while (pending.length) {
+    const [node, depth] = pending.pop();
+    if (!node || typeof node !== 'object' || Array.isArray(node)) throw new TypeError('Scene node must be an object.');
+    if (depth > MAX_SCENE_DEPTH) throw new RangeError(`Scene hierarchy exceeds the maximum depth of ${MAX_SCENE_DEPTH}.`);
+    count += 1;
+    if (count > MAX_SCENE_NODES) throw new RangeError(`Scene exceeds the maximum node count of ${MAX_SCENE_NODES}.`);
+    node.enabled ??= true;
+    node.metadata ??= {};
+    node.children ??= [];
+    if (!Array.isArray(node.children)) throw new TypeError(`Node ${node.id ?? 'unknown'} children must be an array.`);
+    if (node.type === 'Camera3D') {
+      node.fov ??= 50;
+      node.near ??= 0.05;
+      node.far ??= 1000;
+      node.primary ??= false;
+    }
+    if (node.type === 'Light3D') {
+      node.lightKind ??= 'directional';
+      node.color ??= '#ffffff';
+      node.intensity ??= 2;
+      node.castShadow ??= true;
+    }
+    for (const child of node.children) pending.push([child, depth + 1]);
   }
-  if (node.type === 'Light3D') {
-    node.lightKind ??= 'directional';
-    node.color ??= '#ffffff';
-    node.intensity ??= 2;
-    node.castShadow ??= true;
-  }
-  node.children = node.children.map(migrateNodeV1);
-  return node;
+  return root;
 }
 
-function nodeFromJSON(data, ids) {
+function nodeFromJSON(data, state, depth = 0) {
+  if (depth > MAX_SCENE_DEPTH) throw new RangeError(`Scene hierarchy exceeds the maximum depth of ${MAX_SCENE_DEPTH}.`);
+  state.count += 1;
+  if (state.count > MAX_SCENE_NODES) throw new RangeError(`Scene exceeds the maximum node count of ${MAX_SCENE_NODES}.`);
   requireNodeData(data);
-  if (ids.has(data.id)) throw new Error(`Duplicate node id: ${data.id}`);
-  ids.add(data.id);
+  if (state.ids.has(data.id)) throw new Error(`Duplicate node id: ${data.id}`);
+  state.ids.add(data.id);
   if (data.children !== undefined && !Array.isArray(data.children)) throw new TypeError(`Node ${data.id} children must be an array.`);
 
   const base = {
@@ -97,7 +112,7 @@ function nodeFromJSON(data, ids) {
 
   node.enabled = data.enabled ?? true;
   node.metadata = structuredClone(data.metadata ?? {});
-  for (const childData of data.children ?? []) node.addChild(nodeFromJSON(childData, ids));
+  for (const childData of data.children ?? []) node.addChild(nodeFromJSON(childData, state, depth + 1));
   return node;
 }
 
@@ -138,7 +153,7 @@ export class SceneDocument {
     if (!SUPPORTED_VERSIONS.has(sourceVersion)) throw new Error(`Unsupported Parlyn scene version: ${data.version}`);
     const scene = new SceneDocument(data.name);
     const rootData = sourceVersion === 1 ? migrateNodeV1(data.root) : data.root;
-    scene.root = nodeFromJSON(rootData, new Set());
+    scene.root = nodeFromJSON(rootData, { ids:new Set(), count:0 });
     if (scene.root.type !== 'SceneRoot') throw new Error('Parlyn scene root must use type SceneRoot.');
     scene.version = VERSION;
     return scene;
