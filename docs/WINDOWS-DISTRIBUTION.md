@@ -2,15 +2,19 @@
 
 ## Status and scope
 
-The Windows installer foundation is a limited exception to Parlyn's ordered
-roadmap. It addresses the confirmed test blocker in
-[Issue #12](https://github.com/WebCrew/Parlyn-Engine/issues/12): the project
-owner cannot run the unsigned Electron development binary while Windows Smart
-App Control remains enabled.
+The Windows installer foundation was introduced to address the test blocker
+recorded in [Issue #12](https://github.com/WebCrew/Parlyn-Engine/issues/12): the
+project owner could not run the unsigned Electron development binary while
+Windows Smart App Control remained enabled.
+
+A packaged installer has since been installed and launched successfully on the
+maintainer's Windows machine with Smart App Control left enabled, so Issue #12
+has been closed as a testing blocker. Trusted public code signing remains a
+separate distribution-hardening step.
 
 This work does not activate the broader launcher, account or online ecosystem
 scope from Phase 8. It provides a reproducible packaged editor, an NSIS
-installer and a strict boundary for trusted code signing.
+installer and a strict boundary for future trusted code signing.
 
 ## Installer behavior
 
@@ -46,16 +50,21 @@ npm run build:windows:dir
 
 Artifacts are written to `release/`, which remains excluded from source control.
 
-An unsigned local build is useful only for packaging inspection. It does not
-resolve Smart App Control and must not be described as a trusted release.
+An unsigned local build is useful for packaging inspection and local testing,
+but it must not be described as a trusted or publicly signed release.
 
 ## Trusted signing boundary
 
-Parlyn's release workflow uses SignPath's GitHub integration. GitHub Actions
-builds an explicitly unsigned package on a GitHub-hosted Windows runner and
-uploads it as a workflow artifact. SignPath verifies that origin, signs the
-configured Parlyn executables and returns the signed artifact to the same
-workflow for verification.
+Parlyn has applied to the SignPath Foundation Open Source Code Signing program.
+Approval and certificate availability are pending. The repository already
+contains a SignPath-compatible GitHub workflow so that the controlled signing
+path can be enabled if the application is approved.
+
+The intended workflow builds an explicitly unsigned package on a GitHub-hosted
+Windows runner and uploads it as a workflow artifact. After approval and
+configuration, SignPath would verify the build origin, sign the configured
+Parlyn executables and return the signed artifact to the same workflow for
+verification.
 
 ```text
 SIGNPATH_API_TOKEN                 protected GitHub Actions secret
@@ -65,26 +74,27 @@ SIGNPATH_SIGNING_POLICY_SLUG       GitHub Actions variable
 WINDOWS_EXPECTED_PUBLISHER         protected GitHub Actions secret
 ```
 
-The token must belong to a SignPath submitter permitted by Parlyn's release
-signing policy. Signing keys remain in SignPath's HSM and are never exported to
-the repository or GitHub runner. Every release signing request requires manual
-approval in accordance with the Parlyn
-[Code signing policy](CODE-SIGNING-POLICY.md).
+These values are placeholders for the approved configuration and must not be
+populated or used to claim trusted signing before approval. Signing keys would
+remain outside the repository and GitHub runner.
 
-Before enabling the signed workflow, the maintainer must:
+Before enabling trusted signing, the maintainer must:
 
-- receive approval for Parlyn from SignPath Foundation;
-- install the SignPath GitHub App for this repository;
-- create and link the SignPath project, artifact configuration and release
+- receive approval for Parlyn from SignPath Foundation or configure another
+  publicly trusted signing identity;
+- install and authorize the required signing integration;
+- create and link the signing project, artifact configuration and release
   signing policy;
 - configure the secret and variables listed above;
 - set `WINDOWS_EXPECTED_PUBLISHER` to the exact certificate subject returned by
-  the approved SignPath configuration.
+  the approved signing configuration.
 
 The default workflow refuses to build when trusted signing is required but no
-SignPath configuration or expected publisher is configured. It may be run with
-`require_signing` disabled only to inspect the packaging pipeline; that artifact
-is not suitable for the Smart App Control acceptance test.
+signing configuration or expected publisher is configured. It may be run with
+`require_signing` disabled to inspect the packaging pipeline; that artifact is
+not a trusted signed release.
+
+See the Parlyn [Code signing policy](CODE-SIGNING-POLICY.md).
 
 ## Verification
 
@@ -97,7 +107,7 @@ After building on Windows, run:
   -ExpectedPublisher "<expected certificate subject>"
 ```
 
-The verifier checks:
+For a future signed release, the verifier checks:
 
 - exactly one expected NSIS installer exists;
 - the unpacked `Parlyn Engine.exe` exists and carries Parlyn product metadata;
@@ -107,16 +117,16 @@ The verifier checks:
 
 ## Maintainer acceptance test
 
-Smart App Control must remain enabled throughout the test.
+Smart App Control should remain enabled throughout the test.
 
-1. Download the artifact produced by the trusted workflow.
-2. Verify its SHA-256 hash and Authenticode status.
-3. Confirm Windows displays the expected publisher.
-4. Install to the default per-user location.
-5. Launch Parlyn from the final installer page, Start menu and desktop shortcut.
-6. Create a project and reopen the bundled test project.
-7. Save and reopen its scene and world data.
-8. Uninstall Parlyn and confirm separately stored user projects remain intact.
+1. Download the intended test or release artifact.
+2. Verify its SHA-256 hash and, for signed releases, Authenticode status.
+3. Install to the default per-user location.
+4. Launch Parlyn from the final installer page, Start menu and desktop shortcut.
+5. Create a project and reopen the bundled test project.
+6. Save and reopen its scene and world data.
+7. Uninstall Parlyn and confirm separately stored user projects remain intact.
 
-Issue #12 remains open until this test succeeds on the maintainer's Windows
-machine with Smart App Control enabled.
+The packaged installer has passed the initial install-and-launch smoke test on
+the maintainer's Windows machine. Public trusted-signing acceptance remains
+pending separately from the resolved development-binary blocker.
