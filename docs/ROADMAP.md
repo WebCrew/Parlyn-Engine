@@ -28,7 +28,8 @@ Already present:
 - renderer abstraction with THREE.js backend;
 - hybrid 2.5D and 3D viewport;
 - project, scene and versioned world formats;
-- local project and scene persistence;
+- validated project, scene and world persistence with atomic document writes;
+- explicit format compatibility, scene-v1 migration and automated round-trip checks;
 - hierarchy selection, Inspector and viewport ray casting;
 - Move, Rotate and Scale gizmos;
 - Undo/Redo foundation;
@@ -37,12 +38,9 @@ Already present:
 
 Completion gate:
 
-- harden model validation and round-trip serialization;
-- define explicit format compatibility and migrations;
-- make project, scene and world persistence reliable;
 - replace silent failures with useful errors;
 - protect critical filesystem and IPC boundaries;
-- expand automated tests for core invariants;
+- expand automated tests for core invariants beyond the persistence contract;
 - synchronize README, changelog and technical documentation;
 - complete a repeatable maintainer test pass.
 

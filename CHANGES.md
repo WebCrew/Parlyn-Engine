@@ -19,6 +19,13 @@
 - Detect duplicate scene node IDs and invalid scene roots.
 - Replace silent project-loading failures with actionable errors.
 - Add automated project, scene and world roundtrip/error-case checks.
+- Added a shared persistence boundary for project, scene and world documents.
+- Validate complete documents before both open and save operations.
+- Write documents through temporary sibling files and atomic replacement.
+- Preserve the previous valid file when a save payload is rejected.
+- Reject non-finite numbers, non-JSON values and unsupported scene node types before data can be lost.
+- Harden timestamp, transform, camera, light and required-field validation.
+- Test real filesystem round trips, malformed input and rejected-save preservation.
 
 
 ## v0.5.0 — Transform Tools & Module Foundation

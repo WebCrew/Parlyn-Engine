@@ -79,6 +79,8 @@ My Project/
 
 Projects can be created and reopened through native desktop dialogs. Scene data remains plain, readable JSON during this early phase.
 
+Project, scene and world files are normalized and validated at the desktop boundary. Valid saves use an atomic replace operation, while malformed files, unsupported versions and values that JSON cannot preserve are rejected with an explicit error instead of silently damaging the previous file.
+
 ### Asset workflow foundation
 
 The editor can now import common asset files into a Parlyn project's `assets/` directory and display them in the Asset panel.
