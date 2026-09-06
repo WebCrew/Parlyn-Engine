@@ -216,8 +216,13 @@ verification and the maintainer acceptance test.
 
 ### Code signing policy
 
-Free code signing provided by [SignPath.io](https://signpath.io/), certificate
-by [SignPath Foundation](https://signpath.org/).
+Parlyn has applied to the SignPath Foundation Open Source Code Signing program.
+Approval and certificate availability are currently pending. The repository
+already contains a SignPath-compatible controlled workflow so trusted signing
+can be integrated if the application is approved.
+
+Until approval is confirmed, no Parlyn build is described as SignPath-signed or
+as using a SignPath Foundation certificate.
 
 Parlyn's signing roles, privacy statement and controlled release procedure are
 documented in [`docs/CODE-SIGNING-POLICY.md`](docs/CODE-SIGNING-POLICY.md).
