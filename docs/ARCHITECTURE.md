@@ -33,6 +33,12 @@ Node identity fields are non-empty engine-owned strings. Reparenting rejects sel
 
 Persisted scenes are bounded to 10,000 nodes and 256 hierarchy levels. These are protective document limits, not editor viewport or world-size limits. Undo/Redo likewise owns cloned snapshots, requires meaningful labels and enforces a positive configured history limit.
 
+Saved project scenes also maintain a versioned `parlyn-scene-history` document
+inside the project's `.parlyn` directory. The history is bounded to 100 states
+and a 16 MiB exported transaction payload. Parlyn restores it only when its
+validated current-scene snapshot exactly matches the loaded scene; stale,
+oversized or invalid history is ignored without blocking the project itself.
+
 ## Renderer rule
 
 Parlyn code talks to a RendererBackend contract. THREE.js can be replaced or complemented later without changing the project format or editor concepts.

@@ -1,11 +1,13 @@
 import { ProjectDocument } from '../project/ProjectDocument.mjs';
 import { SceneDocument } from '../scene/SceneDocument.mjs';
 import { WorldDocument } from '../world/WorldDocument.mjs';
+import { SceneHistoryDocument } from '../history/SceneHistoryDocument.mjs';
 
 const DOCUMENT_READERS = new Map([
   [ProjectDocument.FORMAT, (data) => ProjectDocument.fromJSON(data)],
   [SceneDocument.FORMAT, (data) => SceneDocument.fromJSON(data)],
-  [WorldDocument.FORMAT, (data) => WorldDocument.fromJSON(data)]
+  [WorldDocument.FORMAT, (data) => WorldDocument.fromJSON(data)],
+  [SceneHistoryDocument.FORMAT, (data) => SceneHistoryDocument.fromJSON(data)]
 ]);
 
 function requirePlainJson(value, path = 'document') {

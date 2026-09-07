@@ -59,6 +59,9 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
   assert.match(main, /secureHandle\('parlyn:project:open'/);
   assert.match(main, /secureHandle\('parlyn:project:close'/);
   assert.match(main, /secureHandle\('parlyn:project:delete'/);
+  assert.match(main, /parlyn-scene-history/);
+  assert.match(renderer, /history\.exportState\(/);
+  assert.match(renderer, /history\.restoreState\(result\.history\)/);
 
   let exposedHost = null;
   vm.runInNewContext(preload, {

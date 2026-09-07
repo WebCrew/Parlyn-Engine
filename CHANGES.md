@@ -2,6 +2,10 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Started Phase 2 with editor commands for deep node duplication and safe reparenting.
+- Added recursive hierarchy rendering and fixed subtree deletion in the viewport.
+- Added a bounded, validated local Scene History that preserves Undo/Redo through project close and application restart.
+- Added the versioned `parlyn-scene-history` document format with stale-history rejection.
 - Added explicit Close Project behavior that clears the privileged project session and protects unsaved scene changes.
 - Added exact-name-confirmed project deletion through the operating system Recycle Bin; Parlyn never permanently deletes the active project.
 - Adopted full Semantic Version prerelease names in application metadata and Windows installer filenames.

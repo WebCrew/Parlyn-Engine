@@ -26,6 +26,22 @@ root.walk((node) => visited.push(node.id));
 assert.deepEqual(visited, ['root', 'branch', 'leaf']);
 assert.throws(() => root.walk(null), /visitor/);
 
+const hierarchyScene = new SceneDocument('Hierarchy Commands');
+const parentA = hierarchyScene.root.addChild(new Node({ id:'parent-a', name:'Parent A', type:'Node' }));
+const parentB = hierarchyScene.root.addChild(new Node({ id:'parent-b', name:'Parent B', type:'Node' }));
+const nested = parentA.addChild(new Node({ id:'nested', name:'Nested', type:'Node' }));
+const duplicate = hierarchyScene.duplicateById(parentA.id);
+assert.equal(duplicate.name, 'Parent A Copy');
+assert.equal(duplicate.parent, hierarchyScene.root);
+assert.equal(duplicate.children.length, 1);
+assert.notEqual(duplicate.id, parentA.id);
+assert.notEqual(duplicate.children[0].id, nested.id);
+assert.equal(hierarchyScene.reparentById(nested.id, parentB.id), true);
+assert.equal(nested.parent, parentB);
+assert.equal(hierarchyScene.reparentById(nested.id, parentB.id), false);
+assert.throws(() => hierarchyScene.reparentById(parentB.id, nested.id), /descendants/);
+assert.throws(() => hierarchyScene.reparentById(hierarchyScene.root.id, parentA.id), /scene nodes/);
+
 const deepRoot = new Node({ id:'deep-0', name:'Deep 0', type:'Node' });
 let deepCursor = deepRoot;
 for (let index = 1; index <= 2000; index += 1) {
@@ -51,6 +67,16 @@ secondUndo.snapshot.value = 100;
 assert.deepEqual(history.redo({ value:2 }), { snapshot:{ value:3 }, label:'Second' });
 history.push({ value:5 }, 'New branch');
 assert.equal(history.canRedo, false, 'A new change must invalidate the redo branch.');
+const exportedHistory = history.exportState();
+assert.throws(() => history.exportState({ maxBytes:0 }), /positive/);
+const boundedExport = history.exportState({ maxBytes:120 });
+assert.ok(boundedExport.undoStack.length < exportedHistory.undoStack.length, 'Bounded history export must discard oldest entries when required.');
+const restoredHistory = new History({ limit:2 });
+restoredHistory.restoreState(exportedHistory);
+exportedHistory.undoStack[0].snapshot.value = 999;
+assert.deepEqual(restoredHistory.undo({ value:6 }), { snapshot:{ value:5 }, label:'New branch' });
+assert.throws(() => restoredHistory.restoreState({ version:2, undoStack:[], redoStack:[] }), /supported/);
+assert.throws(() => restoredHistory.restoreState({ version:1, undoStack:[{ snapshot:{}, label:'A' }, { snapshot:{}, label:'B' }], redoStack:[{ snapshot:{}, label:'C' }] }), /limit/);
 assert.throws(() => history.push(null, 'Invalid'), /snapshot/);
 assert.throws(() => history.push({ value:1 }, ' '), /label/);
 history.clear();
@@ -73,6 +99,9 @@ function sceneWithDepth(depth) {
 
 assert.doesNotThrow(() => SceneDocument.fromJSON(sceneWithDepth(256)));
 assert.throws(() => SceneDocument.fromJSON(sceneWithDepth(257)), /maximum depth/);
+const depthBoundScene = SceneDocument.fromJSON(sceneWithDepth(256));
+const extraRootNode = depthBoundScene.root.addChild(new Node({ id:'depth-extra', name:'Depth Extra', type:'Node' }));
+assert.throws(() => depthBoundScene.reparentById(extraRootNode.id, 'depth-node-256'), /maximum scene depth/);
 
 const oversizedScene = sceneWithDepth(0);
 for (let index = 0; index < 10000; index += 1) {

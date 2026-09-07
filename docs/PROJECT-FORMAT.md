@@ -41,7 +41,10 @@ Contains source assets imported by the developer. External asset formats are not
 
 ## `.parlyn/`
 
-Reserved for generated caches, import metadata and other project-local internal data. Developers should not rely on its contents as a public API.
+Reserved for generated caches, import metadata and other project-local internal
+data. Beta 5 stores the validated startup Scene History here as
+`startup-scene.parlyn-history.json`. Developers should not rely on internal
+paths as a public API; the history document itself remains explicitly versioned.
 
 ## Compatibility contract v1
 
@@ -52,6 +55,7 @@ Every persisted Parlyn document declares a `format` and numeric `version`.
 | `parlyn-project` | 1 | version 1 |
 | `parlyn-scene` | 2 | versions 1 and 2; version 1 is upgraded in memory and saved as version 2 |
 | `parlyn-world` | 1 | version 1 |
+| `parlyn-scene-history` | 1 | version 1 |
 
 Unknown future versions are rejected with an explicit error. Parlyn must never silently interpret an unsupported document as the current format.
 
@@ -69,6 +73,7 @@ Project references such as `startupScene` and `world` are project-relative paths
 - Documents are fully normalized and validated before they replace an existing file.
 - Saves use a temporary sibling file followed by an atomic rename. A rejected document never truncates the last valid file.
 - Persisted values must be plain JSON data. Functions, non-finite numbers, custom object prototypes, symbol keys and circular references are rejected because JSON cannot preserve them reliably.
+- Scene History contains at most 100 Undo/Redo states, is size-bounded on export and is restored only when its current-scene snapshot matches the loaded scene exactly.
 
 The persistence boundary is shared by loose scenes and project-owned project, scene and world files. Validation therefore does not depend on which editor command initiated the operation.
 

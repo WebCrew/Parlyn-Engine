@@ -131,7 +131,7 @@ The packaged installer has passed the initial install-and-launch smoke test on
 the maintainer's Windows machine. Public trusted-signing acceptance remains
 pending separately from the resolved development-binary blocker.
 
-The full Phase 1 functional acceptance candidate is the unsigned
-`v0.5.0-beta.4` prerelease. Its repeatable checklist is documented in
-[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md),
-and the result is recorded in Issue #23 before Phase 1 can be marked complete.
+Phase 1 functional acceptance completed with the unsigned `v0.5.0-beta.4`
+prerelease and Issue #23. The current Phase 2 editor candidate is
+`v0.5.0-beta.5`; its repeatable checklist is documented in
+[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.5.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.5.md).
