@@ -28,13 +28,14 @@ const required = [
   'docs/SMART-SYSTEMS.md',
   'docs/AUTHENTICATION.md',
   'docs/WINDOWS-DISTRIBUTION.md',
-  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.2.md',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.3.md',
   'build/icon.ico',
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
   'scripts/check-core-persistence.mjs',
   'scripts/check-core-invariants.mjs',
   'scripts/check-desktop-boundaries.cjs',
+  'scripts/check-electron-preload.cjs',
   'scripts/check-windows-distribution.cjs',
   'scripts/verify-windows-artifacts.ps1'
 ];

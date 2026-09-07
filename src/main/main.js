@@ -85,6 +85,11 @@ function secureHandle(channel, handler, { payload = false } = {}) {
   });
 }
 
+secureHandle('parlyn:app:get-info', async () => ({
+  version:app.getVersion(),
+  platform:process.platform
+}));
+
 secureHandle('parlyn:scene:save-as', async (payload) => {
   const defaultName = `${slug(payload?.name || 'scene','scene')}.parlyn-scene.json`;
   const result = await dialog.showSaveDialog({ title:'Save Parlyn Scene', defaultPath:defaultName, filters:[{ name:'Parlyn Scene', extensions:['json'] }] });

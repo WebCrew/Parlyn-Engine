@@ -609,7 +609,14 @@ async function bootstrap() {
   selectById(scene.root.children[1].id);
   updateHistoryButtons();
   setDirty(false);
-  status.textContent = `Ready \xB7 Parlyn ${host?.version ?? "0.5.0"} \xB7 THREE renderer backend`;
+  let appVersion = "0.5.0";
+  try {
+    const appInfo = await host.getAppInfo();
+    if (appInfo?.version) appVersion = appInfo.version;
+  } catch (error) {
+    console.warn("Could not read Parlyn application information:", error);
+  }
+  status.textContent = `Ready \xB7 Parlyn ${appVersion} \xB7 THREE renderer backend`;
 }
 bootstrap().catch((error) => {
   console.error("Parlyn failed to initialize:", error);

@@ -2,6 +2,7 @@ const assert = require('assert/strict');
 const fs = require('fs/promises');
 const os = require('os');
 const path = require('path');
+const vm = require('vm');
 const { assertTrustedIpcEvent, assertIpcPayload } = require('../src/main/ipcSecurity');
 const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../src/main/projectPaths');
 
@@ -42,6 +43,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
   const html = await fs.readFile(path.join(repositoryRoot, 'src/renderer/index.html'), 'utf8');
   const renderer = await fs.readFile(path.join(repositoryRoot, 'src/renderer/app.mjs'), 'utf8');
   const main = await fs.readFile(path.join(repositoryRoot, 'src/main/main.js'), 'utf8');
+  const preload = await fs.readFile(path.join(repositoryRoot, 'src/main/preload.js'), 'utf8');
   const pkg = JSON.parse(await fs.readFile(path.join(repositoryRoot, 'package.json'), 'utf8'));
   assert.match(html, /class="brand" aria-label="Parlyn Engine"/);
   assert.match(html, /alt="" aria-hidden="true" class="brand-logo"/);
@@ -53,7 +55,23 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
   assert.ok(pkg.build.files.includes('assets/branding/**/*'), 'Packaged editor must include its branding assets.');
   assert.match(main, /setWindowOpenHandler/);
   assert.match(main, /will-navigate/);
+  assert.match(main, /secureHandle\('parlyn:app:get-info'/);
   assert.match(main, /secureHandle\('parlyn:project:open'/);
+
+  let exposedHost = null;
+  vm.runInNewContext(preload, {
+    require(moduleName) {
+      assert.equal(moduleName, 'electron', 'Sandboxed preload may only load Electron APIs.');
+      return {
+        contextBridge:{ exposeInMainWorld(name, value) { assert.equal(name, 'parlynHost'); exposedHost = value; } },
+        ipcRenderer:{ invoke:async () => ({}) }
+      };
+    }
+  }, { filename:'src/main/preload.js' });
+  assert.ok(exposedHost, 'Preload must expose window.parlynHost.');
+  for (const method of ['getAppInfo','createProject','openProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets']) {
+    assert.equal(typeof exposedHost[method], 'function', `Preload host is missing ${method}().`);
+  }
 
   console.log('Desktop trust boundary and editor error contract check passed.');
 })().catch((error) => {
