@@ -88,14 +88,17 @@ async function bootstrap() {
     rootButton.className = "tree-item scene-root";
     rootButton.innerHTML = `<span class="node-icon">\u25C7</span><span>${escapeHtml(scene.name)}</span>`;
     root.appendChild(rootButton);
-    scene.root.children.forEach((node) => {
+    function appendNode(node, depth) {
       const b = document.createElement("button");
       b.className = "tree-item child" + (selected?.id === node.id ? " active" : "");
+      b.style.setProperty("--tree-depth", depth);
       b.dataset.id = node.id;
       b.innerHTML = `<span class="node-icon">${nodeIcon(node)}</span><span>${escapeHtml(node.name)}</span>`;
       b.addEventListener("click", () => selectById(node.id));
       root.appendChild(b);
-    });
+      node.children.forEach((child) => appendNode(child, depth + 1));
+    }
+    scene.root.children.forEach((node) => appendNode(node, 1));
   }
   function escapeHtml(value) {
     const d = document.createElement("div");
@@ -156,6 +159,8 @@ async function bootstrap() {
     $("inspector").hidden = true;
     $("selected-type").textContent = "None";
     $("delete-node").disabled = true;
+    $("duplicate-node").disabled = true;
+    $("reparent-node").disabled = true;
     renderHierarchy();
   }
   function selectById(id) {
@@ -165,6 +170,8 @@ async function bootstrap() {
     renderHierarchy();
     populateInspector();
     $("delete-node").disabled = false;
+    $("duplicate-node").disabled = false;
+    $("reparent-node").disabled = false;
     status.textContent = `Selected: ${selected.name}`;
   }
   function populateInspector() {
@@ -371,10 +378,66 @@ async function bootstrap() {
     const before = sceneSnapshot();
     const name = selected.name, id = selected.id;
     if (!scene.removeById(id)) return;
-    renderer.removeNode(id);
+    renderer.rebuild(scene);
     pushHistory(before, `Delete ${name}`);
     clearSelection();
     status.textContent = `Deleted: ${name}`;
+  }
+  function duplicateSelected() {
+    if (!selected) return;
+    const before = sceneSnapshot();
+    const originalName = selected.name;
+    const duplicate = scene.duplicateById(selected.id);
+    if (!duplicate) return;
+    renderer.rebuild(scene);
+    pushHistory(before, `Duplicate ${originalName}`);
+    renderHierarchy();
+    selectById(duplicate.id);
+    status.textContent = `Duplicated: ${duplicate.name}`;
+  }
+  function nodePath(node) {
+    const names = [];
+    for (let current = node; current && current !== scene.root; current = current.parent) names.unshift(current.name);
+    return names.join(" › ");
+  }
+  function showReparentDialog() {
+    if (!selected) return;
+    const excluded = new Set();
+    selected.walk((node) => excluded.add(node.id));
+    const select = $("reparent-target");
+    select.replaceChildren();
+    const rootOption = document.createElement("option");
+    rootOption.value = scene.root.id;
+    rootOption.textContent = "Scene Root";
+    select.appendChild(rootOption);
+    scene.root.walk((node) => {
+      if (node === scene.root || excluded.has(node.id)) return;
+      const option = document.createElement("option");
+      option.value = node.id;
+      option.textContent = nodePath(node);
+      select.appendChild(option);
+    });
+    select.value = selected.parent?.id ?? scene.root.id;
+    $("reparent-node-name").textContent = selected.name;
+    $("reparent-dialog").showModal();
+  }
+  function reparentSelected() {
+    if (!selected) return;
+    const before = sceneSnapshot();
+    const target = scene.findById($("reparent-target").value);
+    try {
+      if (!scene.reparentById(selected.id, target?.id)) {
+        $("reparent-dialog").close();
+        status.textContent = `${selected.name} already uses that parent.`;
+        return;
+      }
+      pushHistory(before, `Reparent ${selected.name}`);
+      renderHierarchy();
+      $("reparent-dialog").close();
+      status.textContent = `Moved ${selected.name} under ${target === scene.root ? "Scene Root" : target.name}`;
+    } catch (error) {
+      showError("Node reparent failed", error);
+    }
   }
   function newScene() {
     pushHistory(sceneSnapshot(), "New Scene");
@@ -389,9 +452,14 @@ async function bootstrap() {
   async function saveScene() {
     try {
       if (currentProject && host?.saveProjectScene) {
-        const result2 = await host.saveProjectScene({ relativePath: currentSceneRelativePath || currentProject.startupScene, scene: scene.toJSON() });
+        const result2 = await host.saveProjectScene({ relativePath: currentSceneRelativePath || currentProject.startupScene, scene: scene.toJSON(), history:history.exportState({ maxBytes:16 * 1024 * 1024 }) });
         if (!result2.ok) throw new Error("Project scene could not be saved.");
         currentFilePath = result2.filePath;
+        if (result2.historyWarning) {
+          setDirty(true);
+          showError("Local history save failed", result2.historyWarning);
+          return false;
+        }
         setDirty(false);
         status.textContent = `Saved project scene: ${currentSceneRelativePath || currentProject.startupScene}`;
         return true;
@@ -439,6 +507,8 @@ async function bootstrap() {
       currentSceneRelativePath = currentProject.startupScene;
       currentFilePath = null;
       assets = result.assets ?? [];
+      history.clear();
+      updateHistoryButtons();
       $("project-dialog").close();
       updateProjectUI();
       renderAssets();
@@ -462,13 +532,18 @@ async function bootstrap() {
         scene = SceneDocument.fromJSON(result.scene);
         renderer.rebuild(scene);
       }
-      history.clear();
+      if (result.history) {
+        try { history.restoreState(result.history); }
+        catch (error) { console.warn("Saved scene history was ignored:", error); history.clear(); }
+      } else history.clear();
       clearSelection();
       updateHistoryButtons();
       updateProjectUI();
       renderAssets();
       setDirty(false);
-      status.textContent = `Project opened: ${currentProject.name}`;
+      status.textContent = result.historyWarning
+        ? `Project opened without local history: ${result.historyWarning}`
+        : `Project opened: ${currentProject.name}`;
     } catch (error) {
       showError("Project open failed", error);
     }
@@ -634,6 +709,10 @@ async function bootstrap() {
   });
   $("cancel-add").addEventListener("click", () => $("add-dialog").close());
   $("delete-node").addEventListener("click", deleteSelected);
+  $("duplicate-node").addEventListener("click", duplicateSelected);
+  $("reparent-node").addEventListener("click", showReparentDialog);
+  $("cancel-reparent").addEventListener("click", () => $("reparent-dialog").close());
+  $("confirm-reparent").addEventListener("click", reparentSelected);
   $("undo").addEventListener("click", undo);
   $("redo").addEventListener("click", redo);
   $("import-asset").addEventListener("click", importAssets);
@@ -664,6 +743,10 @@ async function bootstrap() {
       }
     }
     if (!(event.ctrlKey || event.metaKey)) return;
+    if (key === "d" && !editing) {
+      event.preventDefault();
+      duplicateSelected();
+    }
     if (key === "s") {
       event.preventDefault();
       saveScene();

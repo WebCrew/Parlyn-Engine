@@ -40,6 +40,8 @@
       <div class="panel-title">
         <strong>Hierarchy</strong>
         <div class="panel-actions">
+          <button id="reparent-node" class="icon-button" title="Move selected node to another parent" disabled>↳</button>
+          <button id="duplicate-node" class="icon-button" title="Duplicate selected node (Ctrl+D)" disabled>⧉</button>
           <button id="delete-node" class="icon-button" title="Delete selected node" disabled>−</button>
           <button id="add-node" class="icon-button" title="Add node">+</button>
         </div>
@@ -116,6 +118,12 @@
       <button id="add-camera" class="node-option"><span>▣</span><strong>3D Camera</strong><small>Scene camera foundation</small></button>
     </div>
     <div class="dialog-actions"><button id="cancel-add">Cancel</button></div>
+  </dialog>
+
+  <dialog id="reparent-dialog" class="node-dialog small-dialog" aria-labelledby="reparent-title">
+    <div class="dialog-head"><strong id="reparent-title">Move Node in Hierarchy</strong><span>Choose a new parent for <strong id="reparent-node-name"></strong>.</span></div>
+    <div class="dialog-body"><label>New parent<select id="reparent-target"></select></label></div>
+    <div class="dialog-actions"><button id="cancel-reparent">Cancel</button><button id="confirm-reparent" class="primary">Move Node</button></div>
   </dialog>
 
   <dialog id="project-dialog" class="node-dialog small-dialog">

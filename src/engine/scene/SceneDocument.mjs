@@ -116,6 +116,35 @@ function nodeFromJSON(data, state, depth = 0) {
   return node;
 }
 
+function duplicateNodeData(node) {
+  const data = node.toJSON();
+  const pending = [data];
+  while (pending.length) {
+    const current = pending.pop();
+    current.id = crypto.randomUUID();
+    for (const child of current.children ?? []) pending.push(child);
+  }
+  data.name = `${node.name} Copy`;
+  return data;
+}
+
+function nodeDepth(node) {
+  let depth = 0;
+  for (let current = node; current.parent; current = current.parent) depth += 1;
+  return depth;
+}
+
+function subtreeDepth(node) {
+  let maximum = 0;
+  const pending = [[node, 0]];
+  while (pending.length) {
+    const [current, depth] = pending.pop();
+    maximum = Math.max(maximum, depth);
+    for (const child of current.children) pending.push([child, depth + 1]);
+  }
+  return maximum;
+}
+
 export class SceneDocument {
   static FORMAT = FORMAT;
   static VERSION = VERSION;
@@ -138,6 +167,27 @@ export class SceneDocument {
     const node = this.findById(id);
     if (!node || node === this.root || !node.parent) return false;
     return node.parent.removeChild(node);
+  }
+
+  duplicateById(id) {
+    const node = this.findById(id);
+    if (!node || node === this.root || !node.parent) return null;
+    const duplicate = nodeFromJSON(duplicateNodeData(node), { ids:new Set(), count:0 });
+    node.parent.addChild(duplicate);
+    return duplicate;
+  }
+
+  reparentById(id, parentId) {
+    const node = this.findById(id);
+    const parent = this.findById(parentId);
+    if (!node || node === this.root) throw new Error('Only scene nodes can be reparented.');
+    if (!parent) throw new Error('The target parent does not exist in this scene.');
+    if (node.parent === parent) return false;
+    if (nodeDepth(parent) + 1 + subtreeDepth(node) > MAX_SCENE_DEPTH) {
+      throw new RangeError(`Reparenting would exceed the maximum scene depth of ${MAX_SCENE_DEPTH}.`);
+    }
+    parent.addChild(node);
+    return true;
   }
 
   toJSON() {

@@ -20,7 +20,7 @@ Official systems remain replaceable. Developers may use Parlyn defaults, custom 
 
 ## Phase 1 — Engine and basic editor foundation
 
-**Status: In Progress**
+**Status: Complete**
 
 Already present:
 
@@ -39,15 +39,16 @@ Already present:
 - visible, actionable errors for project, scene, world and asset operations;
 - automated structural, Smart Systems and CodeQL checks.
 
-Completion gate:
+Completion evidence:
 
-- complete the repeatable `v0.5.0-beta.4` maintainer test pass and record the result in Issue #23.
+- the repeatable `v0.5.0-beta.4` maintainer test passed and is recorded in completed Issue #23.
 
 ## Phase 2 — Editor foundation
 
-**Status: Planned**
+**Status: In Progress**
 
-- duplication and reparenting;
+- duplication and reparenting — initial editor commands complete;
+- durable, validated local Scene History — initial foundation complete;
 - multi-selection where appropriate;
 - multi-scene project browser;
 - rename and move project assets;

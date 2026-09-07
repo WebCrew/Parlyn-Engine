@@ -18,6 +18,7 @@ const required = [
   'src/renderer/index.html',
   'src/renderer/app.mjs',
   'src/engine/project/ProjectDocument.mjs',
+  'src/engine/history/SceneHistoryDocument.mjs',
   'src/engine/persistence/DocumentPersistence.mjs',
   'src/engine/world/WorldDocument.mjs',
   'src/engine/world/DeterministicEncounter.mjs',
@@ -30,6 +31,7 @@ const required = [
   'docs/AUTHENTICATION.md',
   'docs/WINDOWS-DISTRIBUTION.md',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.5.md',
   'build/icon.ico',
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
@@ -48,7 +50,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.5.0-beta.4') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0-beta.5') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {

@@ -8,6 +8,8 @@ import { ProjectDocument } from '../src/engine/project/ProjectDocument.mjs';
 import { SceneDocument } from '../src/engine/scene/SceneDocument.mjs';
 import { Node2_5D } from '../src/engine/core/Node2_5D.mjs';
 import { WorldDocument } from '../src/engine/world/WorldDocument.mjs';
+import { History } from '../src/engine/history/History.mjs';
+import { SceneHistoryDocument } from '../src/engine/history/SceneHistoryDocument.mjs';
 import { normalizeDocument, parseDocumentText, stringifyDocument } from '../src/engine/persistence/DocumentPersistence.mjs';
 import { readDocumentFile, writeDocumentFileAtomic } from '../src/main/documentFiles.mjs';
 
@@ -37,7 +39,16 @@ assert.deepEqual(migratedScene.root.children[0].metadata, {});
 const world = new WorldDocument({ name:'Roundtrip World', seed:'roundtrip' });
 assert.deepEqual(WorldDocument.fromJSON(world.toJSON()).toJSON(), world.toJSON());
 
-for (const document of [project.toJSON(), scene.toJSON(), world.toJSON()]) {
+const sceneHistory = new History({ limit:100 });
+sceneHistory.push(scene.toJSON(), 'Add Sprite');
+const historyDocument = new SceneHistoryDocument({
+  scenePath:'scenes/Main.parlyn-scene.json',
+  currentScene:scene.toJSON(),
+  history:sceneHistory.exportState()
+});
+assert.deepEqual(SceneHistoryDocument.fromJSON(historyDocument.toJSON()).toJSON(), historyDocument.toJSON());
+
+for (const document of [project.toJSON(), scene.toJSON(), world.toJSON(), historyDocument.toJSON()]) {
   const source = stringifyDocument(document, document.format);
   assert.deepEqual(parseDocumentText(source, document.format), normalizeDocument(document, document.format));
 }
@@ -64,6 +75,10 @@ assert.throws(() => SceneDocument.fromJSON({ format:'parlyn-scene', version:99, 
 assert.throws(() => SceneDocument.fromJSON({ format:'parlyn-scene', version:2, name:'Missing Root' }), /missing root/);
 assert.throws(() => WorldDocument.fromJSON({ format:'parlyn-world', version:99 }), /Unsupported/);
 assert.throws(() => WorldDocument.fromJSON({ format:'parlyn-world', version:1 }), /missing name/);
+assert.throws(() => SceneHistoryDocument.fromJSON({ ...historyDocument.toJSON(), version:99 }), /Unsupported/);
+const invalidHistorySnapshot = historyDocument.toJSON();
+invalidHistorySnapshot.history.undoStack[0].snapshot.format = 'not-a-scene';
+assert.throws(() => SceneHistoryDocument.fromJSON(invalidHistorySnapshot), /scene file/);
 
 const duplicate = scene.toJSON();
 duplicate.root.children.push(structuredClone(duplicate.root.children[0]));
@@ -94,6 +109,10 @@ try {
   );
   assert.equal(await fs.readFile(projectFile, 'utf8'), firstSource, 'A rejected save must preserve the previous file.');
   assert.deepEqual((await fs.readdir(temporaryRoot)).filter((name) => name.includes('.tmp-')), []);
+
+  const historyFile = path.join(temporaryRoot, 'startup-scene.parlyn-history.json');
+  await writeDocumentFileAtomic(historyFile, historyDocument.toJSON(), 'parlyn-scene-history', 'test scene history');
+  assert.deepEqual(await readDocumentFile(historyFile, 'parlyn-scene-history', 'test scene history'), historyDocument.toJSON());
 
   const malformedFile = path.join(temporaryRoot, 'broken.parlyn-scene.json');
   await fs.writeFile(malformedFile, '{ broken json', 'utf8');
