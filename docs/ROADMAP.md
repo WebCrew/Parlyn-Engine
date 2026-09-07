@@ -41,7 +41,7 @@ Already present:
 
 Completion gate:
 
-- complete the repeatable `v0.5.0-beta.2` maintainer test pass and record the result in Issue #23.
+- complete the repeatable `v0.5.0-beta.3` maintainer test pass and record the result in Issue #23.
 
 ## Phase 2 — Editor foundation
 

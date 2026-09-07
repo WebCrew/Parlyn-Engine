@@ -2,6 +2,8 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Restored the sandboxed Electron preload bridge so packaged project creation and saving work again.
+- Added sandboxed preload contract and real Electron smoke tests that verify every desktop host method before Windows packaging.
 - Added a reproducible 64-bit Windows NSIS installer foundation.
 - Added branded Windows executable and installer metadata.
 - Added a manual Windows build workflow with a strict trusted-signing gate.
@@ -39,8 +41,8 @@
 - Bounded loaded scenes to 10,000 nodes and 256 hierarchy levels.
 - Reworked plain-JSON validation to avoid recursive call-stack exhaustion.
 - Added automated Node hierarchy and Undo/Redo invariant checks.
-- Added a repeatable Beta 2 maintainer acceptance checklist for the Phase 1 completion gate.
-- Generalized the non-overwriting unsigned preview workflow for an explicit Beta 2 release.
+- Added a repeatable Beta 3 maintainer acceptance checklist for the Phase 1 completion gate.
+- Generalized the non-overwriting unsigned preview workflow for explicit beta releases.
 
 
 ## v0.5.0 — Transform Tools & Module Foundation
