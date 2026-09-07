@@ -2,6 +2,9 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Added explicit Close Project behavior that clears the privileged project session and protects unsaved scene changes.
+- Added exact-name-confirmed project deletion through the operating system Recycle Bin; Parlyn never permanently deletes the active project.
+- Adopted full Semantic Version prerelease names in application metadata and Windows installer filenames.
 - Restored the sandboxed Electron preload bridge so packaged project creation and saving work again.
 - Added sandboxed preload contract and real Electron smoke tests that verify every desktop host method before Windows packaging.
 - Added a reproducible 64-bit Windows NSIS installer foundation.
@@ -41,7 +44,7 @@
 - Bounded loaded scenes to 10,000 nodes and 256 hierarchy levels.
 - Reworked plain-JSON validation to avoid recursive call-stack exhaustion.
 - Added automated Node hierarchy and Undo/Redo invariant checks.
-- Added a repeatable Beta 3 maintainer acceptance checklist for the Phase 1 completion gate.
+- Added a repeatable Beta 4 maintainer acceptance checklist for the Phase 1 completion gate.
 - Generalized the non-overwriting unsigned preview workflow for explicit beta releases.
 
 

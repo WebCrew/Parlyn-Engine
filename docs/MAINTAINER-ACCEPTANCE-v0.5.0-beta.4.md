@@ -1,7 +1,7 @@
-# Parlyn Engine v0.5.0 Beta 3 — Maintainer Acceptance
+# Parlyn Engine v0.5.0 Beta 4 — Maintainer Acceptance
 
 This is the repeatable Phase 1 acceptance pass. Perform it on the published
-`v0.5.0-beta.3` artifact, not on a development checkout or an older beta.
+`v0.5.0-beta.4` artifact, not on a development checkout or an older beta.
 
 Smart App Control and normal Windows security settings remain enabled. This
 preview is intentionally unsigned while the SignPath Foundation application is
@@ -19,11 +19,11 @@ Record these values in Issue #23 after the pass:
 
 ## 1. Download and integrity
 
-1. Download the installer and `SHA256SUMS.txt` from the Beta 3 prerelease.
+1. Download the installer and `SHA256SUMS.txt` from the Beta 4 prerelease.
 2. In PowerShell, run:
 
    ```powershell
-   Get-FileHash "$env:USERPROFILE\Downloads\Parlyn-Engine-Setup-0.5.0-x64.exe" -Algorithm SHA256
+   Get-FileHash "$env:USERPROFILE\Downloads\Parlyn-Engine-Setup-0.5.0-beta.4-x64.exe" -Algorithm SHA256
    ```
 
 3. Confirm the displayed hash matches `SHA256SUMS.txt`.
@@ -37,12 +37,16 @@ Record these values in Issue #23 after the pass:
 
 ## 3. Project and persistence
 
-1. Create a project named `Parlyn Beta 3 Test` in a new empty parent folder.
+1. Create a project named `Parlyn Beta 4 Test` in a new empty parent folder.
 2. Add one 2.5D Sprite and one 3D Mesh.
 3. Rename both nodes and change their positions.
 4. Save the scene, close Parlyn, reopen the project and confirm names and positions survived.
 5. Open **World**, confirm the project world name and seed appear, then use **Save World**.
 6. Open the bundled `samples/Parlyn-Test-Project` and confirm its hierarchy and imported asset appear.
+7. Make an unsaved change, choose **Close**, then cancel the warning and confirm the project remains open.
+8. Choose **Close** again, use **Save & Continue**, then reopen the project and confirm the last change survived.
+9. Create a disposable project named `Parlyn Delete Test`, choose **Delete**, confirm the button remains disabled for a wrong name, then enter the exact name.
+10. Confirm the editor returns to `Loose Scene`, the project folder leaves its original location and can be found in the Windows Recycle Bin.
 
 ## 4. Hierarchy, transforms and history
 
@@ -68,8 +72,8 @@ Record these values in Issue #23 after the pass:
 
 ## 7. Uninstall preservation
 
-1. Close Parlyn and uninstall Beta 3 normally.
-2. Confirm the separately created `Parlyn Beta 3 Test` project still exists with its files intact.
+1. Close Parlyn and uninstall Beta 4 normally.
+2. Confirm the separately created `Parlyn Beta 4 Test` project still exists with its files intact.
 
 Phase 1 passes only when every required section succeeds or a discovered defect
 is fixed and the affected section is repeated against a new artifact.

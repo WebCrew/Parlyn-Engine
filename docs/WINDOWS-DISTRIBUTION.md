@@ -132,6 +132,6 @@ the maintainer's Windows machine. Public trusted-signing acceptance remains
 pending separately from the resolved development-binary blocker.
 
 The full Phase 1 functional acceptance candidate is the unsigned
-`v0.5.0-beta.3` prerelease. Its repeatable checklist is documented in
-[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.3.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.3.md),
+`v0.5.0-beta.4` prerelease. Its repeatable checklist is documented in
+[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md),
 and the result is recorded in Issue #23 before Phase 1 can be marked complete.

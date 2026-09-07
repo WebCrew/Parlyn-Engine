@@ -24,6 +24,7 @@ async function bootstrap() {
   let assets = [];
   let inspectorStartSnapshot = null;
   let dirty = false;
+  let pendingUnsavedDecision = null;
   let gizmoStartSnapshot = null;
   let transformMode = "select";
   const moduleEvents = new EventTarget();
@@ -113,6 +114,40 @@ async function bootstrap() {
     const errorDialog = $("error-dialog");
     if (errorDialog.open) errorDialog.close();
     errorDialog.showModal();
+  }
+  function resetProjectWorkspace() {
+    currentProject = null;
+    currentProjectRoot = null;
+    currentSceneRelativePath = null;
+    currentFilePath = null;
+    currentWorld = null;
+    assets = [];
+    scene = new SceneDocument("Untitled Scene");
+    history.clear();
+    renderer.rebuild(scene);
+    clearSelection();
+    updateHistoryButtons();
+    updateProjectUI();
+    renderAssets();
+    setDirty(false);
+  }
+  function resolveUnsavedDecision(decision) {
+    const resolve = pendingUnsavedDecision;
+    pendingUnsavedDecision = null;
+    if ($("unsaved-dialog").open) $("unsaved-dialog").close();
+    resolve?.(decision);
+  }
+  function askAboutUnsavedChanges() {
+    if (!dirty) return Promise.resolve("continue");
+    if (pendingUnsavedDecision) return Promise.resolve("cancel");
+    $("unsaved-dialog").showModal();
+    return new Promise((resolve) => { pendingUnsavedDecision = resolve; });
+  }
+  async function mayCloseProject() {
+    const decision = await askAboutUnsavedChanges();
+    if (decision === "cancel") return false;
+    if (decision === "save") return saveScene();
+    return true;
   }
   function clearSelection() {
     selected = null;
@@ -359,18 +394,20 @@ async function bootstrap() {
         currentFilePath = result2.filePath;
         setDirty(false);
         status.textContent = `Saved project scene: ${currentSceneRelativePath || currentProject.startupScene}`;
-        return;
+        return true;
       }
       const result = await host.saveSceneAs({ name: scene.name, scene: scene.toJSON() });
       if (result.canceled) {
         status.textContent = "Save canceled.";
-        return;
+        return false;
       }
       currentFilePath = result.filePath;
       setDirty(false);
       status.textContent = `Saved: ${shortPath(currentFilePath)}`;
+      return true;
     } catch (error) {
       showError("Scene save failed", error);
+      return false;
     }
   }
   async function openScene() {
@@ -436,9 +473,49 @@ async function bootstrap() {
       showError("Project open failed", error);
     }
   }
+  async function closeProject() {
+    if (!currentProject || !await mayCloseProject()) return;
+    const projectName = currentProject.name;
+    try {
+      const result = await host.closeProject();
+      if (!result.ok) throw new Error("No active project could be closed.");
+      resetProjectWorkspace();
+      status.textContent = `Project closed: ${projectName}`;
+    } catch (error) {
+      showError("Project close failed", error);
+    }
+  }
+  function showDeleteProjectDialog() {
+    if (!currentProject) return;
+    $("delete-project-name").textContent = currentProject.name;
+    $("delete-project-path").textContent = currentProjectRoot;
+    $("delete-unsaved-warning").hidden = !dirty;
+    $("delete-project-confirmation").value = "";
+    $("confirm-delete-project").disabled = true;
+    $("delete-project-dialog").showModal();
+    $("delete-project-confirmation").focus();
+  }
+  async function deleteProject() {
+    if (!currentProject) return;
+    const confirmationName = $("delete-project-confirmation").value;
+    const projectName = currentProject.name;
+    $("confirm-delete-project").disabled = true;
+    try {
+      const result = await host.deleteProject({ confirmationName });
+      if (!result.ok) throw new Error("No active project could be moved to the Recycle Bin.");
+      $("delete-project-dialog").close();
+      resetProjectWorkspace();
+      status.textContent = `Moved to Recycle Bin: ${projectName}`;
+    } catch (error) {
+      showError("Project deletion failed", error);
+      $("confirm-delete-project").disabled = confirmationName !== currentProject?.name;
+    }
+  }
   function updateProjectUI() {
     $("project-name").textContent = currentProject?.name ?? "Loose Scene";
     $("project-name").title = currentProjectRoot ?? "";
+    $("close-project").disabled = !currentProject;
+    $("delete-project").disabled = !currentProject;
   }
   function assetIcon(ext) {
     if ([".png", ".jpg", ".jpeg", ".webp", ".svg"].includes(ext)) return "\u25A7";
@@ -518,6 +595,17 @@ async function bootstrap() {
   $("save-world").addEventListener("click", saveWorld);
   $("close-modules").addEventListener("click", () => $("module-dialog").close());
   $("close-error").addEventListener("click", () => $("error-dialog").close());
+  $("close-project").addEventListener("click", closeProject);
+  $("delete-project").addEventListener("click", showDeleteProjectDialog);
+  $("cancel-delete-project").addEventListener("click", () => $("delete-project-dialog").close());
+  $("confirm-delete-project").addEventListener("click", deleteProject);
+  $("delete-project-confirmation").addEventListener("input", () => {
+    $("confirm-delete-project").disabled = $("delete-project-confirmation").value !== currentProject?.name;
+  });
+  $("cancel-unsaved").addEventListener("click", () => resolveUnsavedDecision("cancel"));
+  $("discard-unsaved").addEventListener("click", () => resolveUnsavedDecision("discard"));
+  $("save-unsaved").addEventListener("click", () => resolveUnsavedDecision("save"));
+  $("unsaved-dialog").addEventListener("cancel", (event) => { event.preventDefault(); resolveUnsavedDecision("cancel"); });
   moduleEvents.addEventListener("module-changed", renderModules);
   $("view-25").addEventListener("click", () => {
     renderer.setView("2.5d");
@@ -609,13 +697,15 @@ async function bootstrap() {
   selectById(scene.root.children[1].id);
   updateHistoryButtons();
   setDirty(false);
-  let appVersion = "0.5.0";
+  let appVersion = "unknown";
   try {
     const appInfo = await host.getAppInfo();
     if (appInfo?.version) appVersion = appInfo.version;
   } catch (error) {
     console.warn("Could not read Parlyn application information:", error);
   }
+  $("brand-version").textContent = `${appVersion} GitHub Preview`;
+  $("footer-version").textContent = `v${appVersion}`;
   status.textContent = `Ready \xB7 Parlyn ${appVersion} \xB7 THREE renderer backend`;
 }
 bootstrap().catch((error) => {

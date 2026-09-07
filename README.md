@@ -223,7 +223,7 @@ See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
 The current Phase 1 acceptance candidate uses the repeatable
-[`v0.5.0-beta.3 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.3.md).
+[`v0.5.0-beta.4 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md).
 
 ### Code signing policy
 

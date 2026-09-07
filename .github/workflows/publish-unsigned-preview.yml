@@ -12,12 +12,12 @@ on:
         description: New prerelease tag; an existing release is never overwritten
         required: true
         type: string
-        default: v0.5.0-beta.3
+        default: v0.5.0-beta.4
       preview_title:
         description: Public prerelease title
         required: true
         type: string
-        default: Parlyn Engine v0.5.0 Beta 3 (unsigned)
+        default: Parlyn Engine v0.5.0 Beta 4 (unsigned)
 
 permissions:
   contents: write
@@ -29,8 +29,8 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: false
       GH_TOKEN: ${{ github.token }}
-      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.3' }}
-      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 3 (unsigned)' }}
+      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.4' }}
+      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 4 (unsigned)' }}
 
     steps:
       - name: Checkout
@@ -68,11 +68,12 @@ jobs:
         shell: pwsh
         run: |
           @"
-          # Parlyn Engine v0.5.0 Beta 3
+          # Parlyn Engine v0.5.0 Beta 4
 
           This unsigned Windows beta contains the completed automated Phase 1
           foundation candidate. It restores the packaged Electron host bridge
-          required for project creation and saving, and includes atomic persistence,
+          required for project creation and saving. It adds safe project closing,
+          recoverable Recycle Bin deletion and explicit prerelease filenames alongside atomic persistence,
           hardened Node and Undo/Redo invariants, visible editor errors, tighter
           desktop trust boundaries and corrected packaged toolbar branding.
 
@@ -87,7 +88,7 @@ jobs:
           remain pending. This release is not SignPath-signed.
 
           Maintainer acceptance instructions:
-          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.3.md
+          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md
           "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
 
       - name: Publish GitHub pre-release

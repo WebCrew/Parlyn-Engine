@@ -6,6 +6,8 @@ const methods = [
   'getAppInfo',
   'createProject',
   'openProject',
+  'closeProject',
+  'deleteProject',
   'saveProjectScene',
   'saveProjectWorld',
   'saveSceneAs',
