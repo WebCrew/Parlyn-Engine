@@ -13,6 +13,7 @@ const required = [
   'src/main/documentFiles.mjs',
   'src/main/ipcSecurity.js',
   'src/main/projectPaths.js',
+  'src/main/ProjectSession.js',
   'src/main/preload.js',
   'src/renderer/index.html',
   'src/renderer/app.mjs',
@@ -28,13 +29,14 @@ const required = [
   'docs/SMART-SYSTEMS.md',
   'docs/AUTHENTICATION.md',
   'docs/WINDOWS-DISTRIBUTION.md',
-  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.3.md',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md',
   'build/icon.ico',
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
   'scripts/check-core-persistence.mjs',
   'scripts/check-core-invariants.mjs',
   'scripts/check-desktop-boundaries.cjs',
+  'scripts/check-project-session.cjs',
   'scripts/check-electron-preload.cjs',
   'scripts/check-windows-distribution.cjs',
   'scripts/verify-windows-artifacts.ps1'
@@ -46,7 +48,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.5.0') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0-beta.4') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -65,6 +67,7 @@ cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-smart-systems.
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-persistence.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-invariants.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-desktop-boundaries.cjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-project-session.cjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-windows-distribution.cjs')], { stdio: 'inherit' });
 
 console.log(`Parlyn structure check passed (${codeFiles.length} JavaScript modules checked).`);

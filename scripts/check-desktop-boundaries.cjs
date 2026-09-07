@@ -57,6 +57,8 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
   assert.match(main, /will-navigate/);
   assert.match(main, /secureHandle\('parlyn:app:get-info'/);
   assert.match(main, /secureHandle\('parlyn:project:open'/);
+  assert.match(main, /secureHandle\('parlyn:project:close'/);
+  assert.match(main, /secureHandle\('parlyn:project:delete'/);
 
   let exposedHost = null;
   vm.runInNewContext(preload, {
@@ -69,7 +71,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
     }
   }, { filename:'src/main/preload.js' });
   assert.ok(exposedHost, 'Preload must expose window.parlynHost.');
-  for (const method of ['getAppInfo','createProject','openProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets']) {
+  for (const method of ['getAppInfo','createProject','openProject','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets']) {
     assert.equal(typeof exposedHost[method], 'function', `Preload host is missing ${method}().`);
   }
 

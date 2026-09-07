@@ -1,11 +1,11 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const fs = require('fs/promises');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { resolveExistingProjectPath, resolveWritableProjectPath } = require('./projectPaths');
 const { assertTrustedIpcEvent, assertIpcPayload } = require('./ipcSecurity');
+const { ProjectSession } = require('./ProjectSession');
 
-let activeProjectRoot = null;
 const persistence = import('../engine/persistence/DocumentPersistence.mjs');
 const documentFiles = import('./documentFiles.mjs');
 const EDITOR_FILE = path.join(__dirname, '..', 'renderer', 'index.html');
@@ -31,6 +31,26 @@ async function writeDocumentAtomic(filePath, document, expectedFormat, label = '
   const { writeDocumentFileAtomic } = await documentFiles;
   return writeDocumentFileAtomic(filePath, document, expectedFormat, label);
 }
+
+const projectSession = new ProjectSession({
+  async loadProject(projectRoot) {
+    const projectFile = await resolveExistingProjectPath(projectRoot, 'parlyn.project.json', 'Parlyn project file');
+    return readDocument(projectFile, 'parlyn-project', 'Parlyn project file');
+  },
+  trashItem:projectRoot => shell.trashItem(projectRoot),
+  isProtectedRoot(projectRoot) {
+    const normalize = value => {
+      const resolved = path.resolve(value);
+      return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+    };
+    const target = normalize(projectRoot);
+    const protectedUserFolders = ['home', 'desktop', 'documents', 'downloads'].map(name => normalize(app.getPath(name)));
+    if (protectedUserFolders.includes(target)) return true;
+
+    const protectedApplicationRoots = [app.getAppPath(), process.resourcesPath].filter(Boolean).map(normalize);
+    return protectedApplicationRoots.some(root => target === root || target.startsWith(`${root}${path.sep}`));
+  }
+});
 
 async function listAssets(projectRoot) {
   if (!projectRoot) return [];
@@ -134,7 +154,7 @@ secureHandle('parlyn:project:create', async (payload) => {
     await fs.rm(projectRoot, { recursive:true, force:true }).catch(() => {});
     throw error;
   }
-  activeProjectRoot=await fs.realpath(projectRoot);
+  const activeProjectRoot=projectSession.activate(await fs.realpath(projectRoot));
   return { canceled:false, projectRoot:activeProjectRoot, project, world, assets:await listAssets(activeProjectRoot) };
 }, { payload:true });
 
@@ -148,11 +168,16 @@ secureHandle('parlyn:project:open', async () => {
   const worldPath=await resolveExistingProjectPath(projectRoot,project.world,'World document');
   const scene=await readDocument(scenePath, 'parlyn-scene', 'Startup scene');
   const world=await readDocument(worldPath, 'parlyn-world', 'World document');
-  activeProjectRoot=projectRoot;
+  projectSession.activate(projectRoot);
   return { canceled:false, projectRoot, project, scene, world, assets:await listAssets(projectRoot) };
 });
 
+secureHandle('parlyn:project:close', async () => projectSession.close());
+
+secureHandle('parlyn:project:delete', async (payload) => projectSession.moveToTrash(payload?.confirmationName), { payload:true });
+
 secureHandle('parlyn:project:save-scene', async (payload) => {
+  const activeProjectRoot=projectSession.activeProjectRoot;
   if (!activeProjectRoot) return { ok:false, reason:'no-project' };
   const relativePath=payload?.relativePath || 'scenes/Main.parlyn-scene.json';
   const target=await resolveWritableProjectPath(activeProjectRoot,relativePath,'Project scene path');
@@ -165,6 +190,7 @@ secureHandle('parlyn:project:save-scene', async (payload) => {
 }, { payload:true });
 
 secureHandle('parlyn:project:save-world', async (payload) => {
+  const activeProjectRoot=projectSession.activeProjectRoot;
   if (!activeProjectRoot) return { ok:false, reason:'no-project' };
   const relativePath=payload?.relativePath || 'worlds/Main.parlyn-world.json';
   const target=await resolveWritableProjectPath(activeProjectRoot,relativePath,'Project world path');
@@ -177,6 +203,7 @@ secureHandle('parlyn:project:save-world', async (payload) => {
 }, { payload:true });
 
 secureHandle('parlyn:project:import-assets', async () => {
+  const activeProjectRoot=projectSession.activeProjectRoot;
   if (!activeProjectRoot) return { canceled:false, reason:'no-project', assets:[] };
   const choose=await dialog.showOpenDialog({
     title:'Import Assets into Parlyn Project',

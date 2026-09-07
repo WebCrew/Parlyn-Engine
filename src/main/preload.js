@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('parlynHost', {
   openScene:()=>ipcRenderer.invoke('parlyn:scene:open'),
   createProject:(payload)=>ipcRenderer.invoke('parlyn:project:create',payload),
   openProject:()=>ipcRenderer.invoke('parlyn:project:open'),
+  closeProject:()=>ipcRenderer.invoke('parlyn:project:close'),
+  deleteProject:(payload)=>ipcRenderer.invoke('parlyn:project:delete',payload),
   saveProjectScene:(payload)=>ipcRenderer.invoke('parlyn:project:save-scene',payload),
   saveProjectWorld:(payload)=>ipcRenderer.invoke('parlyn:project:save-world',payload),
   importAssets:()=>ipcRenderer.invoke('parlyn:project:import-assets')

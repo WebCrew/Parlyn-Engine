@@ -10,7 +10,7 @@
   <header class="app-bar">
     <div class="brand" aria-label="Parlyn Engine">
       <img src="../../assets/branding/parlyn-logo-dark.svg" alt="" aria-hidden="true" class="brand-logo">
-      <span class="brand-version">0.5.0 GitHub Preview</span>
+      <span id="brand-version" class="brand-version">Loading version…</span>
     </div>
     <nav class="top-actions">
       <button id="new-project">New Project</button>
@@ -31,8 +31,11 @@
   <main class="workspace">
     <aside class="panel hierarchy-panel">
       <div class="project-strip">
-        <span>Project</span>
-        <strong id="project-name">Loose Scene</strong>
+        <div class="project-identity"><span>Project</span><strong id="project-name">Loose Scene</strong></div>
+        <div class="project-actions">
+          <button id="close-project" title="Close the active project" disabled>Close</button>
+          <button id="delete-project" class="danger-subtle" title="Move the active project to the Recycle Bin" disabled>Delete</button>
+        </div>
       </div>
       <div class="panel-title">
         <strong>Hierarchy</strong>
@@ -121,6 +124,23 @@
     <div class="dialog-actions"><button id="cancel-project">Cancel</button><button id="confirm-project" class="primary">Choose Folder & Create</button></div>
   </dialog>
 
+  <dialog id="unsaved-dialog" class="node-dialog small-dialog" aria-labelledby="unsaved-title">
+    <div class="dialog-head"><strong id="unsaved-title">Unsaved scene changes</strong><span>Save the current scene before closing the project?</span></div>
+    <div class="dialog-actions"><button id="cancel-unsaved">Cancel</button><button id="discard-unsaved">Discard Changes</button><button id="save-unsaved" class="primary">Save &amp; Continue</button></div>
+  </dialog>
+
+  <dialog id="delete-project-dialog" class="node-dialog small-dialog" aria-labelledby="delete-project-title">
+    <div class="dialog-head"><strong id="delete-project-title">Move Project to Recycle Bin</strong><span>This removes the complete project folder from its current location.</span></div>
+    <div class="dialog-body delete-project-body">
+      <p><strong id="delete-project-name"></strong></p>
+      <code id="delete-project-path"></code>
+      <p id="delete-unsaved-warning" class="danger-note" hidden>Unsaved scene changes will be discarded.</p>
+      <label>Type the exact project name to confirm<input id="delete-project-confirmation" type="text" autocomplete="off" spellcheck="false"></label>
+      <p class="recovery-note">The project is moved to the operating system Recycle Bin rather than permanently erased.</p>
+    </div>
+    <div class="dialog-actions"><button id="cancel-delete-project">Cancel</button><button id="confirm-delete-project" class="danger" disabled>Move to Recycle Bin</button></div>
+  </dialog>
+
 
   <dialog id="smart-dialog" class="node-dialog smart-dialog">
     <div class="dialog-head"><strong>Parlyn Smart Systems</strong><span id="smart-world-name">No world loaded</span><small id="smart-world-seed"></small></div>
@@ -145,7 +165,7 @@
     <div class="dialog-actions"><button id="close-error" class="primary">Close</button></div>
   </dialog>
 
-  <footer class="status-bar"><span>Parlyn Engine v0.5.0 · GitHub Preview</span><span id="status">Starting renderer…</span></footer>
+  <footer class="status-bar"><span>Parlyn Engine <span id="footer-version"></span> · GitHub Preview</span><span id="status">Starting renderer…</span></footer>
   <script src="./dist/app.js"></script>
 </body>
 </html>
