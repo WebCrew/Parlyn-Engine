@@ -25,7 +25,8 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
     assert.equal(await resolveExistingProjectPath(temporaryRoot, 'scenes/Main.parlyn-scene.json'), realScenePath);
     assert.equal(await resolveWritableProjectPath(temporaryRoot, 'scenes/Main.parlyn-scene.json'), realScenePath);
     const nestedScenePath = await resolveWritableProjectPathCreatingParents(temporaryRoot, 'scenes/chapters/Intro.parlyn-scene.json');
-    assert.equal(nestedScenePath, path.join(temporaryRoot, 'scenes', 'chapters', 'Intro.parlyn-scene.json'));
+    const realNestedParent = await fs.realpath(path.join(temporaryRoot, 'scenes', 'chapters'));
+    assert.equal(nestedScenePath, path.join(realNestedParent, 'Intro.parlyn-scene.json'));
 
     try {
       await fs.symlink(outsideRoot, path.join(temporaryRoot, 'escaped'), 'dir');
