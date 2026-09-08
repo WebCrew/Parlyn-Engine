@@ -7,6 +7,8 @@ const methods = [
   'createProject',
   'openProject',
   'openProjectScene',
+  'createProjectScene',
+  'moveProjectScene',
   'closeProject',
   'deleteProject',
   'saveProjectScene',

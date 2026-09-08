@@ -50,7 +50,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.5.0-beta.5') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0-beta.6') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {

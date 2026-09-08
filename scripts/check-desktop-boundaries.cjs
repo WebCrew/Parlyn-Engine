@@ -4,7 +4,7 @@ const os = require('os');
 const path = require('path');
 const vm = require('vm');
 const { assertTrustedIpcEvent, assertIpcPayload } = require('../src/main/ipcSecurity');
-const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../src/main/projectPaths');
+const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableProjectPathCreatingParents } = require('../src/main/projectPaths');
 
 (async () => {
   const editorUrl = 'file:///parlyn/src/renderer/index.html';
@@ -24,6 +24,8 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
     const realScenePath = await fs.realpath(scenePath);
     assert.equal(await resolveExistingProjectPath(temporaryRoot, 'scenes/Main.parlyn-scene.json'), realScenePath);
     assert.equal(await resolveWritableProjectPath(temporaryRoot, 'scenes/Main.parlyn-scene.json'), realScenePath);
+    const nestedScenePath = await resolveWritableProjectPathCreatingParents(temporaryRoot, 'scenes/chapters/Intro.parlyn-scene.json');
+    assert.equal(nestedScenePath, path.join(temporaryRoot, 'scenes', 'chapters', 'Intro.parlyn-scene.json'));
 
     try {
       await fs.symlink(outsideRoot, path.join(temporaryRoot, 'escaped'), 'dir');
@@ -58,6 +60,8 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
   assert.match(main, /secureHandle\('parlyn:app:get-info'/);
   assert.match(main, /secureHandle\('parlyn:project:open'/);
   assert.match(main, /secureHandle\('parlyn:project:open-scene'/);
+  assert.match(main, /secureHandle\('parlyn:project:create-scene'/);
+  assert.match(main, /secureHandle\('parlyn:project:move-scene'/);
   assert.match(main, /secureHandle\('parlyn:project:close'/);
   assert.match(main, /secureHandle\('parlyn:project:delete'/);
   assert.match(main, /parlyn-scene-history/);
@@ -75,7 +79,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath } = require('../s
     }
   }, { filename:'src/main/preload.js' });
   assert.ok(exposedHost, 'Preload must expose window.parlynHost.');
-  for (const method of ['getAppInfo','createProject','openProject','openProjectScene','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets']) {
+  for (const method of ['getAppInfo','createProject','openProject','openProjectScene','createProjectScene','moveProjectScene','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets']) {
     assert.equal(typeof exposedHost[method], 'function', `Preload host is missing ${method}().`);
   }
 

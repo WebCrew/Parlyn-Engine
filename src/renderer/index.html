@@ -37,7 +37,7 @@
           <button id="delete-project" class="danger-subtle" title="Move the active project to the Recycle Bin" disabled>Delete</button>
         </div>
       </div>
-      <div class="project-scenes-head"><strong>Scenes</strong><span id="scene-count">No project</span></div>
+      <div class="project-scenes-head"><div><strong>Scenes</strong><span id="scene-count">No project</span></div><div><button id="move-scene" title="Rename or move current scene" disabled>↳</button><button id="create-scene" title="Create project scene" disabled>+</button></div></div>
       <div id="project-scenes" class="project-scenes"></div>
       <div class="panel-title">
         <strong>Hierarchy</strong>
@@ -126,6 +126,18 @@
     <div class="dialog-head"><strong id="reparent-title">Move Node in Hierarchy</strong><span>Choose a new parent for <strong id="reparent-node-name"></strong>.</span></div>
     <div class="dialog-body"><label>New parent<select id="reparent-target"></select></label></div>
     <div class="dialog-actions"><button id="cancel-reparent">Cancel</button><button id="confirm-reparent" class="primary">Move Node</button></div>
+  </dialog>
+
+  <dialog id="create-scene-dialog" class="node-dialog small-dialog">
+    <div class="dialog-head"><strong>Create Project Scene</strong><span>Create a new empty scene inside the active project.</span></div>
+    <div class="dialog-body"><label>Scene name<input id="create-scene-name" type="text" value="New Scene"></label><label>Project path<input id="create-scene-path" type="text" value="scenes/New-Scene.parlyn-scene.json"></label></div>
+    <div class="dialog-actions"><button id="cancel-create-scene">Cancel</button><button id="confirm-create-scene" class="primary">Create Scene</button></div>
+  </dialog>
+
+  <dialog id="move-scene-dialog" class="node-dialog small-dialog">
+    <div class="dialog-head"><strong>Rename or Move Scene</strong><span>Choose a name and a path inside the project's scenes folder.</span></div>
+    <div class="dialog-body"><label>Scene name<input id="move-scene-name" type="text"></label><label>Project path<input id="move-scene-path" type="text"></label></div>
+    <div class="dialog-actions"><button id="cancel-move-scene">Cancel</button><button id="confirm-move-scene" class="primary">Apply</button></div>
   </dialog>
 
   <dialog id="project-dialog" class="node-dialog small-dialog">
