@@ -25,6 +25,7 @@ async function bootstrap() {
   let currentSceneRelativePath = null;
   let currentWorld = null;
   let assets = [];
+  let projectScenes = [];
   let inspectorStartSnapshot = null;
   let dirty = false;
   let pendingUnsavedDecision = null;
@@ -126,6 +127,7 @@ async function bootstrap() {
     currentFilePath = null;
     currentWorld = null;
     assets = [];
+    projectScenes = [];
     scene = new SceneDocument("Untitled Scene");
     history.clear();
     renderer.rebuild(scene);
@@ -133,6 +135,7 @@ async function bootstrap() {
     updateHistoryButtons();
     updateProjectUI();
     renderAssets();
+    renderProjectScenes();
     setDirty(false);
   }
   function resolveUnsavedDecision(decision) {
@@ -534,11 +537,13 @@ async function bootstrap() {
       currentSceneRelativePath = currentProject.startupScene;
       currentFilePath = null;
       assets = result.assets ?? [];
+      projectScenes = result.scenes ?? [];
       history.clear();
       updateHistoryButtons();
       $("project-dialog").close();
       updateProjectUI();
       renderAssets();
+      renderProjectScenes();
       setDirty(false);
       status.textContent = `Project created: ${currentProject.name}`;
     } catch (error) {
@@ -555,6 +560,7 @@ async function bootstrap() {
       currentSceneRelativePath = currentProject.startupScene;
       currentFilePath = null;
       assets = result.assets ?? [];
+      projectScenes = result.scenes ?? [];
       if (result.scene) {
         scene = SceneDocument.fromJSON(result.scene);
         renderer.rebuild(scene);
@@ -567,6 +573,7 @@ async function bootstrap() {
       updateHistoryButtons();
       updateProjectUI();
       renderAssets();
+      renderProjectScenes();
       setDirty(false);
       status.textContent = result.historyWarning
         ? `Project opened without local history: ${result.historyWarning}`
@@ -643,6 +650,46 @@ async function bootstrap() {
       card.title = asset.relativePath;
       card.innerHTML = `<span>${assetIcon(asset.extension)}</span><strong>${escapeHtml(asset.name)}</strong><small>${escapeHtml(asset.relativePath)}</small>`;
       grid.appendChild(card);
+    }
+  }
+  function renderProjectScenes() {
+    const list = $("project-scenes");
+    list.replaceChildren();
+    $("scene-count").textContent = currentProject ? `${projectScenes.length} available` : "No project";
+    if (!currentProject || !projectScenes.length) {
+      const empty = document.createElement("div");
+      empty.className = "scene-list-empty";
+      empty.textContent = currentProject ? "No project scenes found." : "Open or create a project.";
+      list.appendChild(empty);
+      return;
+    }
+    for (const entry of projectScenes) {
+      const button = document.createElement("button");
+      button.className = "scene-entry" + (entry.relativePath === currentSceneRelativePath ? " active" : "");
+      button.innerHTML = `<span>◇</span><div><strong>${escapeHtml(entry.name)}</strong><small>${escapeHtml(entry.relativePath)}</small></div>`;
+      button.addEventListener("click", () => openProjectScene(entry.relativePath));
+      list.appendChild(button);
+    }
+  }
+  async function openProjectScene(relativePath) {
+    if (!currentProject || relativePath === currentSceneRelativePath || !await mayCloseProject()) return;
+    try {
+      const result = await host.openProjectScene({ relativePath });
+      scene = SceneDocument.fromJSON(result.scene);
+      currentSceneRelativePath = result.relativePath;
+      currentFilePath = null;
+      if (result.history) {
+        try { history.restoreState(result.history); }
+        catch (error) { console.warn("Saved scene history was ignored:", error); history.clear(); }
+      } else history.clear();
+      renderer.rebuild(scene);
+      clearSelection();
+      updateHistoryButtons();
+      renderProjectScenes();
+      setDirty(false);
+      status.textContent = result.historyWarning ? `Scene opened without local history: ${result.historyWarning}` : `Opened project scene: ${relativePath}`;
+    } catch (error) {
+      showError("Project scene open failed", error);
     }
   }
   async function importAssets() {
@@ -803,6 +850,7 @@ async function bootstrap() {
   frame();
   renderHierarchy();
   renderAssets();
+  renderProjectScenes();
   updateProjectUI();
   selectById(scene.root.children[1].id);
   updateHistoryButtons();
