@@ -23,7 +23,7 @@ async function listAssets(projectRoot) {
       if (entry.isSymbolicLink()) continue;
       const fullPath = path.join(directory, entry.name);
       if (entry.isDirectory()) await walk(fullPath);
-      else if (entry.isFile()) result.push({ name:entry.name, relativePath:path.relative(projectRoot, fullPath).replace(/\\/g, '/'), extension:path.extname(entry.name).toLowerCase() });
+      else if (entry.isFile()) result.push({ name:entry.name, relativePath:`assets/${path.relative(assetsRoot, fullPath).replace(/\\/g, '/')}`, extension:path.extname(entry.name).toLowerCase() });
     }
   }
   await walk(assetsRoot);
