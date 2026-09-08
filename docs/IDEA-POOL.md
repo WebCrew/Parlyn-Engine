@@ -19,6 +19,43 @@ Do not add editor buttons, data formats, dependencies or public feature claims f
 
 ## Parked ideas
 
+### MetaHuman Character Workflow
+
+- **Summary:** Investigate an optional Parlyn character workflow that accepts
+  MetaHuman-derived characters only where Epic's then-current licence and
+  distribution terms expressly permit it. The workflow could begin as a
+  separate plugin or importer rather than becoming part of the engine core.
+- **Why it may matter:** High-quality, ready-made digital humans could help
+  small teams prototype and produce character-driven scenes much faster,
+  while preserving Parlyn's focus on accessible authoring workflows.
+- **Dependencies:** Written legal and licence review of the exact MetaHuman,
+  Unreal Engine and distribution terms in force at implementation time;
+  technical validation of export formats, rigs, materials, performance and
+  attribution requirements; and an opt-in integration that does not ship
+  Epic-owned content with Parlyn.
+- **Source/date:** Product idea from Andreas Holzer, 2026-09-08.
+- **Status:** `Unreviewed` — exploratory only; no compatibility, licensing or
+  public support claim is authorized.
+
+### Unreal Marketplace Asset Intake
+
+- **Summary:** Explore an optional Parlyn plugin that helps creators bring
+  assets they have lawfully acquired for Unreal Engine into a Parlyn project,
+  where the applicable licence permits the intended export and use. The tool
+  would focus on asset conversion and project preparation, not on redistributing
+  Marketplace content.
+- **Why it may matter:** A careful import workflow could lower migration and
+  prototyping friction for developers who already own suitable assets, and
+  would make Parlyn easier to evaluate alongside established engines.
+- **Dependencies:** Written legal review of Epic Games Marketplace, Unreal
+  Engine and individual-asset licence terms; a per-asset permission model;
+  technical support for legal source formats and conversion of meshes,
+  textures, materials, animations and metadata; clear handling of assets that
+  cannot be exported or redistributed; and isolation from the MIT engine core.
+- **Source/date:** Product idea from Andreas Holzer, 2026-09-08.
+- **Status:** `Unreviewed` — no import promise or public compatibility claim
+  is authorized until licensing and technical feasibility are confirmed.
+
 ### Parlyn Verified Builds
 
 - **Summary:** Explore a future web-platform service that connects a software
