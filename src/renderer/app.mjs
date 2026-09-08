@@ -25,6 +25,7 @@ async function bootstrap() {
   let currentSceneRelativePath = null;
   let currentWorld = null;
   let assets = [];
+  let selectedAssetPath = null;
   let projectScenes = [];
   let inspectorStartSnapshot = null;
   let dirty = false;
@@ -127,6 +128,7 @@ async function bootstrap() {
     currentFilePath = null;
     currentWorld = null;
     assets = [];
+    selectedAssetPath = null;
     projectScenes = [];
     scene = new SceneDocument("Untitled Scene");
     history.clear();
@@ -537,6 +539,7 @@ async function bootstrap() {
       currentSceneRelativePath = currentProject.startupScene;
       currentFilePath = null;
       assets = result.assets ?? [];
+      selectedAssetPath = null;
       projectScenes = result.scenes ?? [];
       history.clear();
       updateHistoryButtons();
@@ -560,6 +563,7 @@ async function bootstrap() {
       currentSceneRelativePath = currentProject.startupScene;
       currentFilePath = null;
       assets = result.assets ?? [];
+      selectedAssetPath = null;
       projectScenes = result.scenes ?? [];
       if (result.scene) {
         scene = SceneDocument.fromJSON(result.scene);
@@ -638,6 +642,8 @@ async function bootstrap() {
     const grid = $("asset-grid");
     grid.replaceChildren();
     $("asset-count").textContent = currentProject ? `${assets.length} imported` : "No project";
+    if (!assets.some((asset) => asset.relativePath === selectedAssetPath)) selectedAssetPath = null;
+    $("move-asset").disabled = !currentProject || !selectedAssetPath;
     if (!currentProject) {
       grid.innerHTML = '<div class="asset-empty">Create or open a project to import assets.</div>';
       return;
@@ -648,9 +654,14 @@ async function bootstrap() {
     }
     for (const asset of assets) {
       const card = document.createElement("button");
-      card.className = "asset-card";
+      card.className = "asset-card" + (asset.relativePath === selectedAssetPath ? " active" : "");
       card.title = asset.relativePath;
       card.innerHTML = `<span>${assetIcon(asset.extension)}</span><strong>${escapeHtml(asset.name)}</strong><small>${escapeHtml(asset.relativePath)}</small>`;
+      card.addEventListener("click", () => {
+        selectedAssetPath = asset.relativePath;
+        renderAssets();
+        status.textContent = `Selected asset: ${asset.relativePath}`;
+      });
       grid.appendChild(card);
     }
   }
@@ -755,6 +766,20 @@ async function bootstrap() {
       showError("Asset import failed", error);
     }
   }
+  async function moveProjectAsset() {
+    if (!currentProject || !selectedAssetPath) return;
+    const sourcePath = selectedAssetPath;
+    try {
+      const result = await host.moveProjectAsset({ sourcePath, targetPath:$("move-asset-path").value.trim() });
+      assets = result.assets ?? [];
+      selectedAssetPath = result.relativePath;
+      renderAssets();
+      $("move-asset-dialog").close();
+      status.textContent = `Asset moved: ${result.relativePath}`;
+    } catch (error) {
+      showError("Asset move failed", error);
+    }
+  }
   function shortPath(filePath) {
     return filePath ? filePath.split(/[\\/]/).slice(-2).join("/") : "";
   }
@@ -849,6 +874,13 @@ async function bootstrap() {
   $("undo").addEventListener("click", undo);
   $("redo").addEventListener("click", redo);
   $("import-asset").addEventListener("click", importAssets);
+  $("move-asset").addEventListener("click", () => {
+    if (!selectedAssetPath) return;
+    $("move-asset-path").value = selectedAssetPath;
+    $("move-asset-dialog").showModal();
+  });
+  $("cancel-move-asset").addEventListener("click", () => $("move-asset-dialog").close());
+  $("confirm-move-asset").addEventListener("click", moveProjectAsset);
   window.addEventListener("keydown", (event) => {
     const tag = document.activeElement?.tagName?.toLowerCase();
     const editing = tag === "input" || tag === "select" || tag === "textarea";

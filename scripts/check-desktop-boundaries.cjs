@@ -63,6 +63,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(main, /secureHandle\('parlyn:project:open-scene'/);
   assert.match(main, /secureHandle\('parlyn:project:create-scene'/);
   assert.match(main, /secureHandle\('parlyn:project:move-scene'/);
+  assert.match(main, /secureHandle\('parlyn:project:move-asset'/);
   assert.match(main, /secureHandle\('parlyn:project:close'/);
   assert.match(main, /secureHandle\('parlyn:project:delete'/);
   assert.match(main, /parlyn-scene-history/);
@@ -80,7 +81,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
     }
   }, { filename:'src/main/preload.js' });
   assert.ok(exposedHost, 'Preload must expose window.parlynHost.');
-  for (const method of ['getAppInfo','createProject','openProject','openProjectScene','createProjectScene','moveProjectScene','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets']) {
+  for (const method of ['getAppInfo','createProject','openProject','openProjectScene','createProjectScene','moveProjectScene','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets','moveProjectAsset']) {
     assert.equal(typeof exposedHost[method], 'function', `Preload host is missing ${method}().`);
   }
 

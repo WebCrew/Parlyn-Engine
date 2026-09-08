@@ -12,12 +12,12 @@ on:
         description: New prerelease tag; an existing release is never overwritten
         required: true
         type: string
-        default: v0.5.0-beta.6
+        default: v0.5.0-beta.7
       preview_title:
         description: Public prerelease title
         required: true
         type: string
-        default: Parlyn Engine v0.5.0 Beta 6 (unsigned)
+        default: Parlyn Engine v0.5.0 Beta 7 (unsigned)
 
 permissions:
   contents: write
@@ -29,8 +29,8 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: false
       GH_TOKEN: ${{ github.token }}
-      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.6' }}
-      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 6 (unsigned)' }}
+      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.7' }}
+      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 7 (unsigned)' }}
 
     steps:
       - name: Checkout
@@ -68,13 +68,12 @@ jobs:
         shell: pwsh
         run: |
           @"
-          # Parlyn Engine v0.5.0 Beta 6
+          # Parlyn Engine v0.5.0 Beta 7
 
-          This unsigned Windows beta expands Phase 2 with hierarchy and viewport
-          multi-selection, safe one-step bulk deletion and the first complete
-          Multi-Scene Project Browser workflow. Project scenes can be validated,
-          opened, created, renamed and moved within the scenes directory while
-          preserving unsaved-change and project-path protections.
+          This unsigned Windows beta adds safe project-asset management to Phase 2.
+          Imported assets can be selected, renamed and moved into validated nested
+          folders. Parlyn preserves file extensions, refuses existing targets and
+          blocks project-path or symbolic-link escapes.
 
           **Important:** This beta is unsigned and may be blocked by Windows
           Smart App Control. It is published to document and validate the packaged
@@ -87,7 +86,7 @@ jobs:
           remain pending. This release is not SignPath-signed.
 
           Maintainer acceptance instructions:
-          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.6.md
+          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.7.md
           "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
 
       - name: Publish GitHub pre-release
