@@ -133,5 +133,5 @@ pending separately from the resolved development-binary blocker.
 
 Phase 1 functional acceptance completed with the unsigned `v0.5.0-beta.4`
 prerelease and Issue #23. The current Phase 2 editor candidate is
-`v0.5.0-beta.6`; its repeatable checklist is documented in
-[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.6.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.6.md).
+`v0.5.0-beta.7`; its repeatable checklist is documented in
+[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.7.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.7.md).

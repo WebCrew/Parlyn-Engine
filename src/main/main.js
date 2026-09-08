@@ -5,6 +5,7 @@ const { pathToFileURL } = require('url');
 const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableProjectPathCreatingParents } = require('./projectPaths');
 const { assertTrustedIpcEvent, assertIpcPayload } = require('./ipcSecurity');
 const { ProjectSession } = require('./ProjectSession');
+const { listAssets, moveAsset } = require('./assetFiles');
 
 const persistence = import('../engine/persistence/DocumentPersistence.mjs');
 const documentFiles = import('./documentFiles.mjs');
@@ -74,31 +75,6 @@ const projectSession = new ProjectSession({
     return protectedApplicationRoots.some(root => target === root || target.startsWith(`${root}${path.sep}`));
   }
 });
-
-async function listAssets(projectRoot) {
-  if (!projectRoot) return [];
-  let assetsRoot;
-  try {
-    assetsRoot = await resolveExistingProjectPath(projectRoot, 'assets', 'Assets directory');
-  } catch (error) {
-    if (error.code === 'ENOENT') return [];
-    throw error;
-  }
-  const result = [];
-  async function walk(dir) {
-    let entries;
-    try { entries = await fs.readdir(dir, { withFileTypes:true }); }
-    catch (error) { if (error.code === 'ENOENT') return; throw error; }
-    for (const entry of entries) {
-      if (entry.isSymbolicLink()) continue;
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) await walk(full);
-      else result.push({ name:entry.name, relativePath:path.relative(projectRoot, full).replace(/\\/g,'/'), extension:path.extname(entry.name).toLowerCase() });
-    }
-  }
-  await walk(assetsRoot);
-  return result.sort((a,b)=>a.relativePath.localeCompare(b.relativePath));
-}
 
 async function listProjectScenes(projectRoot) {
   if (!projectRoot) return [];
@@ -331,6 +307,12 @@ secureHandle('parlyn:project:import-assets', async () => {
   }
   return { canceled:false, assets:await listAssets(activeProjectRoot) };
 });
+
+secureHandle('parlyn:project:move-asset', async (payload) => {
+  const activeProjectRoot = projectSession.activeProjectRoot;
+  if (!activeProjectRoot) throw new Error('Open a project before moving an asset.');
+  return { ok:true, ...await moveAsset(activeProjectRoot, payload?.sourcePath, payload?.targetPath) };
+}, { payload:true });
 
 app.whenReady().then(()=>{
   createWindow();

@@ -2,6 +2,7 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Added safe project-asset selection, rename and move operations with guarded nested folders, extension preservation and no-overwrite behavior.
 - Added hierarchy and viewport multi-selection with Undo/Redo-safe bulk deletion.
 - Added a validated Multi-Scene Project Browser with scene creation, switching, rename and move operations.
 - Added guarded creation of scene subfolders without allowing path or symbolic-link escapes.

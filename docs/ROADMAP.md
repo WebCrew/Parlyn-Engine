@@ -51,7 +51,7 @@ Completion evidence:
 - durable, validated local Scene History — initial foundation complete;
 - multi-selection where appropriate — initial hierarchy and viewport selection complete;
 - multi-scene project browser — validated listing, switching, creation, rename and move complete;
-- rename and move project assets;
+- rename and move project assets — initial safe editor workflow complete;
 - unsaved-change protection;
 - editor preferences;
 - stronger error reporting;
