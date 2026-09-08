@@ -100,6 +100,21 @@ async function listAssets(projectRoot) {
   return result.sort((a,b)=>a.relativePath.localeCompare(b.relativePath));
 }
 
+async function listProjectScenes(projectRoot) {
+  if (!projectRoot) return [];
+  const scenesRoot = await resolveExistingProjectPath(projectRoot, 'scenes', 'Scenes directory');
+  const entries = await fs.readdir(scenesRoot, { withFileTypes:true });
+  const scenes = [];
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.parlyn-scene.json')) continue;
+    const relativePath = `scenes/${entry.name}`;
+    const filePath = await resolveExistingProjectPath(projectRoot, relativePath, 'Project scene');
+    const scene = await readDocument(filePath, 'parlyn-scene', 'Project scene');
+    scenes.push({ name:scene.name, relativePath });
+  }
+  return scenes.sort((a,b) => a.relativePath.localeCompare(b.relativePath));
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width:1500,
@@ -178,7 +193,7 @@ secureHandle('parlyn:project:create', async (payload) => {
     throw error;
   }
   const activeProjectRoot=projectSession.activate(await fs.realpath(projectRoot));
-  return { canceled:false, projectRoot:activeProjectRoot, project, world, assets:await listAssets(activeProjectRoot) };
+  return { canceled:false, projectRoot:activeProjectRoot, project, world, assets:await listAssets(activeProjectRoot), scenes:await listProjectScenes(activeProjectRoot) };
 }, { payload:true });
 
 secureHandle('parlyn:project:open', async () => {
@@ -193,8 +208,19 @@ secureHandle('parlyn:project:open', async () => {
   const world=await readDocument(worldPath, 'parlyn-world', 'World document');
   const sceneHistory=await loadSceneHistory(projectRoot, project.startupScene, scene);
   projectSession.activate(projectRoot);
-  return { canceled:false, projectRoot, project, scene, world, assets:await listAssets(projectRoot), history:sceneHistory.history, historyWarning:sceneHistory.warning };
+  return { canceled:false, projectRoot, project, scene, world, assets:await listAssets(projectRoot), scenes:await listProjectScenes(projectRoot), history:sceneHistory.history, historyWarning:sceneHistory.warning };
 });
+
+secureHandle('parlyn:project:open-scene', async (payload) => {
+  const activeProjectRoot=projectSession.activeProjectRoot;
+  if (!activeProjectRoot) throw new Error('Open a project before selecting a project scene.');
+  const relativePath=payload?.relativePath;
+  if (typeof relativePath !== 'string' || !relativePath.startsWith('scenes/') || !relativePath.endsWith('.parlyn-scene.json')) throw new Error('Invalid project scene path.');
+  const scenePath=await resolveExistingProjectPath(activeProjectRoot,relativePath,'Project scene');
+  const scene=await readDocument(scenePath, 'parlyn-scene', 'Project scene');
+  const sceneHistory=await loadSceneHistory(activeProjectRoot, relativePath, scene);
+  return { ok:true, relativePath, scene, history:sceneHistory.history, historyWarning:sceneHistory.warning };
+}, { payload:true });
 
 secureHandle('parlyn:project:close', async () => projectSession.close());
 
@@ -221,7 +247,7 @@ secureHandle('parlyn:project:save-scene', async (payload) => {
   const project=await readDocument(projectFile, 'parlyn-project', 'Parlyn project file');
   project.updatedAt=new Date().toISOString();
   await writeDocumentAtomic(projectFile, project, 'parlyn-project', 'Parlyn project file');
-  return { ok:true, filePath:target, relativePath, historyWarning };
+  return { ok:true, filePath:target, relativePath, historyWarning, scenes:await listProjectScenes(activeProjectRoot) };
 }, { payload:true });
 
 secureHandle('parlyn:project:save-world', async (payload) => {
