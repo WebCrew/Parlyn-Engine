@@ -50,7 +50,7 @@ Completion evidence:
 - duplication and reparenting — initial editor commands complete;
 - durable, validated local Scene History — initial foundation complete;
 - multi-selection where appropriate — initial hierarchy and viewport selection complete;
-- multi-scene project browser;
+- multi-scene project browser — initial validated scene listing and switching complete;
 - rename and move project assets;
 - unsaved-change protection;
 - editor preferences;
