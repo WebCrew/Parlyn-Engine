@@ -14,7 +14,8 @@ export class ThreeRenderer extends RendererBackend {
     this.pointer = new THREE.Vector2();
     this.nodeObjects = new Map();
     this.selectedId = null;
-    this.selectionBox = null;
+    this.selectedIds = new Set();
+    this.selectionBoxes = [];
     this.transformControls = null;
     this.transformMode = 'select';
     this.suppressSelectionClick = false;
@@ -209,25 +210,30 @@ export class ThreeRenderer extends RendererBackend {
         object.rotateZ(object.userData.billboardRoll ?? 0);
       }
     }
-    if (this.selectionBox) this.selectionBox.update();
+    for (const box of this.selectionBoxes) box.update();
     this.renderer.render(this.scene,this.camera);
   }
 
-  selectNode(nodeId) {
-    this.selectedId = nodeId;
+  selectNode(nodeId) { this.setSelection(nodeId ? [nodeId] : [], nodeId); }
+
+  setSelection(nodeIds, primaryId = null) {
+    this.selectedIds = new Set(nodeIds.filter((id) => this.nodeObjects.has(id)));
+    this.selectedId = this.selectedIds.has(primaryId) ? primaryId : this.selectedIds.values().next().value ?? null;
     this.transformControls?.detach();
-    if (this.selectionBox) {
-      this.scene.remove(this.selectionBox);
-      this.selectionBox.geometry.dispose();
-      this.selectionBox.material.dispose();
-      this.selectionBox = null;
+    for (const box of this.selectionBoxes) {
+      this.scene.remove(box);
+      box.geometry.dispose();
+      box.material.dispose();
     }
-    const object = this.nodeObjects.get(nodeId);
-    if (object) {
-      this.selectionBox = new THREE.BoxHelper(object,0x78b8ff);
-      this.scene.add(this.selectionBox);
-      this.#attachTransformControls();
+    this.selectionBoxes = [];
+    for (const id of this.selectedIds) {
+      const object = this.nodeObjects.get(id);
+      if (!object) continue;
+      const box = new THREE.BoxHelper(object, 0x78b8ff);
+      this.selectionBoxes.push(box);
+      this.scene.add(box);
     }
+    this.#attachTransformControls();
   }
 
   setTransformMode(mode) {
@@ -276,7 +282,7 @@ export class ThreeRenderer extends RendererBackend {
       object.userData.light.intensity = node.intensity;
       object.userData.light.castShadow = node.castShadow;
     }
-    if (this.selectionBox && this.selectedId === node.id) this.selectionBox.update();
+    if (this.selectedIds.has(node.id)) for (const box of this.selectionBoxes) box.update();
   }
 
   setView(mode) {
@@ -333,7 +339,7 @@ export class ThreeRenderer extends RendererBackend {
       const hit=this.raycaster.intersectObjects(candidates,false)[0];
       let object=hit?.object;
       while (object && !object.userData?.parlynNodeId) object=object.parent;
-      if (object?.userData?.parlynNodeId) this.callbacks.onSelect?.(object.userData.parlynNodeId);
+      if (object?.userData?.parlynNodeId) this.callbacks.onSelect?.(object.userData.parlynNodeId, { toggle: event.ctrlKey || event.metaKey, range: event.shiftKey });
     });
   }
 
