@@ -49,14 +49,15 @@ Completion evidence:
 
 - duplication and reparenting — initial editor commands complete;
 - durable, validated local Scene History — initial foundation complete;
-- multi-selection where appropriate;
+- multi-selection where appropriate — initial hierarchy and viewport selection complete;
 - multi-scene project browser;
 - rename and move project assets;
 - unsaved-change protection;
 - editor preferences;
 - stronger error reporting;
 - transform snapping and local/world gizmo modes;
-- optional Surface/Ground Snap and Grid Snap;
+- optional Surface/Ground Snap and Grid Snap, including a keyboard command to
+  place the current selection on the ground;
 - Frame Selected;
 - optional scene/world bounds independent from viewport size;
 - consistent commands and keyboard behavior.
