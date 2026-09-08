@@ -625,6 +625,8 @@ async function bootstrap() {
     $("project-name").title = currentProjectRoot ?? "";
     $("close-project").disabled = !currentProject;
     $("delete-project").disabled = !currentProject;
+    $("create-scene").disabled = !currentProject;
+    $("move-scene").disabled = !currentProject || !currentSceneRelativePath;
   }
   function assetIcon(ext) {
     if ([".png", ".jpg", ".jpeg", ".webp", ".svg"].includes(ext)) return "\u25A7";
@@ -690,6 +692,52 @@ async function bootstrap() {
       status.textContent = result.historyWarning ? `Scene opened without local history: ${result.historyWarning}` : `Opened project scene: ${relativePath}`;
     } catch (error) {
       showError("Project scene open failed", error);
+    }
+  }
+  async function createProjectScene() {
+    if (!currentProject || !await mayCloseProject()) return;
+    const name = $("create-scene-name").value.trim() || "New Scene";
+    const relativePath = $("create-scene-path").value.trim();
+    try {
+      const newScene = new SceneDocument(name);
+      const result = await host.createProjectScene({ relativePath, scene:newScene.toJSON() });
+      projectScenes = result.scenes ?? projectScenes;
+      scene = newScene;
+      currentSceneRelativePath = result.relativePath;
+      currentFilePath = null;
+      history.clear();
+      renderer.rebuild(scene);
+      clearSelection();
+      updateHistoryButtons();
+      updateProjectUI();
+      renderProjectScenes();
+      setDirty(false);
+      $("create-scene-dialog").close();
+      status.textContent = `Scene created: ${result.relativePath}`;
+    } catch (error) {
+      showError("Project scene creation failed", error);
+    }
+  }
+  async function moveProjectScene() {
+    if (!currentProject || !currentSceneRelativePath || !await mayCloseProject()) return;
+    const sourcePath = currentSceneRelativePath;
+    try {
+      const result = await host.moveProjectScene({ sourcePath, targetPath:$("move-scene-path").value.trim(), name:$("move-scene-name").value.trim() });
+      currentProject = ProjectDocument.fromJSON(result.project);
+      scene = SceneDocument.fromJSON(result.scene);
+      currentSceneRelativePath = result.relativePath;
+      projectScenes = result.scenes ?? [];
+      history.clear();
+      renderer.rebuild(scene);
+      clearSelection();
+      updateHistoryButtons();
+      updateProjectUI();
+      renderProjectScenes();
+      setDirty(false);
+      $("move-scene-dialog").close();
+      status.textContent = `Scene moved: ${result.relativePath}`;
+    } catch (error) {
+      showError("Project scene move failed", error);
     }
   }
   async function importAssets() {
@@ -774,6 +822,17 @@ async function bootstrap() {
   $("new-scene").addEventListener("click", newScene);
   $("new-project").addEventListener("click", () => $("project-dialog").showModal());
   $("open-project").addEventListener("click", openProject);
+  $("create-scene").addEventListener("click", () => $("create-scene-dialog").showModal());
+  $("cancel-create-scene").addEventListener("click", () => $("create-scene-dialog").close());
+  $("confirm-create-scene").addEventListener("click", createProjectScene);
+  $("move-scene").addEventListener("click", () => {
+    const entry = projectScenes.find((item) => item.relativePath === currentSceneRelativePath);
+    $("move-scene-name").value = entry?.name ?? scene.name;
+    $("move-scene-path").value = currentSceneRelativePath ?? "";
+    $("move-scene-dialog").showModal();
+  });
+  $("cancel-move-scene").addEventListener("click", () => $("move-scene-dialog").close());
+  $("confirm-move-scene").addEventListener("click", moveProjectScene);
   $("confirm-project").addEventListener("click", createProject);
   $("cancel-project").addEventListener("click", () => $("project-dialog").close());
   $("add-node").addEventListener("click", () => $("add-dialog").showModal());

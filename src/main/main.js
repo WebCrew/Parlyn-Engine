@@ -2,7 +2,7 @@ const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const fs = require('fs/promises');
 const path = require('path');
 const { pathToFileURL } = require('url');
-const { resolveExistingProjectPath, resolveWritableProjectPath } = require('./projectPaths');
+const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableProjectPathCreatingParents } = require('./projectPaths');
 const { assertTrustedIpcEvent, assertIpcPayload } = require('./ipcSecurity');
 const { ProjectSession } = require('./ProjectSession');
 
@@ -103,16 +103,27 @@ async function listAssets(projectRoot) {
 async function listProjectScenes(projectRoot) {
   if (!projectRoot) return [];
   const scenesRoot = await resolveExistingProjectPath(projectRoot, 'scenes', 'Scenes directory');
-  const entries = await fs.readdir(scenesRoot, { withFileTypes:true });
   const scenes = [];
-  for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith('.parlyn-scene.json')) continue;
-    const relativePath = `scenes/${entry.name}`;
-    const filePath = await resolveExistingProjectPath(projectRoot, relativePath, 'Project scene');
-    const scene = await readDocument(filePath, 'parlyn-scene', 'Project scene');
-    scenes.push({ name:scene.name, relativePath });
+  async function walk(directory) {
+    for (const entry of await fs.readdir(directory, { withFileTypes:true })) {
+      if (entry.isSymbolicLink()) continue;
+      const fullPath=path.join(directory,entry.name);
+      if (entry.isDirectory()) await walk(fullPath);
+      else if (entry.isFile() && entry.name.endsWith('.parlyn-scene.json')) {
+        const relativePath=path.relative(projectRoot,fullPath).replace(/\\/g,'/');
+        const filePath=await resolveExistingProjectPath(projectRoot,relativePath,'Project scene');
+        const scene=await readDocument(filePath,'parlyn-scene','Project scene');
+        scenes.push({ name:scene.name, relativePath });
+      }
+    }
   }
+  await walk(scenesRoot);
   return scenes.sort((a,b) => a.relativePath.localeCompare(b.relativePath));
+}
+
+function requireScenePath(value) {
+  if (typeof value !== 'string' || !/^scenes\/.+\.parlyn-scene\.json$/.test(value)) throw new Error('Scene paths must stay inside scenes/ and end with .parlyn-scene.json.');
+  return value;
 }
 
 function createWindow() {
@@ -220,6 +231,39 @@ secureHandle('parlyn:project:open-scene', async (payload) => {
   const scene=await readDocument(scenePath, 'parlyn-scene', 'Project scene');
   const sceneHistory=await loadSceneHistory(activeProjectRoot, relativePath, scene);
   return { ok:true, relativePath, scene, history:sceneHistory.history, historyWarning:sceneHistory.warning };
+}, { payload:true });
+
+secureHandle('parlyn:project:create-scene', async (payload) => {
+  const activeProjectRoot=projectSession.activeProjectRoot;
+  if (!activeProjectRoot) throw new Error('Open a project before creating a project scene.');
+  const relativePath=requireScenePath(payload?.relativePath);
+  const target=await resolveWritableProjectPathCreatingParents(activeProjectRoot,relativePath,'New project scene');
+  try { await fs.access(target); throw new Error('A scene already exists at that project path.'); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  await writeDocumentAtomic(target,payload?.scene,'parlyn-scene','New project scene');
+  return { ok:true, relativePath, scenes:await listProjectScenes(activeProjectRoot) };
+}, { payload:true });
+
+secureHandle('parlyn:project:move-scene', async (payload) => {
+  const activeProjectRoot=projectSession.activeProjectRoot;
+  if (!activeProjectRoot) throw new Error('Open a project before moving a project scene.');
+  const sourcePath=requireScenePath(payload?.sourcePath);
+  const targetPath=requireScenePath(payload?.targetPath);
+  if (sourcePath === targetPath) return { ok:true, relativePath:sourcePath, scenes:await listProjectScenes(activeProjectRoot) };
+  const source=await resolveExistingProjectPath(activeProjectRoot,sourcePath,'Existing project scene');
+  const target=await resolveWritableProjectPathCreatingParents(activeProjectRoot,targetPath,'New project scene path');
+  try { await fs.access(target); throw new Error('A scene already exists at that project path.'); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const scene=await readDocument(source,'parlyn-scene','Existing project scene');
+  if (typeof payload?.name === 'string' && payload.name.trim()) scene.name=payload.name.trim();
+  await writeDocumentAtomic(target,scene,'parlyn-scene','Moved project scene');
+  const projectFile=await resolveWritableProjectPath(activeProjectRoot,'parlyn.project.json','Parlyn project file');
+  const project=await readDocument(projectFile,'parlyn-project','Parlyn project file');
+  if (project.startupScene === sourcePath) project.startupScene=targetPath;
+  project.updatedAt=new Date().toISOString();
+  await writeDocumentAtomic(projectFile,project,'parlyn-project','Parlyn project file');
+  await fs.unlink(source);
+  return { ok:true, relativePath:targetPath, project, scene, scenes:await listProjectScenes(activeProjectRoot) };
 }, { payload:true });
 
 secureHandle('parlyn:project:close', async () => projectSession.close());

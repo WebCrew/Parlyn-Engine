@@ -46,4 +46,24 @@ async function resolveWritableProjectPath(projectRoot, relativePath, label = 'Pr
   return path.join(realParent, path.basename(target));
 }
 
-module.exports = { validateRelativeProjectPath, resolveProjectPath, resolveExistingProjectPath, resolveWritableProjectPath };
+async function resolveWritableProjectPathCreatingParents(projectRoot, relativePath, label = 'Project path') {
+  const target = resolveProjectPath(projectRoot, relativePath, label);
+  const realRoot = await fs.realpath(projectRoot);
+  const parentParts = path.relative(path.resolve(projectRoot), path.dirname(target)).split(path.sep).filter(Boolean);
+  let current = realRoot;
+  for (const part of parentParts) {
+    const next = path.join(current, part);
+    try {
+      const info = await fs.lstat(next);
+      if (info.isSymbolicLink() || !info.isDirectory()) throw new Error(`${label} contains an unsafe parent.`);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      await fs.mkdir(next);
+    }
+    current = await fs.realpath(next);
+    if (!isInsideOrEqual(realRoot, current)) throw new Error(`${label} escapes the project root.`);
+  }
+  return resolveWritableProjectPath(projectRoot, relativePath, label);
+}
+
+module.exports = { validateRelativeProjectPath, resolveProjectPath, resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableProjectPathCreatingParents };

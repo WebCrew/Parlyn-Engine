@@ -2,6 +2,9 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Added hierarchy and viewport multi-selection with Undo/Redo-safe bulk deletion.
+- Added a validated Multi-Scene Project Browser with scene creation, switching, rename and move operations.
+- Added guarded creation of scene subfolders without allowing path or symbolic-link escapes.
 - Started Phase 2 with editor commands for deep node duplication and safe reparenting.
 - Added recursive hierarchy rendering and fixed subtree deletion in the viewport.
 - Added a bounded, validated local Scene History that preserves Undo/Redo through project close and application restart.
