@@ -16,6 +16,9 @@ async function bootstrap() {
   const history = new History({ limit: 100 });
   let scene = createDemoScene();
   let selected = null;
+  let selectedIds = new Set();
+  let selectionAnchorId = null;
+  let visibleHierarchyIds = [];
   let currentFilePath = null;
   let currentProject = null;
   let currentProjectRoot = null;
@@ -60,12 +63,8 @@ async function bootstrap() {
   function restoreSnapshot(snapshot, selectionId = null) {
     scene = SceneDocument.fromJSON(snapshot);
     renderer.rebuild(scene);
-    selected = selectionId ? scene.findById(selectionId) : null;
-    renderHierarchy();
-    if (selected) {
-      renderer.selectNode(selected.id);
-      populateInspector();
-    } else clearSelection();
+    if (selectionId && scene.findById(selectionId)) selectById(selectionId);
+    else clearSelection();
     updateHistoryButtons();
     setDirty(true);
   }
@@ -84,18 +83,20 @@ async function bootstrap() {
   function renderHierarchy() {
     const root = $("hierarchy");
     root.replaceChildren();
+    visibleHierarchyIds = [];
     const rootButton = document.createElement("button");
     rootButton.className = "tree-item scene-root";
     rootButton.innerHTML = `<span class="node-icon">\u25C7</span><span>${escapeHtml(scene.name)}</span>`;
     root.appendChild(rootButton);
     function appendNode(node, depth) {
       const b = document.createElement("button");
-      b.className = "tree-item child" + (selected?.id === node.id ? " active" : "");
+      b.className = "tree-item child" + (selectedIds.has(node.id) ? " active" : "");
       b.style.setProperty("--tree-depth", depth);
       b.dataset.id = node.id;
       b.innerHTML = `<span class="node-icon">${nodeIcon(node)}</span><span>${escapeHtml(node.name)}</span>`;
-      b.addEventListener("click", () => selectById(node.id));
+      b.addEventListener("click", (event) => selectById(node.id, { toggle: event.ctrlKey || event.metaKey, range: event.shiftKey }));
       root.appendChild(b);
+      visibleHierarchyIds.push(node.id);
       node.children.forEach((child) => appendNode(child, depth + 1));
     }
     scene.root.children.forEach((node) => appendNode(node, 1));
@@ -154,7 +155,9 @@ async function bootstrap() {
   }
   function clearSelection() {
     selected = null;
-    renderer.selectNode(null);
+    selectedIds.clear();
+    selectionAnchorId = null;
+    renderer.setSelection([]);
     $("inspector-empty").hidden = false;
     $("inspector").hidden = true;
     $("selected-type").textContent = "None";
@@ -163,16 +166,37 @@ async function bootstrap() {
     $("reparent-node").disabled = true;
     renderHierarchy();
   }
-  function selectById(id) {
-    selected = scene.findById(id);
-    if (!selected) return;
-    renderer.selectNode(id);
+  function selectById(id, { toggle = false, range = false } = {}) {
+    const node = scene.findById(id);
+    if (!node) return;
+    if (range && selectionAnchorId && visibleHierarchyIds.includes(selectionAnchorId)) {
+      const start = visibleHierarchyIds.indexOf(selectionAnchorId);
+      const end = visibleHierarchyIds.indexOf(id);
+      selectedIds = new Set(visibleHierarchyIds.slice(Math.min(start, end), Math.max(start, end) + 1));
+    } else if (toggle) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      selectionAnchorId = id;
+    } else {
+      selectedIds = new Set([id]);
+      selectionAnchorId = id;
+    }
+    selected = selectedIds.has(id) ? node : scene.findById([...selectedIds][0]) ?? null;
+    renderer.setSelection([...selectedIds], selected?.id ?? null);
     renderHierarchy();
-    populateInspector();
-    $("delete-node").disabled = false;
-    $("duplicate-node").disabled = false;
-    $("reparent-node").disabled = false;
-    status.textContent = `Selected: ${selected.name}`;
+    const count = selectedIds.size;
+    if (count === 1 && selected) {
+      populateInspector();
+      $("selected-type").textContent = selected.type;
+    } else {
+      $("inspector-empty").hidden = false;
+      $("inspector").hidden = true;
+      $("selected-type").textContent = count ? `${count} selected` : "None";
+    }
+    $("delete-node").disabled = count === 0;
+    $("duplicate-node").disabled = count !== 1;
+    $("reparent-node").disabled = count !== 1;
+    status.textContent = count === 1 ? `Selected: ${selected.name}` : `${count} nodes selected`;
   }
   function populateInspector() {
     $("inspector-empty").hidden = true;
@@ -374,17 +398,20 @@ async function bootstrap() {
     status.textContent = `Added: ${node.name}`;
   }
   function deleteSelected() {
-    if (!selected) return;
+    if (!selectedIds.size) return;
     const before = sceneSnapshot();
-    const name = selected.name, id = selected.id;
-    if (!scene.removeById(id)) return;
+    const targets = [...selectedIds].map((id) => scene.findById(id)).filter(Boolean);
+    const targetIds = new Set(targets.map((node) => node.id));
+    const roots = targets.filter((node) => !node.parent || !targetIds.has(node.parent.id));
+    if (!roots.length) return;
+    for (const node of roots) scene.removeById(node.id);
     renderer.rebuild(scene);
-    pushHistory(before, `Delete ${name}`);
+    pushHistory(before, roots.length === 1 ? `Delete ${roots[0].name}` : `Delete ${roots.length} nodes`);
     clearSelection();
-    status.textContent = `Deleted: ${name}`;
+    status.textContent = roots.length === 1 ? `Deleted: ${roots[0].name}` : `Deleted: ${roots.length} nodes`;
   }
   function duplicateSelected() {
-    if (!selected) return;
+    if (!selected || selectedIds.size !== 1) return;
     const before = sceneSnapshot();
     const originalName = selected.name;
     const duplicate = scene.duplicateById(selected.id);
@@ -401,7 +428,7 @@ async function bootstrap() {
     return names.join(" › ");
   }
   function showReparentDialog() {
-    if (!selected) return;
+    if (!selected || selectedIds.size !== 1) return;
     const excluded = new Set();
     selected.walk((node) => excluded.add(node.id));
     const select = $("reparent-target");
@@ -422,7 +449,7 @@ async function bootstrap() {
     $("reparent-dialog").showModal();
   }
   function reparentSelected() {
-    if (!selected) return;
+    if (!selected || selectedIds.size !== 1) return;
     const before = sceneSnapshot();
     const target = scene.findById($("reparent-target").value);
     try {
