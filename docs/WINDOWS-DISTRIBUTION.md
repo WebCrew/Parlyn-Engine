@@ -53,18 +53,28 @@ Artifacts are written to `release/`, which remains excluded from source control.
 An unsigned local build is useful for packaging inspection and local testing,
 but it must not be described as a trusted or publicly signed release.
 
-## Trusted signing boundary
+## Current unsigned distribution and future signing
 
-Parlyn has applied to the SignPath Foundation Open Source Code Signing program.
-Approval and certificate availability are pending. The repository already
-contains a SignPath-compatible GitHub workflow so that the controlled signing
-path can be enabled if the application is approved.
+Parlyn's September 2026 SignPath Foundation application was not approved because
+the project is still too young to meet the Foundation's public-trust and
+visibility criteria. Parlyn therefore has no Foundation certificate or other
+publicly trusted Authenticode identity at present.
 
-The intended workflow builds an explicitly unsigned package on a GitHub-hosted
-Windows runner and uploads it as a workflow artifact. After approval and
-configuration, SignPath would verify the build origin, sign the configured
-Parlyn executables and return the signed artifact to the same workflow for
-verification.
+Current installer and portable artifacts are unsigned preview releases. They
+are still built by the reproducible GitHub Actions workflow, checked before
+publication, accompanied by SHA-256 checksums, and covered by documented
+maintainer acceptance tests. Users should obtain them only from the official
+GitHub release, verify the matching checksum, and respect any Windows security
+decision.
+
+The repository retains a controlled signing workflow for a later trusted
+identity. A paid SignPath subscription or another established certificate
+provider may be considered only when operational need and sustainable funding
+justify it. There is no configured certificate, provider commitment or
+timeline.
+
+If trusted signing is later enabled, the workflow expects these protected
+configuration values:
 
 ```text
 SIGNPATH_API_TOKEN                 protected GitHub Actions secret
@@ -74,27 +84,12 @@ SIGNPATH_SIGNING_POLICY_SLUG       GitHub Actions variable
 WINDOWS_EXPECTED_PUBLISHER         protected GitHub Actions secret
 ```
 
-These values are placeholders for the approved configuration and must not be
-populated or used to claim trusted signing before approval. Signing keys would
-remain outside the repository and GitHub runner.
+They are placeholders only and must not be populated or used to claim trusted
+signing until a real identity is configured. Signing keys remain outside the
+repository and GitHub runner. The workflow refuses a signing-required build
+without the expected configuration and publisher.
 
-Before enabling trusted signing, the maintainer must:
-
-- receive approval for Parlyn from SignPath Foundation or configure another
-  publicly trusted signing identity;
-- install and authorize the required signing integration;
-- create and link the signing project, artifact configuration and release
-  signing policy;
-- configure the secret and variables listed above;
-- set `WINDOWS_EXPECTED_PUBLISHER` to the exact certificate subject returned by
-  the approved signing configuration.
-
-The default workflow refuses to build when trusted signing is required but no
-signing configuration or expected publisher is configured. It may be run with
-`require_signing` disabled to inspect the packaging pipeline; that artifact is
-not a trusted signed release.
-
-See the Parlyn [Code signing policy](CODE-SIGNING-POLICY.md).
+See the Parlyn [Code-signing policy](CODE-SIGNING-POLICY.md).
 
 ## Verification
 
@@ -128,8 +123,9 @@ Smart App Control should remain enabled throughout the test.
 7. Uninstall Parlyn and confirm separately stored user projects remain intact.
 
 The packaged installer has passed the initial install-and-launch smoke test on
-the maintainer's Windows machine. Public trusted-signing acceptance remains
-pending separately from the resolved development-binary blocker.
+the maintainer's Windows machine. Public trusted signing remains a future
+distribution-hardening option, separate from the resolved development-binary
+blocker.
 
 Phase 1 functional acceptance completed with the unsigned `v0.5.0-beta.4`
 prerelease and Issue #23. The current Phase 2 editor candidate is

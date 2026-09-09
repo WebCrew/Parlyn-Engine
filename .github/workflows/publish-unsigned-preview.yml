@@ -88,14 +88,16 @@ jobs:
           installation or uninstall entry. It is the preferred unsigned test path.
 
           **Important:** This beta is unsigned and may be blocked by Windows
-          Smart App Control. It is published to document and validate the packaged
-          application while Parlyn applies for trusted Open Source code signing.
-          It must not be described as a trusted or signed release.
+          Smart App Control. Download it only from this official release, verify
+          the published SHA-256 checksum, and do not bypass a Windows security
+          decision. It must not be described as trusted, digitally signed,
+          SignPath-signed or Foundation-certified.
 
-          The repository contains the reproducible build workflow, public code
-          signing policy and SHA-256 verification procedure. Parlyn has applied
-          to the SignPath Foundation program; approval and certificate access
-          remain pending. This release is not SignPath-signed.
+          The repository provides reproducible packaging, required checks,
+          documented maintainer acceptance and SHA-256 verification. A public
+          code-signing identity may be added later when operationally justified
+          and sustainably funded. This release is not signed by SignPath or any
+          other public certificate provider.
 
           Maintainer acceptance instructions:
           https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.10.md
