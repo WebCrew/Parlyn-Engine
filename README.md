@@ -214,10 +214,11 @@ npm ci
 npm run build:windows
 ```
 
-This produces `release/Parlyn-Engine-Setup-<version>-x64.exe`. An unsigned
-artifact is a packaging preflight only and does **not** resolve Windows Smart
-App Control. A distributable test build requires a publicly trusted Authenticode
-identity supplied through the controlled signing boundary.
+This produces `release/Parlyn-Engine-Setup-<version>-x64.exe`. Current preview
+artifacts are unsigned and can trigger browser, SmartScreen or Smart App
+Control warnings. Download only from an official Parlyn GitHub release and
+verify its published SHA-256 checksum before testing. A publicly trusted
+Authenticode identity remains a future distribution-hardening step.
 
 See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
@@ -225,18 +226,17 @@ verification and the maintainer acceptance test.
 Phase 1 acceptance is complete. The current Phase 2 editor candidate uses the
 repeatable [`v0.5.0-beta.10 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.10.md).
 
-### Code signing policy
+### Windows release integrity
 
-Parlyn has applied to the SignPath Foundation Open Source Code Signing program.
-Approval and certificate availability are currently pending. The repository
-already contains a SignPath-compatible controlled workflow so trusted signing
-can be integrated if the application is approved.
+Current Windows preview releases are unsigned. They are published from the
+official repository with reproducible packaging, required checks, SHA-256
+checksums and documented maintainer acceptance tests. They are not
+SignPath-signed, Foundation-certified or trusted by Windows.
 
-Until approval is confirmed, no Parlyn build is described as SignPath-signed or
-as using a SignPath Foundation certificate.
-
-Parlyn's signing roles, privacy statement and controlled release procedure are
-documented in [`docs/CODE-SIGNING-POLICY.md`](docs/CODE-SIGNING-POLICY.md).
+A public code-signing identity may be added later when it is operationally
+justified and sustainably funded; no certificate or date is promised. See
+[`docs/CODE-SIGNING-POLICY.md`](docs/CODE-SIGNING-POLICY.md) for the current
+status, verification guidance and future controlled signing procedure.
 
 ## Editor controls
 
