@@ -4,6 +4,9 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 
 const methods = [
   'getAppInfo',
+  'editorReady',
+  'onAppCloseRequested',
+  'confirmAppClose',
   'createProject',
   'openProject',
   'openProjectScene',

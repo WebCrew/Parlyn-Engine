@@ -2,6 +2,9 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Completed unsaved-scene protection across scene, project and application-close transitions.
+- Prevented loose scenes from retaining a privileged project session or overwriting its startup scene.
+- Kept long asset filenames inside their cards with ellipsis while preserving the full path tooltip.
 - Added safe project-asset selection, rename and move operations with guarded nested folders, extension preservation and no-overwrite behavior.
 - Added hierarchy and viewport multi-selection with Undo/Redo-safe bulk deletion.
 - Added a validated Multi-Scene Project Browser with scene creation, switching, rename and move operations.

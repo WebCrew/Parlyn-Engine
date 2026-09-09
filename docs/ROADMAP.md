@@ -52,7 +52,7 @@ Completion evidence:
 - multi-selection where appropriate — initial hierarchy and viewport selection complete;
 - multi-scene project browser — validated listing, switching, creation, rename and move complete;
 - rename and move project assets — initial safe editor workflow complete;
-- unsaved-change protection;
+- unsaved-change protection — complete across editor transitions and application close;
 - editor preferences;
 - stronger error reporting;
 - transform snapping and local/world gizmo modes;
