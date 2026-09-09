@@ -39,6 +39,7 @@ const required = [
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.7.md',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.8.md',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.9.md',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.9.1.md',
   'build/icon.ico',
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
@@ -60,7 +61,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.5.0-beta.9') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0-beta.9.1') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {

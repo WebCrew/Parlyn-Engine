@@ -133,5 +133,10 @@ pending separately from the resolved development-binary blocker.
 
 Phase 1 functional acceptance completed with the unsigned `v0.5.0-beta.4`
 prerelease and Issue #23. The current Phase 2 editor candidate is
-`v0.5.0-beta.9`; its repeatable checklist is documented in
-[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.9.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.9.md).
+`v0.5.0-beta.9.1`; its repeatable checklist is documented in
+[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.9.1.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.9.1.md).
+
+Unsigned preview releases also provide a portable ZIP for functional testing.
+It creates no installation or uninstall registration and is the preferred test
+artifact until trusted signing is available. The executable inside remains
+unsigned and must not be used to bypass a Windows security decision.
