@@ -81,6 +81,44 @@ Do not add editor buttons, data formats, dependencies or public feature claims f
 - **Status:** `Unreviewed` — reconsider and explicitly accept, retain or reject
   at a future planning review. No implementation is authorized.
 
+### Guided-Based Parlyn Web Platform
+
+- **Summary:** Build Parlyn's future private web platform from a deliberately
+  separated copy or reusable core of Guided CMS without changing the standalone
+  Guided product sold publicly. Guided's flat-file content and administration
+  foundation would power the Parlyn website, while Parlyn-only SQL modules would
+  provide accounts, secure sessions, launcher authorization, user libraries and
+  the later Asset Store. CodoForum remains the support forum and would be linked
+  to the central Parlyn identity through SSO rather than becoming the Engine's
+  account database.
+- **Why it may matter:** Reusing a codebase owned and already understood by the
+  project can avoid rebuilding page, navigation, media and administration
+  foundations. A single Parlyn registration could serve the website, Engine,
+  future Asset Store and support forum without exposing forum tables or
+  passwords to desktop software.
+- **Possible implementation sequence:** (1) isolate the reusable Guided core;
+  (2) establish a Parlyn-specific configuration and visual shell; (3) add a
+  relational account store with email verification, password recovery, rate
+  limits, audit events and optional MFA; (4) expose a versioned Parlyn account
+  API using a browser-based OAuth 2.0/OpenID Connect flow with PKCE for desktop
+  clients; (5) connect CodoForum as an SSO consumer with automatic user
+  provisioning; (6) add downloads and user libraries; and only then (7) design
+  Asset Store, publisher, entitlement and payment workflows.
+- **System boundaries:** Public Guided CMS releases remain independent and do
+  not receive Parlyn account or commerce code. Website content may remain flat
+  files, while identities, sessions, roles, purchases, entitlements and audit
+  records use SQL. The Engine and launcher communicate only with a documented
+  HTTPS API and never read Guided or CodoForum database tables directly.
+- **Dependencies:** Completion of the ordered Engine baseline; a security and
+  privacy design review; selection of a maintained authentication/OIDC
+  foundation and supported SQL database; mail delivery; backup and migration
+  procedures; SSO validation against the installed CodoForum version; and
+  separate legal/payment review before commerce becomes active.
+- **Source/date:** Architecture discussion with Andreas Holzer, 2026-09-09.
+- **Status:** `Unreviewed` — preferred direction for later evaluation, but no
+  web-account, SSO or Asset Store implementation is authorized during the
+  current Editor Foundation phase.
+
 The named Parlyn Smart Systems are not Idea Pool entries: their direction and initial foundation were already accepted before this policy and are documented in `SMART-SYSTEMS.md`. Their further implementation remains paused until their ordered roadmap phase becomes active.
 
 ## Review gate
