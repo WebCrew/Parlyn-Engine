@@ -51,6 +51,10 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(html, /class="brand" aria-label="Parlyn Engine"/);
   assert.match(html, /alt="" aria-hidden="true" class="brand-logo"/);
   assert.match(html, /id="error-dialog"/);
+  assert.match(html, /id="view-menu"/);
+  assert.match(html, /data-resize-panel="hierarchy"/);
+  assert.match(html, /data-resize-panel="inspector"/);
+  assert.match(html, /data-resize-panel="assets"/);
   assert.match(html, /asset-browser\.css/);
   const htmlIds = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(htmlIds).size, htmlIds.length, 'Editor element IDs must be unique.');
@@ -73,6 +77,8 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(main, /parlyn-scene-history/);
   assert.match(renderer, /history\.exportState\(/);
   assert.match(renderer, /history\.restoreState\(result\.history\)/);
+  assert.match(renderer, /normalizeWorkspaceLayout/);
+  assert.match(renderer, /parlyn\.editor\.workspace-layout/);
 
   let exposedHost = null;
   vm.runInNewContext(preload, {

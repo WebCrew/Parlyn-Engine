@@ -23,6 +23,16 @@
       <span class="toolbar-divider"></span>
       <button id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
       <button id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
+      <div class="view-menu-wrap">
+        <button id="view-menu-button" aria-haspopup="true" aria-expanded="false">View</button>
+        <div id="view-menu" class="view-menu" hidden>
+          <strong>Panels</strong>
+          <label><input id="show-hierarchy" type="checkbox"> Hierarchy &amp; Scenes</label>
+          <label><input id="show-inspector" type="checkbox"> Inspector</label>
+          <label><input id="show-assets" type="checkbox"> Assets</label>
+          <button id="reset-layout">Reset Layout</button>
+        </div>
+      </div>
       <button id="smart-systems" title="Parlyn Smart Systems">World</button>
       <button id="modules" title="Parlyn modules">Modules</button>
       <button id="play" class="primary">▶ Play</button>
@@ -30,7 +40,7 @@
   </header>
 
   <main class="workspace">
-    <aside class="panel hierarchy-panel">
+    <aside id="hierarchy-panel" class="panel hierarchy-panel">
       <div class="project-strip">
         <div class="project-identity"><span>Project</span><strong id="project-name">Loose Scene</strong></div>
         <div class="project-actions">
@@ -47,10 +57,13 @@
           <button id="duplicate-node" class="icon-button" title="Duplicate selected node (Ctrl+D)" disabled>⧉</button>
           <button id="delete-node" class="icon-button" title="Delete selected node" disabled>−</button>
           <button id="add-node" class="icon-button" title="Add node">+</button>
+          <button class="icon-button panel-close" data-close-panel="hierarchy" title="Hide Hierarchy and Scenes" aria-label="Hide Hierarchy and Scenes">×</button>
         </div>
       </div>
       <div id="hierarchy" class="hierarchy"></div>
     </aside>
+
+    <div id="hierarchy-resizer" class="panel-resizer vertical" data-resize-panel="hierarchy" role="separator" aria-label="Resize Hierarchy panel" aria-orientation="vertical" tabindex="0"></div>
 
     <section class="center">
       <div class="viewport-toolbar">
@@ -68,17 +81,20 @@
         <span class="hint">LMB select/gizmo · RMB orbit · MMB pan · wheel zoom</span>
       </div>
       <div id="viewport" class="viewport"></div>
-      <section class="assets panel">
+      <div id="assets-resizer" class="panel-resizer horizontal" data-resize-panel="assets" role="separator" aria-label="Resize Assets panel" aria-orientation="horizontal" tabindex="0"></div>
+      <section id="assets-panel" class="assets panel">
         <div class="panel-title">
           <div><strong>Assets</strong><span id="asset-count" class="panel-subtitle">No project</span></div>
-          <div class="panel-actions"><button id="move-asset" disabled>Rename / Move</button><button id="import-asset">Import Assets</button></div>
+          <div class="panel-actions"><button id="move-asset" disabled>Rename / Move</button><button id="import-asset">Import Assets</button><button class="icon-button panel-close" data-close-panel="assets" title="Hide Assets" aria-label="Hide Assets">×</button></div>
         </div>
         <div id="asset-grid" class="asset-grid"></div>
       </section>
     </section>
 
-    <aside class="panel inspector-panel">
-      <div class="panel-title"><strong>Inspector</strong><span id="selected-type" class="type-chip">None</span></div>
+    <div id="inspector-resizer" class="panel-resizer vertical" data-resize-panel="inspector" role="separator" aria-label="Resize Inspector panel" aria-orientation="vertical" tabindex="0"></div>
+
+    <aside id="inspector-panel" class="panel inspector-panel">
+      <div class="panel-title"><strong>Inspector</strong><div class="panel-actions"><span id="selected-type" class="type-chip">None</span><button class="icon-button panel-close" data-close-panel="inspector" title="Hide Inspector" aria-label="Hide Inspector">×</button></div></div>
       <div id="inspector-empty" class="empty-state">Select a scene object.</div>
       <div id="inspector" hidden>
         <section class="inspector-section">

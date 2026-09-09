@@ -53,7 +53,8 @@ Completion evidence:
 - multi-scene project browser — validated listing, switching, creation, rename and move complete;
 - rename and move project assets — initial safe editor workflow complete;
 - unsaved-change protection — complete across editor transitions and application close;
-- editor preferences;
+- editor preferences and workspace layout — initial versioned local foundation
+  complete with panel visibility, bounded resizing, restoration and reset;
 - stronger error reporting;
 - transform snapping and local/world gizmo modes;
 - optional Surface/Ground Snap and Grid Snap, including a keyboard command to

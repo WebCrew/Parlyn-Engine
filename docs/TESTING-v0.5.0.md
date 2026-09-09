@@ -1,7 +1,7 @@
 # Parlyn Engine v0.5.0 Test Guide
 
 For the current Phase 2 editor acceptance pass, use the shorter artifact-specific
-[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.8.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.8.md)
+[`MAINTAINER-ACCEPTANCE-v0.5.0-beta.9.md`](MAINTAINER-ACCEPTANCE-v0.5.0-beta.9.md)
 and record the result in Issue #29. The guide below remains the detailed feature reference.
 
 This test focuses on the two new foundations introduced in v0.5.0: viewport transform gizmos and the module lifecycle.

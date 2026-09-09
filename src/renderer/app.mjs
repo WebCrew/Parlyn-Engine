@@ -10,10 +10,13 @@ import { ThreeRenderer } from "../engine/render/ThreeRenderer.mjs";
 import { ModuleRegistry } from "../engine/modules/ModuleRegistry.mjs";
 import { ExampleModule } from "../modules/example/ExampleModule.mjs";
 import { approveUnsavedTransition } from "../engine/editor/UnsavedChanges.mjs";
+import { DEFAULT_WORKSPACE_LAYOUT, normalizeWorkspaceLayout } from "../engine/editor/WorkspaceLayout.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
   const host = window.parlynHost;
+  const workspaceLayoutKey = "parlyn.editor.workspace-layout";
+  let workspaceLayout = readWorkspaceLayout();
   const history = new History({ limit: 100 });
   let scene = createDemoScene();
   let selected = null;
@@ -43,6 +46,113 @@ async function bootstrap() {
   const renderer = new ThreeRenderer($("viewport"), { onSelect: selectById, getNodeType: (id) => scene.findById(id)?.type ?? null, onTransformStart: beginGizmoTransform, onTransformChange: applyGizmoTransform, onTransformEnd: commitGizmoTransform });
   await renderer.initialize(scene);
   renderer.setTransformMode(transformMode);
+  initializeWorkspaceLayout();
+  function readWorkspaceLayout() {
+    try {
+      const stored = window.localStorage.getItem(workspaceLayoutKey);
+      return normalizeWorkspaceLayout(stored ? JSON.parse(stored) : null);
+    } catch (error) {
+      console.warn("Saved workspace layout was ignored:", error);
+      return normalizeWorkspaceLayout(null);
+    }
+  }
+  function saveWorkspaceLayout() {
+    try { window.localStorage.setItem(workspaceLayoutKey, JSON.stringify(workspaceLayout)); }
+    catch (error) { console.warn("Workspace layout could not be saved:", error); }
+  }
+  function applyWorkspaceLayout({ persist = false } = {}) {
+    workspaceLayout = normalizeWorkspaceLayout(workspaceLayout);
+    const workspace = document.querySelector(".workspace");
+    const { panels, sizes } = workspaceLayout;
+    $("hierarchy-panel").hidden = !panels.hierarchy;
+    $("hierarchy-resizer").hidden = !panels.hierarchy;
+    $("inspector-panel").hidden = !panels.inspector;
+    $("inspector-resizer").hidden = !panels.inspector;
+    $("assets-panel").hidden = !panels.assets;
+    $("assets-resizer").hidden = !panels.assets;
+    $("hierarchy-resizer").setAttribute("aria-valuenow", String(sizes.hierarchy));
+    $("inspector-resizer").setAttribute("aria-valuenow", String(sizes.inspector));
+    $("assets-resizer").setAttribute("aria-valuenow", String(sizes.assets));
+    $("show-hierarchy").checked = panels.hierarchy;
+    $("show-inspector").checked = panels.inspector;
+    $("show-assets").checked = panels.assets;
+    workspace.style.setProperty("--hierarchy-width", panels.hierarchy ? `${sizes.hierarchy}px` : "0px");
+    workspace.style.setProperty("--hierarchy-resizer-width", panels.hierarchy ? "5px" : "0px");
+    workspace.style.setProperty("--inspector-width", panels.inspector ? `${sizes.inspector}px` : "0px");
+    workspace.style.setProperty("--inspector-resizer-width", panels.inspector ? "5px" : "0px");
+    workspace.style.setProperty("--assets-height", panels.assets ? `${sizes.assets}px` : "0px");
+    if (persist) saveWorkspaceLayout();
+    requestAnimationFrame(() => renderer.resize());
+  }
+  function setPanelVisible(panel, visible) {
+    workspaceLayout.panels[panel] = visible;
+    applyWorkspaceLayout({ persist:true });
+    status.textContent = `${{ hierarchy:"Hierarchy and Scenes", inspector:"Inspector", assets:"Assets" }[panel]} panel ${visible ? "shown" : "hidden"}.`;
+  }
+  function closeViewMenu() {
+    $("view-menu").hidden = true;
+    $("view-menu-button").setAttribute("aria-expanded", "false");
+  }
+  function initializeWorkspaceLayout() {
+    applyWorkspaceLayout();
+    $("view-menu-button").addEventListener("click", (event) => {
+      event.stopPropagation();
+      const willOpen = $("view-menu").hidden;
+      $("view-menu").hidden = !willOpen;
+      $("view-menu-button").setAttribute("aria-expanded", String(willOpen));
+    });
+    $("view-menu").addEventListener("click", (event) => event.stopPropagation());
+    document.addEventListener("click", closeViewMenu);
+    for (const [id, panel] of [["show-hierarchy", "hierarchy"], ["show-inspector", "inspector"], ["show-assets", "assets"]]) {
+      $(id).addEventListener("change", () => setPanelVisible(panel, $(id).checked));
+    }
+    document.querySelectorAll("[data-close-panel]").forEach((button) => button.addEventListener("click", () => setPanelVisible(button.dataset.closePanel, false)));
+    $("reset-layout").addEventListener("click", () => {
+      workspaceLayout = normalizeWorkspaceLayout(DEFAULT_WORKSPACE_LAYOUT);
+      applyWorkspaceLayout({ persist:true });
+      closeViewMenu();
+      status.textContent = "Workspace layout reset to default.";
+    });
+    for (const resizer of document.querySelectorAll("[data-resize-panel]")) {
+      resizer.addEventListener("pointerdown", (event) => beginPanelResize(event, resizer));
+      resizer.addEventListener("keydown", (event) => {
+        const panel = resizer.dataset.resizePanel;
+        const direction = panel === "assets" ? (event.key === "ArrowUp" ? 1 : event.key === "ArrowDown" ? -1 : 0) : panel === "hierarchy" ? (event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0) : (event.key === "ArrowLeft" ? 1 : event.key === "ArrowRight" ? -1 : 0);
+        if (!direction) return;
+        event.preventDefault();
+        workspaceLayout.sizes[panel] += direction * 10;
+        applyWorkspaceLayout({ persist:true });
+      });
+    }
+  }
+  function beginPanelResize(event, resizer) {
+    if (event.button !== 0) return;
+    const panel = resizer.dataset.resizePanel;
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startSize = workspaceLayout.sizes[panel];
+    const workspace = document.querySelector(".workspace");
+    resizer.setPointerCapture(event.pointerId);
+    resizer.classList.add("dragging");
+    workspace.classList.add("is-resizing");
+    const move = (moveEvent) => {
+      const delta = panel === "hierarchy" ? moveEvent.clientX - startX : panel === "inspector" ? startX - moveEvent.clientX : startY - moveEvent.clientY;
+      workspaceLayout.sizes[panel] = startSize + delta;
+      applyWorkspaceLayout();
+    };
+    const finish = () => {
+      resizer.removeEventListener("pointermove", move);
+      resizer.removeEventListener("pointerup", finish);
+      resizer.removeEventListener("pointercancel", finish);
+      resizer.classList.remove("dragging");
+      workspace.classList.remove("is-resizing");
+      workspaceLayout = normalizeWorkspaceLayout(workspaceLayout);
+      applyWorkspaceLayout({ persist:true });
+    };
+    resizer.addEventListener("pointermove", move);
+    resizer.addEventListener("pointerup", finish);
+    resizer.addEventListener("pointercancel", finish);
+  }
   function createDemoScene() {
     const doc = new SceneDocument("Parlyn Showcase");
     const back = doc.root.addChild(new Node2_5D({ name: "Mountain Backdrop", type: "Sprite2_5D", position: { x: -1.4, y: 1, z: -2.2 }, scale: { x: 1.35, y: 1.35 }, depthLayer: "background" }));
