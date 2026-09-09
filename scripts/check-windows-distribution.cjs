@@ -21,6 +21,7 @@ requireValue(icon.length > 4, 'Windows icon is empty.');
 requireValue(icon[0] === 0 && icon[1] === 0 && icon[2] === 1 && icon[3] === 0, 'Windows icon has an invalid ICO header.');
 
 const workflow = fs.readFileSync(path.join(root, '.github/workflows/windows-installer.yml'), 'utf8');
+const previewWorkflow = fs.readFileSync(path.join(root, '.github/workflows/publish-unsigned-preview.yml'), 'utf8');
 requireValue(workflow.includes('signpath/github-action-submit-signing-request@v2'), 'Windows workflow is missing the SignPath signing action.');
 for (const setting of [
   'SIGNPATH_API_TOKEN',
@@ -35,6 +36,9 @@ requireValue(workflow.includes('github-artifact-id'), 'SignPath must sign the up
 requireValue(workflow.includes('Verify signed Windows artifacts'), 'Signed output must be verified before publication.');
 requireValue(workflow.includes('require_signing'), 'Windows workflow must distinguish signed and unsigned preflight builds.');
 requireValue(!workflow.includes('BEGIN PRIVATE KEY'), 'Signing material must never be embedded in the workflow.');
+requireValue(previewWorkflow.includes('Compress-Archive'), 'Unsigned previews must create a portable ZIP test artifact.');
+requireValue(previewWorkflow.includes('Parlyn-Engine-Portable-0.5.0-beta.9.1-x64.zip'), 'Portable preview artifact has an unexpected name.');
+requireValue(previewWorkflow.includes('release/win-unpacked/Parlyn Engine.exe'), 'Portable preview must verify its packaged executable.');
 
 const gitignore = fs.readFileSync(path.join(root, '.gitignore'), 'utf8');
 for (const sensitivePattern of ['*.pfx', '*.p12', '*.key']) {
