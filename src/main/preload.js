@@ -2,6 +2,14 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('parlynHost', {
   getAppInfo:()=>ipcRenderer.invoke('parlyn:app:get-info'),
+  editorReady:()=>ipcRenderer.invoke('parlyn:app:editor-ready'),
+  onAppCloseRequested:(callback)=>{
+    if (typeof callback !== 'function') throw new TypeError('Close-request callback must be a function.');
+    const listener=()=>callback();
+    ipcRenderer.on('parlyn:app:close-requested',listener);
+    return ()=>ipcRenderer.removeListener('parlyn:app:close-requested',listener);
+  },
+  confirmAppClose:()=>ipcRenderer.invoke('parlyn:app:confirm-close'),
   saveSceneAs:(payload)=>ipcRenderer.invoke('parlyn:scene:save-as',payload),
   openScene:()=>ipcRenderer.invoke('parlyn:scene:open'),
   createProject:(payload)=>ipcRenderer.invoke('parlyn:project:create',payload),

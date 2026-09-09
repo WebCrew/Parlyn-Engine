@@ -9,6 +9,7 @@ import { History } from "../engine/history/History.mjs";
 import { ThreeRenderer } from "../engine/render/ThreeRenderer.mjs";
 import { ModuleRegistry } from "../engine/modules/ModuleRegistry.mjs";
 import { ExampleModule } from "../modules/example/ExampleModule.mjs";
+import { approveUnsavedTransition } from "../engine/editor/UnsavedChanges.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
@@ -152,10 +153,31 @@ async function bootstrap() {
     $("unsaved-dialog").showModal();
     return new Promise((resolve) => { pendingUnsavedDecision = resolve; });
   }
-  async function mayCloseProject() {
-    const decision = await askAboutUnsavedChanges();
-    if (decision === "cancel") return false;
-    if (decision === "save") return saveScene();
+  async function mayReplaceScene() {
+    return approveUnsavedTransition({ dirty, requestDecision:askAboutUnsavedChanges, save:saveScene });
+  }
+  async function handleAppCloseRequest() {
+    if (!await mayReplaceScene()) {
+      status.textContent = "Application close canceled.";
+      return;
+    }
+    try { await host.confirmAppClose(); }
+    catch (error) { showError("Application close failed", error); }
+  }
+  async function leaveProjectForLooseScene() {
+    if (!currentProject) return true;
+    const result = await host.closeProject();
+    if (!result.ok) throw new Error("The active project session could not be closed.");
+    currentProject = null;
+    currentProjectRoot = null;
+    currentSceneRelativePath = null;
+    currentWorld = null;
+    assets = [];
+    selectedAssetPath = null;
+    projectScenes = [];
+    updateProjectUI();
+    renderAssets();
+    renderProjectScenes();
     return true;
   }
   function clearSelection() {
@@ -471,15 +493,21 @@ async function bootstrap() {
       showError("Node reparent failed", error);
     }
   }
-  function newScene() {
-    pushHistory(sceneSnapshot(), "New Scene");
-    scene = new SceneDocument("Untitled Scene");
-    currentFilePath = null;
-    currentSceneRelativePath = currentProject?.startupScene ?? null;
-    renderer.rebuild(scene);
-    clearSelection();
-    setDirty(true);
-    status.textContent = "New untitled scene";
+  async function newScene() {
+    if (!await mayReplaceScene()) return;
+    try {
+      await leaveProjectForLooseScene();
+      scene = new SceneDocument("Untitled Scene");
+      currentFilePath = null;
+      history.clear();
+      renderer.rebuild(scene);
+      clearSelection();
+      updateHistoryButtons();
+      setDirty(true);
+      status.textContent = "New untitled scene";
+    } catch (error) {
+      showError("New scene failed", error);
+    }
   }
   async function saveScene() {
     try {
@@ -511,9 +539,11 @@ async function bootstrap() {
     }
   }
   async function openScene() {
+    if (!await mayReplaceScene()) return;
     try {
       const result = await host.openScene();
       if (result.canceled) return;
+      await leaveProjectForLooseScene();
       scene = SceneDocument.fromJSON(result.scene);
       currentFilePath = result.filePath;
       currentSceneRelativePath = null;
@@ -529,6 +559,11 @@ async function bootstrap() {
   }
   async function createProject() {
     const name = $("project-input").value.trim() || "My Parlyn Project";
+    $("project-dialog").close();
+    if (!await mayReplaceScene()) {
+      $("project-dialog").showModal();
+      return;
+    }
     try {
       const projectDoc = new ProjectDocument({ name });
       const result = await host.createProject({ name: projectDoc.name, scene: scene.toJSON() });
@@ -543,7 +578,6 @@ async function bootstrap() {
       projectScenes = result.scenes ?? [];
       history.clear();
       updateHistoryButtons();
-      $("project-dialog").close();
       updateProjectUI();
       renderAssets();
       renderProjectScenes();
@@ -554,6 +588,7 @@ async function bootstrap() {
     }
   }
   async function openProject() {
+    if (!await mayReplaceScene()) return;
     try {
       const result = await host.openProject();
       if (result.canceled) return;
@@ -587,7 +622,7 @@ async function bootstrap() {
     }
   }
   async function closeProject() {
-    if (!currentProject || !await mayCloseProject()) return;
+    if (!currentProject || !await mayReplaceScene()) return;
     const projectName = currentProject.name;
     try {
       const result = await host.closeProject();
@@ -685,7 +720,7 @@ async function bootstrap() {
     }
   }
   async function openProjectScene(relativePath) {
-    if (!currentProject || relativePath === currentSceneRelativePath || !await mayCloseProject()) return;
+    if (!currentProject || relativePath === currentSceneRelativePath || !await mayReplaceScene()) return;
     try {
       const result = await host.openProjectScene({ relativePath });
       scene = SceneDocument.fromJSON(result.scene);
@@ -706,7 +741,7 @@ async function bootstrap() {
     }
   }
   async function createProjectScene() {
-    if (!currentProject || !await mayCloseProject()) return;
+    if (!currentProject || !await mayReplaceScene()) return;
     const name = $("create-scene-name").value.trim() || "New Scene";
     const relativePath = $("create-scene-path").value.trim();
     try {
@@ -730,7 +765,7 @@ async function bootstrap() {
     }
   }
   async function moveProjectScene() {
-    if (!currentProject || !currentSceneRelativePath || !await mayCloseProject()) return;
+    if (!currentProject || !currentSceneRelativePath || !await mayReplaceScene()) return;
     const sourcePath = currentSceneRelativePath;
     try {
       const result = await host.moveProjectScene({ sourcePath, targetPath:$("move-scene-path").value.trim(), name:$("move-scene-name").value.trim() });
@@ -828,6 +863,7 @@ async function bootstrap() {
   $("discard-unsaved").addEventListener("click", () => resolveUnsavedDecision("discard"));
   $("save-unsaved").addEventListener("click", () => resolveUnsavedDecision("save"));
   $("unsaved-dialog").addEventListener("cancel", (event) => { event.preventDefault(); resolveUnsavedDecision("cancel"); });
+  host.onAppCloseRequested(handleAppCloseRequest);
   moduleEvents.addEventListener("module-changed", renderModules);
   $("view-25").addEventListener("click", () => {
     renderer.setView("2.5d");
@@ -956,6 +992,7 @@ async function bootstrap() {
   $("brand-version").textContent = `${appVersion} GitHub Preview`;
   $("footer-version").textContent = `v${appVersion}`;
   status.textContent = `Ready \xB7 Parlyn ${appVersion} \xB7 THREE renderer backend`;
+  await host.editorReady();
 }
 bootstrap().catch((error) => {
   console.error("Parlyn failed to initialize:", error);

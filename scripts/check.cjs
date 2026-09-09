@@ -17,8 +17,10 @@ const required = [
   'src/main/ProjectSession.js',
   'src/main/preload.js',
   'src/renderer/index.html',
+  'src/renderer/asset-browser.css',
   'src/renderer/app.mjs',
   'src/engine/project/ProjectDocument.mjs',
+  'src/engine/editor/UnsavedChanges.mjs',
   'src/engine/history/SceneHistoryDocument.mjs',
   'src/engine/persistence/DocumentPersistence.mjs',
   'src/engine/world/WorldDocument.mjs',
@@ -34,6 +36,7 @@ const required = [
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.4.md',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.5.md',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.7.md',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.8.md',
   'build/icon.ico',
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
@@ -41,6 +44,7 @@ const required = [
   'scripts/check-core-invariants.mjs',
   'scripts/check-desktop-boundaries.cjs',
   'scripts/check-project-session.cjs',
+  'scripts/check-unsaved-changes.mjs',
   'scripts/check-asset-files.cjs',
   'scripts/check-electron-preload.cjs',
   'scripts/check-windows-distribution.cjs',
@@ -53,7 +57,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.5.0-beta.7') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0-beta.8') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -73,6 +77,7 @@ cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-persisten
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-core-invariants.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-desktop-boundaries.cjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-project-session.cjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-unsaved-changes.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-asset-files.cjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-windows-distribution.cjs')], { stdio: 'inherit' });
 

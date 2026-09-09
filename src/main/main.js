@@ -13,6 +13,8 @@ const EDITOR_FILE = path.join(__dirname, '..', 'renderer', 'index.html');
 const EDITOR_URL = pathToFileURL(EDITOR_FILE).href;
 const STARTUP_HISTORY_PATH = '.parlyn/startup-scene.parlyn-history.json';
 const MAX_HISTORY_FILE_BYTES = 32 * 1024 * 1024;
+const approvedWindowClosures = new WeakSet();
+const readyEditorWindows = new WeakSet();
 
 app.setAppUserModelId('org.parlyn.engine');
 
@@ -119,6 +121,15 @@ function createWindow() {
   win.removeMenu();
   win.webContents.setWindowOpenHandler(() => ({ action:'deny' }));
   win.webContents.on('will-navigate', (event, url) => { if (url !== EDITOR_URL) event.preventDefault(); });
+  win.webContents.on('render-process-gone', () => readyEditorWindows.delete(win));
+  win.on('close', (event) => {
+    if (approvedWindowClosures.has(win) || !readyEditorWindows.has(win)) {
+      approvedWindowClosures.delete(win);
+      return;
+    }
+    event.preventDefault();
+    win.webContents.send('parlyn:app:close-requested');
+  });
   win.loadURL(EDITOR_URL);
 }
 
@@ -126,7 +137,7 @@ function secureHandle(channel, handler, { payload = false } = {}) {
   ipcMain.handle(channel, async (event, value) => {
     assertTrustedIpcEvent(event, EDITOR_URL);
     if (payload) assertIpcPayload(value, `${channel} payload`);
-    return handler(value);
+    return handler(value, event);
   });
 }
 
@@ -134,6 +145,21 @@ secureHandle('parlyn:app:get-info', async () => ({
   version:app.getVersion(),
   platform:process.platform
 }));
+
+secureHandle('parlyn:app:confirm-close', async (_, event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return { ok:false };
+  approvedWindowClosures.add(win);
+  win.close();
+  return { ok:true };
+});
+
+secureHandle('parlyn:app:editor-ready', async (_, event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return { ok:false };
+  readyEditorWindows.add(win);
+  return { ok:true };
+});
 
 secureHandle('parlyn:scene:save-as', async (payload) => {
   const defaultName = `${slug(payload?.name || 'scene','scene')}.parlyn-scene.json`;

@@ -51,6 +51,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(html, /class="brand" aria-label="Parlyn Engine"/);
   assert.match(html, /alt="" aria-hidden="true" class="brand-logo"/);
   assert.match(html, /id="error-dialog"/);
+  assert.match(html, /asset-browser\.css/);
   const htmlIds = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(htmlIds).size, htmlIds.length, 'Editor element IDs must be unique.');
   const referencedIds = new Set([...renderer.matchAll(/\$\("([^"]+)"\)/g)].map((match) => match[1]));
@@ -59,6 +60,9 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(main, /setWindowOpenHandler/);
   assert.match(main, /will-navigate/);
   assert.match(main, /secureHandle\('parlyn:app:get-info'/);
+  assert.match(main, /secureHandle\('parlyn:app:editor-ready'/);
+  assert.match(main, /secureHandle\('parlyn:app:confirm-close'/);
+  assert.match(main, /parlyn:app:close-requested/);
   assert.match(main, /secureHandle\('parlyn:project:open'/);
   assert.match(main, /secureHandle\('parlyn:project:open-scene'/);
   assert.match(main, /secureHandle\('parlyn:project:create-scene'/);
@@ -81,7 +85,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
     }
   }, { filename:'src/main/preload.js' });
   assert.ok(exposedHost, 'Preload must expose window.parlynHost.');
-  for (const method of ['getAppInfo','createProject','openProject','openProjectScene','createProjectScene','moveProjectScene','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets','moveProjectAsset']) {
+  for (const method of ['getAppInfo','editorReady','onAppCloseRequested','confirmAppClose','createProject','openProject','openProjectScene','createProjectScene','moveProjectScene','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets','moveProjectAsset']) {
     assert.equal(typeof exposedHost[method], 'function', `Preload host is missing ${method}().`);
   }
 
