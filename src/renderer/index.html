@@ -75,6 +75,7 @@
           <button id="tool-scale" class="tool-button" title="Scale (R)">Scale</button>
         </div>
         <button id="snap-toggle" class="tool-button snap-button" type="button" aria-pressed="false" title="Transform Snap: 0.5 units / 15° / 0.1 scale">Snap</button>
+        <button id="snap-settings" class="icon-button snap-settings-button" type="button" title="Configure Transform Snap" aria-label="Configure Transform Snap">⋯</button>
         <span class="toolbar-divider"></span>
         <button id="view-25" class="active">2.5D View</button>
         <button id="view-3d">3D View</button>
@@ -138,6 +139,17 @@
       <button id="add-camera" class="node-option"><span>▣</span><strong>3D Camera</strong><small>Scene camera foundation</small></button>
     </div>
     <div class="dialog-actions"><button id="cancel-add">Cancel</button></div>
+  </dialog>
+
+  <dialog id="snap-settings-dialog" class="node-dialog small-dialog" aria-labelledby="snap-settings-title">
+    <div class="dialog-head"><strong id="snap-settings-title">Transform Snap Settings</strong><span>Set the increments used while dragging viewport gizmos.</span></div>
+    <div class="dialog-body snap-settings-grid">
+      <label>Move units<input id="snap-translation" type="number" min="0.01" max="100" step="0.01" required></label>
+      <label>Rotate degrees<input id="snap-rotation" type="number" min="1" max="180" step="1" required></label>
+      <label>Scale increment<input id="snap-scale" type="number" min="0.01" max="10" step="0.01" required></label>
+      <p>These settings affect viewport gizmos only. Inspector values remain unrestricted.</p>
+    </div>
+    <div class="dialog-actions"><button id="reset-snap-settings">Reset Defaults</button><span class="dialog-spacer"></span><button id="cancel-snap-settings">Cancel</button><button id="save-snap-settings" class="primary">Apply</button></div>
   </dialog>
 
   <dialog id="reparent-dialog" class="node-dialog small-dialog" aria-labelledby="reparent-title">

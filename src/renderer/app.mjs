@@ -12,7 +12,7 @@ import { ExampleModule } from "../modules/example/ExampleModule.mjs";
 import { approveUnsavedTransition } from "../engine/editor/UnsavedChanges.mjs";
 import { DEFAULT_WORKSPACE_LAYOUT, normalizeWorkspaceLayout } from "../engine/editor/WorkspaceLayout.mjs";
 import { createErrorReport } from "../engine/editor/ErrorReport.mjs";
-import { normalizeTransformSnapping } from "../engine/editor/TransformSnapping.mjs";
+import { DEFAULT_TRANSFORM_SNAPPING, normalizeTransformSnapping } from "../engine/editor/TransformSnapping.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
@@ -79,6 +79,38 @@ async function bootstrap() {
   function toggleTransformSnapping() {
     transformSnapping.enabled = !transformSnapping.enabled;
     applyTransformSnapping({ persist:true, announce:true });
+  }
+  function populateTransformSnapSettings() {
+    $("snap-translation").value = String(transformSnapping.translation);
+    $("snap-rotation").value = String(transformSnapping.rotationDegrees);
+    $("snap-scale").value = String(transformSnapping.scale);
+  }
+  function openTransformSnapSettings() {
+    populateTransformSnapSettings();
+    $("snap-settings-dialog").showModal();
+  }
+  function saveTransformSnapSettings() {
+    const inputs = [$("snap-translation"), $("snap-rotation"), $("snap-scale")];
+    const invalid = inputs.find((input) => !input.checkValidity());
+    if (invalid) {
+      invalid.reportValidity();
+      return;
+    }
+    transformSnapping = normalizeTransformSnapping({
+      ...transformSnapping,
+      translation:Number($("snap-translation").value),
+      rotationDegrees:Number($("snap-rotation").value),
+      scale:Number($("snap-scale").value)
+    });
+    applyTransformSnapping({ persist:true });
+    $("snap-settings-dialog").close();
+    status.textContent = `Snap steps saved · ${transformSnapping.translation} units · ${transformSnapping.rotationDegrees}° · ${transformSnapping.scale} scale`;
+  }
+  function resetTransformSnapSettings() {
+    transformSnapping = { ...DEFAULT_TRANSFORM_SNAPPING, enabled:transformSnapping.enabled };
+    applyTransformSnapping({ persist:true });
+    populateTransformSnapSettings();
+    status.textContent = "Snap steps reset to defaults.";
   }
   function readWorkspaceLayout() {
     try {
@@ -986,6 +1018,10 @@ async function bootstrap() {
   $("tool-rotate").addEventListener("click", () => setTransformMode("rotate"));
   $("tool-scale").addEventListener("click", () => setTransformMode("scale"));
   $("snap-toggle").addEventListener("click", toggleTransformSnapping);
+  $("snap-settings").addEventListener("click", openTransformSnapSettings);
+  $("cancel-snap-settings").addEventListener("click", () => $("snap-settings-dialog").close());
+  $("save-snap-settings").addEventListener("click", saveTransformSnapSettings);
+  $("reset-snap-settings").addEventListener("click", resetTransformSnapSettings);
   $("modules").addEventListener("click", () => {
     renderModules();
     $("module-dialog").showModal();
