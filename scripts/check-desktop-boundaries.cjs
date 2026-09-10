@@ -52,6 +52,11 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(html, /class="brand" aria-label="Parlyn Engine"/);
   assert.match(html, /alt="" aria-hidden="true" class="brand-logo"/);
   assert.match(html, /id="error-dialog"/);
+  assert.match(html, /id="error-area"/);
+  assert.match(html, /id="error-guidance"/);
+  assert.match(html, /id="error-details"/);
+  assert.match(html, /id="error-technical"/);
+  assert.match(html, /id="copy-error"/);
   assert.match(html, /id="view-menu"/);
   assert.match(html, /data-resize-panel="hierarchy"/);
   assert.match(html, /data-resize-panel="inspector"/);
@@ -67,6 +72,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(main, /secureHandle\('parlyn:app:get-info'/);
   assert.match(main, /secureHandle\('parlyn:app:editor-ready'/);
   assert.match(main, /secureHandle\('parlyn:app:confirm-close'/);
+  assert.match(main, /secureHandle\('parlyn:clipboard:write-text'/);
   assert.match(main, /parlyn:app:close-requested/);
   assert.match(main, /secureHandle\('parlyn:project:open'/);
   assert.match(main, /secureHandle\('parlyn:project:open-scene'/);
@@ -79,6 +85,8 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(renderer, /history\.exportState\(/);
   assert.match(renderer, /history\.restoreState\(result\.history\)/);
   assert.match(renderer, /normalizeWorkspaceLayout/);
+  assert.match(renderer, /createErrorReport/);
+  assert.match(renderer, /host\.copyText\(currentErrorReport\.technicalDetails\)/);
   assert.match(renderer, /parlyn\.editor\.workspace-layout/);
   for (const [selector, column] of [['#hierarchy-panel', 1], ['#hierarchy-resizer', 2], ['.center', 3], ['#inspector-resizer', 4], ['#inspector-panel', 5]]) {
     assert.match(styles, new RegExp(`${selector.replace('.', '\\.') }\\{grid-column:${column}\\}`), `${selector} must keep a stable workspace grid column.`);
@@ -95,7 +103,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
     }
   }, { filename:'src/main/preload.js' });
   assert.ok(exposedHost, 'Preload must expose window.parlynHost.');
-  for (const method of ['getAppInfo','editorReady','onAppCloseRequested','confirmAppClose','createProject','openProject','openProjectScene','createProjectScene','moveProjectScene','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets','moveProjectAsset']) {
+  for (const method of ['getAppInfo','editorReady','onAppCloseRequested','confirmAppClose','copyText','createProject','openProject','openProjectScene','createProjectScene','moveProjectScene','closeProject','deleteProject','saveProjectScene','saveProjectWorld','saveSceneAs','openScene','importAssets','moveProjectAsset']) {
     assert.equal(typeof exposedHost[method], 'function', `Preload host is missing ${method}().`);
   }
 

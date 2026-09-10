@@ -55,7 +55,8 @@ Completion evidence:
 - unsaved-change protection — complete across editor transitions and application close;
 - editor preferences and workspace layout — initial versioned local foundation
   complete with panel visibility, bounded resizing, restoration and reset;
-- stronger error reporting;
+- stronger error reporting — initial contextual dialog, recovery guidance and
+  copyable technical details complete;
 - transform snapping and local/world gizmo modes;
 - optional Surface/Ground Snap and Grid Snap, including a keyboard command to
   place the current selection on the ground;

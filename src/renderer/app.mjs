@@ -11,6 +11,7 @@ import { ModuleRegistry } from "../engine/modules/ModuleRegistry.mjs";
 import { ExampleModule } from "../modules/example/ExampleModule.mjs";
 import { approveUnsavedTransition } from "../engine/editor/UnsavedChanges.mjs";
 import { DEFAULT_WORKSPACE_LAYOUT, normalizeWorkspaceLayout } from "../engine/editor/WorkspaceLayout.mjs";
+import { createErrorReport } from "../engine/editor/ErrorReport.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
@@ -34,6 +35,7 @@ async function bootstrap() {
   let inspectorStartSnapshot = null;
   let dirty = false;
   let pendingUnsavedDecision = null;
+  let currentErrorReport = null;
   let gizmoStartSnapshot = null;
   let transformMode = "select";
   const moduleEvents = new EventTarget();
@@ -219,15 +221,17 @@ async function bootstrap() {
     d.textContent = value;
     return d.innerHTML;
   }
-  function readableError(error) {
-    return String(error?.message ?? error ?? "Unknown error").replace(/^Error invoking remote method '[^']+': Error:\s*/, "");
-  }
   function showError(title, error) {
-    const message = readableError(error);
+    currentErrorReport = createErrorReport(title, error);
     console.error(title, error);
-    status.textContent = `${title}: ${message}`;
-    $("error-title").textContent = title;
-    $("error-message").textContent = message;
+    status.textContent = `${currentErrorReport.area}: ${currentErrorReport.message}`;
+    $("error-title").textContent = currentErrorReport.operation;
+    $("error-area").textContent = currentErrorReport.area;
+    $("error-message").textContent = currentErrorReport.message;
+    $("error-guidance").textContent = currentErrorReport.guidance;
+    $("error-technical").textContent = currentErrorReport.technicalDetails;
+    $("error-details").open = false;
+    $("copy-error").textContent = "Copy Details";
     const errorDialog = $("error-dialog");
     if (errorDialog.open) errorDialog.close();
     errorDialog.showModal();
@@ -962,6 +966,18 @@ async function bootstrap() {
   $("save-world").addEventListener("click", saveWorld);
   $("close-modules").addEventListener("click", () => $("module-dialog").close());
   $("close-error").addEventListener("click", () => $("error-dialog").close());
+  $("copy-error").addEventListener("click", async () => {
+    if (!currentErrorReport) return;
+    try {
+      await host.copyText(currentErrorReport.technicalDetails);
+      $("copy-error").textContent = "Copied";
+      status.textContent = "Technical error details copied to the clipboard.";
+    } catch (error) {
+      console.error("Copy error details failed", error);
+      $("copy-error").textContent = "Copy Failed";
+      status.textContent = "Could not copy technical error details.";
+    }
+  });
   $("close-project").addEventListener("click", closeProject);
   $("delete-project").addEventListener("click", showDeleteProjectDialog);
   $("cancel-delete-project").addEventListener("click", () => $("delete-project-dialog").close());
