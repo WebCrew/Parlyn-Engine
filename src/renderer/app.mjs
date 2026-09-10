@@ -12,12 +12,15 @@ import { ExampleModule } from "../modules/example/ExampleModule.mjs";
 import { approveUnsavedTransition } from "../engine/editor/UnsavedChanges.mjs";
 import { DEFAULT_WORKSPACE_LAYOUT, normalizeWorkspaceLayout } from "../engine/editor/WorkspaceLayout.mjs";
 import { createErrorReport } from "../engine/editor/ErrorReport.mjs";
+import { normalizeTransformSnapping } from "../engine/editor/TransformSnapping.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
   const host = window.parlynHost;
   const workspaceLayoutKey = "parlyn.editor.workspace-layout";
+  const transformSnappingKey = "parlyn.editor.transform-snapping";
   let workspaceLayout = readWorkspaceLayout();
+  let transformSnapping = readTransformSnapping();
   const history = new History({ limit: 100 });
   let scene = createDemoScene();
   let selected = null;
@@ -48,7 +51,35 @@ async function bootstrap() {
   const renderer = new ThreeRenderer($("viewport"), { onSelect: selectById, getNodeType: (id) => scene.findById(id)?.type ?? null, onTransformStart: beginGizmoTransform, onTransformChange: applyGizmoTransform, onTransformEnd: commitGizmoTransform });
   await renderer.initialize(scene);
   renderer.setTransformMode(transformMode);
+  applyTransformSnapping();
   initializeWorkspaceLayout();
+  function readTransformSnapping() {
+    try {
+      const stored = window.localStorage.getItem(transformSnappingKey);
+      return normalizeTransformSnapping(stored ? JSON.parse(stored) : null);
+    } catch (error) {
+      console.warn("Saved transform snapping was ignored:", error);
+      return normalizeTransformSnapping(null);
+    }
+  }
+  function applyTransformSnapping({ persist = false, announce = false } = {}) {
+    transformSnapping = normalizeTransformSnapping(transformSnapping);
+    renderer.setTransformSnapping(transformSnapping);
+    $("snap-toggle").classList.toggle("active", transformSnapping.enabled);
+    $("snap-toggle").setAttribute("aria-pressed", String(transformSnapping.enabled));
+    $("snap-toggle").title = `Transform Snap: ${transformSnapping.translation} units / ${transformSnapping.rotationDegrees}° / ${transformSnapping.scale} scale`;
+    if (persist) {
+      try { window.localStorage.setItem(transformSnappingKey, JSON.stringify(transformSnapping)); }
+      catch (error) { console.warn("Transform snapping could not be saved:", error); }
+    }
+    if (announce) status.textContent = transformSnapping.enabled
+      ? `Transform Snap on · ${transformSnapping.translation} units · ${transformSnapping.rotationDegrees}° · ${transformSnapping.scale} scale`
+      : "Transform Snap off";
+  }
+  function toggleTransformSnapping() {
+    transformSnapping.enabled = !transformSnapping.enabled;
+    applyTransformSnapping({ persist:true, announce:true });
+  }
   function readWorkspaceLayout() {
     try {
       const stored = window.localStorage.getItem(workspaceLayoutKey);
@@ -954,6 +985,7 @@ async function bootstrap() {
   $("tool-move").addEventListener("click", () => setTransformMode("translate"));
   $("tool-rotate").addEventListener("click", () => setTransformMode("rotate"));
   $("tool-scale").addEventListener("click", () => setTransformMode("scale"));
+  $("snap-toggle").addEventListener("click", toggleTransformSnapping);
   $("modules").addEventListener("click", () => {
     renderModules();
     $("module-dialog").showModal();

@@ -57,7 +57,8 @@ Completion evidence:
   complete with panel visibility, bounded resizing, restoration and reset;
 - stronger error reporting — initial contextual dialog, recovery guidance and
   copyable technical details complete;
-- transform snapping and local/world gizmo modes;
+- transform snapping and local/world gizmo modes — initial fixed-step snapping
+  toggle complete; configurable increments and Local/World modes remain;
 - optional Surface/Ground Snap and Grid Snap, including a keyboard command to
   place the current selection on the ground;
 - Frame Selected;

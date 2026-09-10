@@ -12,12 +12,12 @@ on:
         description: New prerelease tag; an existing release is never overwritten
         required: true
         type: string
-        default: v0.5.0-beta.11
+        default: v0.5.0-beta.12
       preview_title:
         description: Public prerelease title
         required: true
         type: string
-        default: Parlyn Engine v0.5.0 Beta 11 (unsigned)
+        default: Parlyn Engine v0.5.0 Beta 12 (unsigned)
 
 permissions:
   contents: write
@@ -29,8 +29,8 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: false
       GH_TOKEN: ${{ github.token }}
-      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.11' }}
-      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 11 (unsigned)' }}
+      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.12' }}
+      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 12 (unsigned)' }}
 
     steps:
       - name: Checkout
@@ -60,7 +60,7 @@ jobs:
             throw "Expected exactly one Parlyn installer."
           }
 
-          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.11-x64.zip"
+          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.12-x64.zip"
           if (-not (Test-Path -LiteralPath "release/win-unpacked/Parlyn Engine.exe")) {
             throw "Packaged Parlyn executable was not found for the portable build."
           }
@@ -77,15 +77,14 @@ jobs:
         shell: pwsh
         run: |
           @"
-          # Parlyn Engine v0.5.0 Beta 11
+          # Parlyn Engine v0.5.0 Beta 12
 
-          This unsigned Windows beta introduces Parlyn's stronger error-reporting
-          foundation. Failed editor operations identify their affected area and
-          show a readable summary, recovery guidance and optional technical
-          details that can be copied for a bug report. Ordinary messages redact
-          local paths; expanded technical details can contain them and must be
-          reviewed before sharing. The portable ZIP creates no Windows installation
-          or uninstall entry and remains the preferred unsigned test path.
+          This unsigned Windows beta introduces Parlyn's first Transform Snap
+          foundation. A persistent viewport toggle applies predictable increments
+          of 0.5 units for Move, 15 degrees for Rotate and 0.1 for Scale while
+          preserving Parlyn's existing 2.5D axis limits, history and editor state.
+          The portable ZIP creates no Windows installation or uninstall entry and
+          remains the preferred unsigned test path.
 
           **Important:** This beta is unsigned and may be blocked by Windows
           Smart App Control. Download it only from this official release, verify
@@ -100,7 +99,7 @@ jobs:
           other public certificate provider.
 
           Maintainer acceptance instructions:
-          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.11.md
+          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.12.md
           "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
 
       - name: Publish GitHub pre-release
@@ -118,6 +117,6 @@ jobs:
             --notes-file release/PREVIEW-NOTES.md `
             --prerelease `
             "$($installer[0].FullName)" `
-            "release/Parlyn-Engine-Portable-0.5.0-beta.11-x64.zip" `
+            "release/Parlyn-Engine-Portable-0.5.0-beta.12-x64.zip" `
             "release/latest.yml" `
             "release/SHA256SUMS.txt"

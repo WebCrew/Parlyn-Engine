@@ -8,6 +8,7 @@ export class RendererBackend {
   render() { throw new Error('render() not implemented'); }
   selectNode() { throw new Error('selectNode() not implemented'); }
   updateNodeTransform() { throw new Error('updateNodeTransform() not implemented'); }
+  setTransformSnapping() { throw new Error('setTransformSnapping() not implemented'); }
   setView() { throw new Error('setView() not implemented'); }
   dispose() {}
 }

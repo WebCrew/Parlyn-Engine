@@ -18,6 +18,7 @@ export class ThreeRenderer extends RendererBackend {
     this.selectionBoxes = [];
     this.transformControls = null;
     this.transformMode = 'select';
+    this.transformSnapping = { enabled:false, translation:0.5, rotationDegrees:15, scale:0.1 };
     this.suppressSelectionClick = false;
     this.cameraTarget = new THREE.Vector3(0, 0.7, 0);
     this.orbit = { yaw:-0.55, pitch:0.42, distance:11 };
@@ -240,6 +241,14 @@ export class ThreeRenderer extends RendererBackend {
     if (!['select','translate','rotate','scale'].includes(mode)) throw new Error(`Unsupported transform mode: ${mode}`);
     this.transformMode = mode;
     this.#attachTransformControls();
+  }
+
+  setTransformSnapping(settings) {
+    this.transformSnapping = { ...settings };
+    const enabled = settings.enabled;
+    this.transformControls?.setTranslationSnap(enabled ? settings.translation : null);
+    this.transformControls?.setRotationSnap(enabled ? THREE.MathUtils.degToRad(settings.rotationDegrees) : null);
+    this.transformControls?.setScaleSnap(enabled ? settings.scale : null);
   }
 
   #attachTransformControls() {
