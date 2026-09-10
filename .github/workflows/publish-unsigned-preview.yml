@@ -12,12 +12,12 @@ on:
         description: New prerelease tag; an existing release is never overwritten
         required: true
         type: string
-        default: v0.5.0-beta.10
+        default: v0.5.0-beta.11
       preview_title:
         description: Public prerelease title
         required: true
         type: string
-        default: Parlyn Engine v0.5.0 Beta 10 (unsigned)
+        default: Parlyn Engine v0.5.0 Beta 11 (unsigned)
 
 permissions:
   contents: write
@@ -29,8 +29,8 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: false
       GH_TOKEN: ${{ github.token }}
-      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.10' }}
-      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 10 (unsigned)' }}
+      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.11' }}
+      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 11 (unsigned)' }}
 
     steps:
       - name: Checkout
@@ -60,7 +60,7 @@ jobs:
             throw "Expected exactly one Parlyn installer."
           }
 
-          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.10-x64.zip"
+          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.11-x64.zip"
           if (-not (Test-Path -LiteralPath "release/win-unpacked/Parlyn Engine.exe")) {
             throw "Packaged Parlyn executable was not found for the portable build."
           }
@@ -77,15 +77,15 @@ jobs:
         shell: pwsh
         run: |
           @"
-          # Parlyn Engine v0.5.0 Beta 10
+          # Parlyn Engine v0.5.0 Beta 11
 
-          This unsigned Windows beta introduces Parlyn's workspace-layout
-          foundation. Hierarchy/Scenes, Inspector and Assets can be hidden,
-          restored and resized within safe limits. The versioned local layout is
-          restored on the next start and can be reset to Parlyn's default layout.
-          Beta 10 corrects workspace reflow when the leading Hierarchy/Scenes
-          panel is hidden. It provides a portable ZIP that creates no Windows
-          installation or uninstall entry. It is the preferred unsigned test path.
+          This unsigned Windows beta introduces Parlyn's stronger error-reporting
+          foundation. Failed editor operations identify their affected area and
+          show a readable summary, recovery guidance and optional technical
+          details that can be copied for a bug report. Ordinary messages redact
+          local paths; expanded technical details can contain them and must be
+          reviewed before sharing. The portable ZIP creates no Windows installation
+          or uninstall entry and remains the preferred unsigned test path.
 
           **Important:** This beta is unsigned and may be blocked by Windows
           Smart App Control. Download it only from this official release, verify
@@ -100,7 +100,7 @@ jobs:
           other public certificate provider.
 
           Maintainer acceptance instructions:
-          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.10.md
+          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.11.md
           "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
 
       - name: Publish GitHub pre-release
@@ -118,6 +118,6 @@ jobs:
             --notes-file release/PREVIEW-NOTES.md `
             --prerelease `
             "$($installer[0].FullName)" `
-            "release/Parlyn-Engine-Portable-0.5.0-beta.10-x64.zip" `
+            "release/Parlyn-Engine-Portable-0.5.0-beta.11-x64.zip" `
             "release/latest.yml" `
             "release/SHA256SUMS.txt"

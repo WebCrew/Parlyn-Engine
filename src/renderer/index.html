@@ -205,9 +205,13 @@
   </dialog>
 
   <dialog id="error-dialog" class="node-dialog error-dialog" aria-labelledby="error-title">
-    <div class="dialog-head"><strong id="error-title">Parlyn could not complete the operation</strong><span>No project data was accepted silently.</span></div>
-    <div class="error-body"><p id="error-message"></p></div>
-    <div class="dialog-actions"><button id="close-error" class="primary">Close</button></div>
+    <div class="dialog-head"><strong id="error-title">Parlyn could not complete the operation</strong><span id="error-area">Editor</span></div>
+    <div class="error-body">
+      <p id="error-message"></p>
+      <p id="error-guidance" class="error-guidance"></p>
+      <details id="error-details"><summary>Technical details</summary><pre id="error-technical"></pre><small>Technical details may contain local paths. Review them before sharing.</small></details>
+    </div>
+    <div class="dialog-actions"><button id="copy-error">Copy Details</button><button id="close-error" class="primary">Close</button></div>
   </dialog>
 
   <footer class="status-bar"><span>Parlyn Engine <span id="footer-version"></span> · GitHub Preview</span><span id="status">Starting renderer…</span></footer>

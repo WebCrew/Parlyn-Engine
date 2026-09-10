@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('parlynHost', {
     return ()=>ipcRenderer.removeListener('parlyn:app:close-requested',listener);
   },
   confirmAppClose:()=>ipcRenderer.invoke('parlyn:app:confirm-close'),
+  copyText:(text)=>ipcRenderer.invoke('parlyn:clipboard:write-text',{ text }),
   saveSceneAs:(payload)=>ipcRenderer.invoke('parlyn:scene:save-as',payload),
   openScene:()=>ipcRenderer.invoke('parlyn:scene:open'),
   createProject:(payload)=>ipcRenderer.invoke('parlyn:project:create',payload),

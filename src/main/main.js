@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, clipboard, dialog, ipcMain, shell } = require('electron');
 const fs = require('fs/promises');
 const path = require('path');
 const { pathToFileURL } = require('url');
@@ -145,6 +145,12 @@ secureHandle('parlyn:app:get-info', async () => ({
   version:app.getVersion(),
   platform:process.platform
 }));
+
+secureHandle('parlyn:clipboard:write-text', async (payload) => {
+  if (typeof payload.text !== 'string' || payload.text.length > 64 * 1024) throw new Error('Clipboard text must be no larger than 64 KiB.');
+  clipboard.writeText(payload.text);
+  return { ok:true };
+}, { payload:true });
 
 secureHandle('parlyn:app:confirm-close', async (_, event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
