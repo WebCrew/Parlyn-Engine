@@ -61,6 +61,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(html, /id="snap-toggle"[^>]+aria-pressed="false"/);
   assert.match(html, /id="snap-settings-dialog"/);
   assert.match(html, /id="transform-space"[^>]+aria-pressed="false"/);
+  assert.match(html, /id="place-on-ground"/);
   assert.match(html, /id="snap-translation"[^>]+min="0\.01"[^>]+max="100"/);
   assert.match(html, /id="snap-rotation"[^>]+min="1"[^>]+max="180"/);
   assert.match(html, /id="snap-scale"[^>]+min="0\.01"[^>]+max="10"/);
@@ -103,8 +104,11 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(renderer, /normalizeTransformSpace/);
   assert.match(renderer, /renderer\.setTransformSpace\(transformSpace\.space\)/);
   assert.match(renderer, /parlyn\.editor\.transform-space/);
+  assert.match(renderer, /placeSelectionOnGround/);
+  assert.match(renderer, /key === "end"/);
   assert.match(threeRenderer, /setTransformSpace\(space\)/);
   assert.match(threeRenderer, /this\.transformMode === 'scale' \? 'local' : this\.transformSpace/);
+  assert.match(threeRenderer, /getGroundedPosition\(nodeId, groundY = -1\.55\)/);
   assert.match(renderer, /parlyn\.editor\.workspace-layout/);
   for (const [selector, column] of [['#hierarchy-panel', 1], ['#hierarchy-resizer', 2], ['.center', 3], ['#inspector-resizer', 4], ['#inspector-panel', 5]]) {
     assert.match(styles, new RegExp(`${selector.replace('.', '\\.') }\\{grid-column:${column}\\}`), `${selector} must keep a stable workspace grid column.`);
