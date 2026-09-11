@@ -44,7 +44,7 @@ The long-term direction includes:
 - hierarchy selection and viewport ray-cast selection
 - transform inspector
 - viewport Move / Rotate / Scale gizmos with W / E / R shortcuts
-- compact, grouped viewport toolbar with separate transform, placement and view controls
+- compact command bar with Parlyn SVG icons and separate transform, placement and view controls
 - live Inspector synchronization during gizmo edits
 - editor camera orbit, pan and zoom
 - undo/redo history foundation
@@ -228,7 +228,7 @@ See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
 Phase 1 acceptance is complete. The current Phase 2 editor candidate uses the
-repeatable [`v0.5.0-beta.16 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.16.md).
+repeatable [`v0.5.0-beta.17 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.17.md).
 
 ### Windows release integrity
 

@@ -68,17 +68,34 @@
     <section class="center">
       <div class="viewport-toolbar">
         <div class="tool-group viewport-tool-group" aria-label="Transform tools">
-          <button id="tool-select" class="tool-button active" title="Select (Q / Esc)">Select</button>
-          <button id="tool-move" class="tool-button" title="Move (W)">Move</button>
-          <button id="tool-rotate" class="tool-button" title="Rotate (E)">Rotate</button>
-          <button id="tool-scale" class="tool-button" title="Scale (R)">Scale</button>
+          <button id="tool-select" class="tool-button command-icon-button active" title="Select (Q / Esc)" aria-label="Select">
+            <svg class="command-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l12 9-6 1.2 3.8 6-2.6 1.6-3.7-6L5 19V3z"/></svg>
+          </button>
+          <button id="tool-move" class="tool-button command-icon-button" title="Move (W)" aria-label="Move">
+            <svg class="command-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 3h-2v6h6V9l3 3-3 3v-2h-6v6h2l-3 3-3-3h2v-6H5v2l-3-3 3-3v2h6V5H9l3-3z"/></svg>
+          </button>
+          <button id="tool-rotate" class="tool-button command-icon-button" title="Rotate (E)" aria-label="Rotate">
+            <svg class="command-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.4 7A8 8 0 104 16l1.8-.9A6 6 0 1117 8h-3l4-4 4 4h-3.6z"/></svg>
+          </button>
+          <button id="tool-scale" class="tool-button command-icon-button" title="Scale (R)" aria-label="Scale">
+            <svg class="command-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.4l-5.3 5.3-1.4-1.4L17.6 5H14V3zM5 7h5v2H7v8h8v-3h2v5H5V7z"/></svg>
+          </button>
         </div>
         <span class="toolbar-divider"></span>
         <div class="tool-group placement-tool-group" aria-label="Placement tools">
-          <button id="snap-toggle" class="tool-button snap-button" type="button" aria-pressed="false" title="Transform Snap: 0.5 units / 15° / 0.1 scale">Snap</button>
-          <button id="snap-settings" class="icon-button snap-settings-button" type="button" title="Configure Transform Snap" aria-label="Configure Transform Snap">⋯</button>
-          <button id="transform-space" class="tool-button space-button" type="button" aria-pressed="false" title="Transform orientation: world">World</button>
-          <button id="place-on-ground" class="tool-button" type="button" title="Place selection on ground (End)">Ground</button>
+          <button id="snap-toggle" class="tool-button command-icon-button snap-button" type="button" aria-pressed="false" title="Transform Snap: 0.5 units / 15° / 0.1 scale" aria-label="Toggle Transform Snap">
+            <svg class="command-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h5v7H8V5H5v7a4 4 0 008 0V5h-3V3h5v9a6 6 0 01-12 0V3h2z"/><path d="M3 18h5v2H3zm13 0h5v2h-5z"/></svg>
+          </button>
+          <button id="snap-settings" class="icon-button command-menu-button snap-settings-button" type="button" title="Configure Transform Snap" aria-label="Configure Transform Snap">
+            <svg class="command-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5z"/></svg>
+          </button>
+          <button id="transform-space" class="tool-button space-button command-text-button" type="button" aria-pressed="false" title="Transform orientation: world">
+            <svg class="command-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V8h2v7.6l5-5 1.4 1.4-5 5H16v2H5z"/><path d="M5 8l-3 3h6L5 8zm11 11l-3-3v6l3-3z"/></svg>
+            <span class="command-label">World</span>
+          </button>
+          <button id="place-on-ground" class="tool-button command-icon-button" type="button" title="Place selection on ground (End)" aria-label="Place selection on ground">
+            <svg class="command-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3h2v10h3l-4 4-4-4h3V3zM3 19h18v2H3z"/></svg>
+          </button>
         </div>
         <span class="toolbar-spacer"></span>
         <span class="hint">LMB select/gizmo · RMB orbit · MMB pan · wheel zoom</span>

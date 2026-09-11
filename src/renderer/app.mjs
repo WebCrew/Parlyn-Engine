@@ -70,9 +70,10 @@ async function bootstrap() {
     transformSpace = normalizeTransformSpace(transformSpace);
     renderer.setTransformSpace(transformSpace.space);
     const scaleMode = transformMode === "scale";
-    $("transform-space").textContent = scaleMode ? "Local" : transformSpace.space === "world" ? "World" : "Local";
+    $("transform-space").querySelector(".command-label").textContent = scaleMode ? "Local" : transformSpace.space === "world" ? "World" : "Local";
     $("transform-space").disabled = scaleMode;
     $("transform-space").setAttribute("aria-pressed", String(transformSpace.space === "local"));
+    $("transform-space").setAttribute("aria-label", scaleMode ? "Transform orientation: Local (Scale)" : `Transform orientation: ${transformSpace.space === "world" ? "World" : "Local"}`);
     $("transform-space").title = scaleMode ? "Scale always uses local axes" : `Transform orientation: ${transformSpace.space}`;
     if (persist) {
       try { window.localStorage.setItem(transformSpaceKey, JSON.stringify(transformSpace)); }

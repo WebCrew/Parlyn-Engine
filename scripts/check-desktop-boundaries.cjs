@@ -66,6 +66,12 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(html, /class="tool-group viewport-tool-group" aria-label="Transform tools"/);
   assert.match(html, /class="tool-group placement-tool-group" aria-label="Placement tools"/);
   assert.match(html, /class="tool-group viewport-view-group" aria-label="Viewport mode"/);
+  assert.equal((html.match(/class="command-icon"/g) || []).length, 7, 'Command Bar must expose seven Parlyn command icons.');
+  assert.match(html, /id="tool-select"[^>]+aria-label="Select"/);
+  assert.match(html, /id="tool-move"[^>]+aria-label="Move"/);
+  assert.match(html, /id="tool-rotate"[^>]+aria-label="Rotate"/);
+  assert.match(html, /id="tool-scale"[^>]+aria-label="Scale"/);
+  assert.match(html, /id="place-on-ground"[^>]+aria-label="Place selection on ground"/);
   assert.match(html, /id="snap-translation"[^>]+min="0\.01"[^>]+max="100"/);
   assert.match(html, /id="snap-rotation"[^>]+min="1"[^>]+max="180"/);
   assert.match(html, /id="snap-scale"[^>]+min="0\.01"[^>]+max="10"/);
@@ -108,6 +114,7 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(renderer, /normalizeTransformSpace/);
   assert.match(renderer, /renderer\.setTransformSpace\(transformSpace\.space\)/);
   assert.match(renderer, /parlyn\.editor\.transform-space/);
+  assert.match(renderer, /querySelector\("\.command-label"\)\.textContent/);
   assert.match(renderer, /placeSelectionOnGround/);
   assert.match(renderer, /key === "end"/);
   assert.match(threeRenderer, /setTransformSpace\(space\)/);
