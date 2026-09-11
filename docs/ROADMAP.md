@@ -55,6 +55,8 @@ Completion evidence:
 - unsaved-change protection — complete across editor transitions and application close;
 - editor preferences and workspace layout — initial versioned local foundation
   complete with panel visibility, bounded resizing, restoration and reset;
+- consistent editor command layout — initial viewport toolbar grouping complete
+  with separate transform, placement and view controls;
 - stronger error reporting — initial contextual dialog, recovery guidance and
   copyable technical details complete;
 - transform snapping and local/world gizmo modes — complete with persistent,

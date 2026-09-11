@@ -12,12 +12,12 @@ on:
         description: New prerelease tag; an existing release is never overwritten
         required: true
         type: string
-        default: v0.5.0-beta.15
+        default: v0.5.0-beta.16
       preview_title:
         description: Public prerelease title
         required: true
         type: string
-        default: Parlyn Engine v0.5.0 Beta 15 (unsigned)
+        default: Parlyn Engine v0.5.0 Beta 16 (unsigned)
 
 permissions:
   contents: write
@@ -29,8 +29,8 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: false
       GH_TOKEN: ${{ github.token }}
-      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.15' }}
-      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 15 (unsigned)' }}
+      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.16' }}
+      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 16 (unsigned)' }}
 
     steps:
       - name: Checkout
@@ -60,7 +60,7 @@ jobs:
             throw "Expected exactly one Parlyn installer."
           }
 
-          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.15-x64.zip"
+          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.16-x64.zip"
           if (-not (Test-Path -LiteralPath "release/win-unpacked/Parlyn Engine.exe")) {
             throw "Packaged Parlyn executable was not found for the portable build."
           }
@@ -77,12 +77,12 @@ jobs:
         shell: pwsh
         run: |
           @"
-          # Parlyn Engine v0.5.0 Beta 15
+          # Parlyn Engine v0.5.0 Beta 16
 
-          This unsigned Windows beta adds Ground Placement for the current
-          selection through a toolbar command and the End key. Placement uses the
-          rendered object bounds and integrates with multi-selection, Undo/Redo
-          and scene persistence. Automatic Surface Snap remains a later step.
+          This unsigned Windows beta reorganizes the viewport toolbar into clear
+          transform, placement and view groups. The redundant 2.5D First badge is
+          removed, while the compact 2.5D/3D switch moves to the right. Existing
+          commands, shortcuts and editor behavior remain unchanged.
           The portable ZIP creates no Windows installation or uninstall entry and
           remains the preferred unsigned test path.
 
@@ -99,7 +99,7 @@ jobs:
           other public certificate provider.
 
           Maintainer acceptance instructions:
-          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.15.md
+          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.16.md
           "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
 
       - name: Publish GitHub pre-release
@@ -117,6 +117,6 @@ jobs:
             --notes-file release/PREVIEW-NOTES.md `
             --prerelease `
             "$($installer[0].FullName)" `
-            "release/Parlyn-Engine-Portable-0.5.0-beta.15-x64.zip" `
+            "release/Parlyn-Engine-Portable-0.5.0-beta.16-x64.zip" `
             "release/latest.yml" `
             "release/SHA256SUMS.txt"

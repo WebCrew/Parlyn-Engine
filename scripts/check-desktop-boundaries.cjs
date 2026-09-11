@@ -62,6 +62,10 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(html, /id="snap-settings-dialog"/);
   assert.match(html, /id="transform-space"[^>]+aria-pressed="false"/);
   assert.match(html, /id="place-on-ground"/);
+  assert.doesNotMatch(html, /class="mode-badge">2\.5D First/);
+  assert.match(html, /class="tool-group viewport-tool-group" aria-label="Transform tools"/);
+  assert.match(html, /class="tool-group placement-tool-group" aria-label="Placement tools"/);
+  assert.match(html, /class="tool-group viewport-view-group" aria-label="Viewport mode"/);
   assert.match(html, /id="snap-translation"[^>]+min="0\.01"[^>]+max="100"/);
   assert.match(html, /id="snap-rotation"[^>]+min="1"[^>]+max="180"/);
   assert.match(html, /id="snap-scale"[^>]+min="0\.01"[^>]+max="10"/);
