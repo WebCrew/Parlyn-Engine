@@ -227,7 +227,7 @@ See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
 Phase 1 acceptance is complete. The current Phase 2 editor candidate uses the
-repeatable [`v0.5.0-beta.13 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.13.md).
+repeatable [`v0.5.0-beta.14 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.14.md).
 
 ### Windows release integrity
 

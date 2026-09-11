@@ -13,14 +13,17 @@ import { approveUnsavedTransition } from "../engine/editor/UnsavedChanges.mjs";
 import { DEFAULT_WORKSPACE_LAYOUT, normalizeWorkspaceLayout } from "../engine/editor/WorkspaceLayout.mjs";
 import { createErrorReport } from "../engine/editor/ErrorReport.mjs";
 import { DEFAULT_TRANSFORM_SNAPPING, normalizeTransformSnapping } from "../engine/editor/TransformSnapping.mjs";
+import { normalizeTransformSpace } from "../engine/editor/TransformSpace.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
   const host = window.parlynHost;
   const workspaceLayoutKey = "parlyn.editor.workspace-layout";
   const transformSnappingKey = "parlyn.editor.transform-snapping";
+  const transformSpaceKey = "parlyn.editor.transform-space";
   let workspaceLayout = readWorkspaceLayout();
   let transformSnapping = readTransformSnapping();
+  let transformSpace = readTransformSpace();
   const history = new History({ limit: 100 });
   let scene = createDemoScene();
   let selected = null;
@@ -51,8 +54,36 @@ async function bootstrap() {
   const renderer = new ThreeRenderer($("viewport"), { onSelect: selectById, getNodeType: (id) => scene.findById(id)?.type ?? null, onTransformStart: beginGizmoTransform, onTransformChange: applyGizmoTransform, onTransformEnd: commitGizmoTransform });
   await renderer.initialize(scene);
   renderer.setTransformMode(transformMode);
+  applyTransformSpace();
   applyTransformSnapping();
   initializeWorkspaceLayout();
+  function readTransformSpace() {
+    try {
+      const stored = window.localStorage.getItem(transformSpaceKey);
+      return normalizeTransformSpace(stored ? JSON.parse(stored) : null);
+    } catch (error) {
+      console.warn("Saved transform space was ignored:", error);
+      return normalizeTransformSpace(null);
+    }
+  }
+  function applyTransformSpace({ persist = false, announce = false } = {}) {
+    transformSpace = normalizeTransformSpace(transformSpace);
+    renderer.setTransformSpace(transformSpace.space);
+    const scaleMode = transformMode === "scale";
+    $("transform-space").textContent = scaleMode ? "Local" : transformSpace.space === "world" ? "World" : "Local";
+    $("transform-space").disabled = scaleMode;
+    $("transform-space").setAttribute("aria-pressed", String(transformSpace.space === "local"));
+    $("transform-space").title = scaleMode ? "Scale always uses local axes" : `Transform orientation: ${transformSpace.space}`;
+    if (persist) {
+      try { window.localStorage.setItem(transformSpaceKey, JSON.stringify(transformSpace)); }
+      catch (error) { console.warn("Transform space could not be saved:", error); }
+    }
+    if (announce) status.textContent = `Transform orientation: ${transformSpace.space === "world" ? "World" : "Local"}`;
+  }
+  function toggleTransformSpace() {
+    transformSpace.space = transformSpace.space === "world" ? "local" : "world";
+    applyTransformSpace({ persist:true, announce:true });
+  }
   function readTransformSnapping() {
     try {
       const stored = window.localStorage.getItem(transformSnappingKey);
@@ -504,6 +535,7 @@ async function bootstrap() {
   function setTransformMode(mode) {
     transformMode = mode;
     renderer.setTransformMode(mode);
+    applyTransformSpace();
     for (const [id, value] of [["tool-select", "select"], ["tool-move", "translate"], ["tool-rotate", "rotate"], ["tool-scale", "scale"]]) {
       $(id).classList.toggle("active", value === mode);
     }
@@ -1018,6 +1050,7 @@ async function bootstrap() {
   $("tool-rotate").addEventListener("click", () => setTransformMode("rotate"));
   $("tool-scale").addEventListener("click", () => setTransformMode("scale"));
   $("snap-toggle").addEventListener("click", toggleTransformSnapping);
+  $("transform-space").addEventListener("click", toggleTransformSpace);
   $("snap-settings").addEventListener("click", openTransformSnapSettings);
   $("cancel-snap-settings").addEventListener("click", () => $("snap-settings-dialog").close());
   $("save-snap-settings").addEventListener("click", saveTransformSnapSettings);
