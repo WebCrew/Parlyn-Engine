@@ -18,6 +18,7 @@ export class ThreeRenderer extends RendererBackend {
     this.selectionBoxes = [];
     this.transformControls = null;
     this.transformMode = 'select';
+    this.transformSpace = 'world';
     this.transformSnapping = { enabled:false, translation:0.5, rotationDegrees:15, scale:0.1 };
     this.suppressSelectionClick = false;
     this.cameraTarget = new THREE.Vector3(0, 0.7, 0);
@@ -251,6 +252,12 @@ export class ThreeRenderer extends RendererBackend {
     this.transformControls?.setScaleSnap(enabled ? settings.scale : null);
   }
 
+  setTransformSpace(space) {
+    if (!['local', 'world'].includes(space)) throw new Error(`Unsupported transform space: ${space}`);
+    this.transformSpace = space;
+    this.#attachTransformControls();
+  }
+
   #attachTransformControls() {
     if (!this.transformControls) return;
     this.transformControls.detach();
@@ -259,7 +266,7 @@ export class ThreeRenderer extends RendererBackend {
     if (!object) return;
     const nodeType = this.callbacks.getNodeType?.(this.selectedId);
     this.transformControls.setMode(this.transformMode);
-    this.transformControls.setSpace(this.transformMode === 'translate' ? 'world' : 'local');
+    this.transformControls.setSpace(this.transformMode === 'scale' ? 'local' : this.transformSpace);
     this.transformControls.showX = true;
     this.transformControls.showY = true;
     this.transformControls.showZ = true;
