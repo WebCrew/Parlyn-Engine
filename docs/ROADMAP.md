@@ -60,7 +60,8 @@ Completion evidence:
 - transform snapping and local/world gizmo modes — complete with persistent,
   configurable snapping and explicit Local/World orientation;
 - optional Surface/Ground Snap and Grid Snap, including a keyboard command to
-  place the current selection on the ground;
+  place the current selection on the ground — initial Ground command and End
+  shortcut complete; automatic surface placement remains;
 - Frame Selected;
 - optional scene/world bounds independent from viewport size;
 - consistent commands and keyboard behavior.

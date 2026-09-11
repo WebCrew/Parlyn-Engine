@@ -258,6 +258,15 @@ export class ThreeRenderer extends RendererBackend {
     this.#attachTransformControls();
   }
 
+  getGroundedPosition(nodeId, groundY = -1.55) {
+    const object = this.nodeObjects.get(nodeId);
+    if (!object || !Number.isFinite(groundY)) return null;
+    object.updateWorldMatrix(true, true);
+    const bounds = new THREE.Box3().setFromObject(object);
+    if (bounds.isEmpty() || !Number.isFinite(bounds.min.y)) return null;
+    return { x:object.position.x, y:object.position.y + groundY - bounds.min.y, z:object.position.z };
+  }
+
   #attachTransformControls() {
     if (!this.transformControls) return;
     this.transformControls.detach();

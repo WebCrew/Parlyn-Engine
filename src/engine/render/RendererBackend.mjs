@@ -10,6 +10,7 @@ export class RendererBackend {
   updateNodeTransform() { throw new Error('updateNodeTransform() not implemented'); }
   setTransformSnapping() { throw new Error('setTransformSnapping() not implemented'); }
   setTransformSpace() { throw new Error('setTransformSpace() not implemented'); }
+  getGroundedPosition() { throw new Error('getGroundedPosition() not implemented'); }
   setView() { throw new Error('setView() not implemented'); }
   dispose() {}
 }

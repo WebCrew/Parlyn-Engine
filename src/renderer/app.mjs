@@ -658,6 +658,30 @@ async function bootstrap() {
     selectById(duplicate.id);
     status.textContent = `Duplicated: ${duplicate.name}`;
   }
+  function placeSelectionOnGround() {
+    const nodes = [...selectedIds].map((id) => scene.findById(id)).filter(Boolean);
+    if (!nodes.length) {
+      status.textContent = "Select at least one node to place on the ground.";
+      return;
+    }
+    const before = sceneSnapshot();
+    let placed = 0;
+    for (const node of nodes) {
+      const position = renderer.getGroundedPosition(node.id);
+      if (!position) continue;
+      node.position = position;
+      renderer.updateNodeTransform(node);
+      placed += 1;
+    }
+    if (!placed || JSON.stringify(before) === JSON.stringify(sceneSnapshot())) {
+      status.textContent = placed ? "Selection is already on the ground." : "The selection cannot be placed on the ground.";
+      return;
+    }
+    pushHistory(before, placed === 1 ? `Ground ${nodes[0].name}` : `Ground ${placed} nodes`);
+    if (selectedIds.size === 1) populateInspector();
+    setDirty(true);
+    status.textContent = placed === 1 ? `Placed on ground: ${nodes[0].name}` : `Placed ${placed} nodes on ground`;
+  }
   function nodePath(node) {
     const names = [];
     for (let current = node; current && current !== scene.root; current = current.parent) names.unshift(current.name);
@@ -1051,6 +1075,7 @@ async function bootstrap() {
   $("tool-scale").addEventListener("click", () => setTransformMode("scale"));
   $("snap-toggle").addEventListener("click", toggleTransformSnapping);
   $("transform-space").addEventListener("click", toggleTransformSpace);
+  $("place-on-ground").addEventListener("click", placeSelectionOnGround);
   $("snap-settings").addEventListener("click", openTransformSnapSettings);
   $("cancel-snap-settings").addEventListener("click", () => $("snap-settings-dialog").close());
   $("save-snap-settings").addEventListener("click", saveTransformSnapSettings);
@@ -1167,6 +1192,11 @@ async function bootstrap() {
       if (key === "r") {
         event.preventDefault();
         setTransformMode("scale");
+        return;
+      }
+      if (key === "end") {
+        event.preventDefault();
+        placeSelectionOnGround();
         return;
       }
     }
