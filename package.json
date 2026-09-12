@@ -9,7 +9,7 @@
   "scripts": {
     "build:renderer": "esbuild src/renderer/app.mjs --bundle --outfile=src/renderer/dist/app.js --format=iife --platform=browser --target=chrome120 --sourcemap",
     "build:renderer:release": "esbuild src/renderer/app.mjs --bundle --outfile=src/renderer/dist/app.js --format=iife --platform=browser --target=chrome120 --minify",
-    "build:windows": "npm run check && npm run test:desktop-smoke && npm run build:renderer:release && electron-builder --win nsis",
+    "build:windows": "npm run check && npm run test:desktop-smoke && npm run build:renderer:release && electron-builder --win nsis --publish never",
     "build:windows:dir": "npm run check && npm run test:desktop-smoke && npm run build:renderer:release && electron-builder --win dir",
     "dev": "npm run build:renderer && electron .",
     "start": "npm run dev",
