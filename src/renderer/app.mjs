@@ -400,6 +400,7 @@ async function bootstrap() {
     $("delete-node").disabled = true;
     $("duplicate-node").disabled = true;
     $("reparent-node").disabled = true;
+    $("frame-selected").disabled = true;
     renderHierarchy();
   }
   function selectById(id, { toggle = false, range = false } = {}) {
@@ -432,6 +433,7 @@ async function bootstrap() {
     $("delete-node").disabled = count === 0;
     $("duplicate-node").disabled = count !== 1;
     $("reparent-node").disabled = count !== 1;
+    $("frame-selected").disabled = count === 0;
     status.textContent = count === 1 ? `Selected: ${selected.name}` : `${count} nodes selected`;
   }
   function populateInspector() {
@@ -682,6 +684,16 @@ async function bootstrap() {
     if (selectedIds.size === 1) populateInspector();
     setDirty(true);
     status.textContent = placed === 1 ? `Placed on ground: ${nodes[0].name}` : `Placed ${placed} nodes on ground`;
+  }
+  function frameSelected() {
+    if (!selectedIds.size) {
+      status.textContent = "Select at least one node to frame.";
+      return;
+    }
+    const framed = renderer.frameSelection([...selectedIds]);
+    status.textContent = framed
+      ? selectedIds.size === 1 ? `Framed: ${selected.name}` : `Framed ${selectedIds.size} selected nodes`
+      : "The current selection cannot be framed.";
   }
   function nodePath(node) {
     const names = [];
@@ -1077,6 +1089,7 @@ async function bootstrap() {
   $("snap-toggle").addEventListener("click", toggleTransformSnapping);
   $("transform-space").addEventListener("click", toggleTransformSpace);
   $("place-on-ground").addEventListener("click", placeSelectionOnGround);
+  $("frame-selected").addEventListener("click", frameSelected);
   $("snap-settings").addEventListener("click", openTransformSnapSettings);
   $("cancel-snap-settings").addEventListener("click", () => $("snap-settings-dialog").close());
   $("save-snap-settings").addEventListener("click", saveTransformSnapSettings);
@@ -1198,6 +1211,11 @@ async function bootstrap() {
       if (key === "end") {
         event.preventDefault();
         placeSelectionOnGround();
+        return;
+      }
+      if (key === "f") {
+        event.preventDefault();
+        frameSelected();
         return;
       }
     }
