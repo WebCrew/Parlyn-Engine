@@ -16,6 +16,12 @@ This work does not activate the broader launcher, account or online ecosystem
 scope from Phase 8. It provides a reproducible packaged editor, an NSIS
 installer and a strict boundary for future trusted code signing.
 
+An additional development-only experiment packages the unchanged editor as an
+unsigned MSIX with Microsoft's required OID identity. It is an internal
+maintainer test, not a public distribution method, and is installed only with
+the documented Windows 11 \`Add-AppxPackage -AllowUnsigned\` mechanism. Smart App
+Control remains enabled throughout the test.
+
 ## Installer behavior
 
 The Windows build produces a 64-bit per-user NSIS installer named:
