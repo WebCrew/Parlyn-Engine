@@ -1,0 +1,43 @@
+name: Unsigned MSIX development test
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/unsigned-msix-test.yml
+      - build/msix/**
+      - scripts/build-unsigned-msix-test.ps1
+      - scripts/check-windows-distribution.cjs
+      - package.json
+      - package-lock.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Use Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build unpacked Windows editor
+        run: npm run build:windows:dir
+      - name: Build unsigned MSIX test package
+        shell: pwsh
+        run: ./scripts/build-unsigned-msix-test.ps1
+      - name: Upload internal MSIX test artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: parlyn-unsigned-msix-development-test
+          path: |
+            release/msix-test/*.msix
+            release/msix-test/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 7
