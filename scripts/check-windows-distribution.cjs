@@ -44,7 +44,7 @@ requireValue(msixWorkflow.includes('workflow_dispatch:'), 'Unsigned MSIX testing
 requireValue(msixWorkflow.includes('actions/upload-artifact@v7'), 'Unsigned MSIX testing must upload only an internal workflow artifact.');
 
 const msixManifest = fs.readFileSync(path.join(root, 'build/msix/AppxManifest.xml'), 'utf8');
-requireValue(msixManifest.includes('OID.2.25.'), 'Unsigned MSIX identity must contain the Microsoft-required OID marker.');
+requireValue(msixManifest.includes('OID.2.25.311729368913984317654407730594956997722=1'), "Unsigned MSIX identity must use Microsoft's required unsigned namespace OID.");
 requireValue(msixManifest.includes('WebCrew.ParlynEngine.Development'), 'Unsigned MSIX must use a development-only identity.');
 requireValue(msixManifest.includes('runFullTrust'), 'Packaged Electron editor requires the full-trust capability.');
 const msixScript = fs.readFileSync(path.join(root, 'scripts/build-unsigned-msix-test.ps1'), 'utf8');

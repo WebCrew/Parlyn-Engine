@@ -5,7 +5,7 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap uap10 rescap">
   <Identity Name="WebCrew.ParlynEngine.Development"
-    Publisher="CN=WebCrew, OID.2.25.147859075984780395232269364346793584684=1"
+    Publisher="CN=WebCrew, OID.2.25.311729368913984317654407730594956997722=1"
     Version="0.5.0.18" ProcessorArchitecture="x64" />
   <Properties>
     <DisplayName>Parlyn Engine Development</DisplayName>
