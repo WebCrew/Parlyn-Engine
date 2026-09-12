@@ -2,6 +2,9 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Added Frame Selected for single and multiple nodes through the Command Bar and F shortcut.
+- Preserved the current viewing angle while fitting the selection's visible bounds with a safe margin.
+- Recorded the successful Beta 17 maintainer acceptance of the Command Bar and regression scope.
 - Completed unsaved-scene protection across scene, project and application-close transitions.
 - Prevented loose scenes from retaining a privileged project session or overwriting its startup scene.
 - Kept long asset filenames inside their cards with ellipsis while preserving the full path tooltip.
