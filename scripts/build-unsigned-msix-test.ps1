@@ -14,7 +14,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $source "Parlyn Engine.exe"))) {
   throw "The unpacked Parlyn executable was not found."
 }
 
-$kitsRoot = Join-Path $env:ProgramFiles(x86) "Windows Kits\10\bin"
+$kitsRoot = Join-Path ([Environment]::GetFolderPath("ProgramFilesX86")) "Windows Kits\10\bin"
 $makeAppx = Get-ChildItem -LiteralPath $kitsRoot -Filter MakeAppx.exe -Recurse |
   Where-Object { $_.FullName -match '\\x64\\MakeAppx\.exe$' } |
   Sort-Object FullName -Descending | Select-Object -First 1
