@@ -49,6 +49,7 @@ const required = [
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.13.md',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.14.md',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.17.md',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.18.md',
   'build/icon.ico',
   '.github/workflows/windows-installer.yml',
   'scripts/check-smart-systems.mjs',
@@ -61,6 +62,7 @@ const required = [
   'scripts/check-error-reporting.mjs',
   'scripts/check-transform-snapping.mjs',
   'scripts/check-transform-space.mjs',
+  'scripts/check-frame-selected.mjs',
   'scripts/check-asset-files.cjs',
   'scripts/check-electron-preload.cjs',
   'scripts/check-windows-distribution.cjs',
@@ -73,7 +75,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.5.0-beta.17') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0-beta.18') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -98,6 +100,7 @@ cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-workspace-layo
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-error-reporting.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-transform-snapping.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-transform-space.mjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-frame-selected.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-asset-files.cjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-windows-distribution.cjs')], { stdio: 'inherit' });
 
