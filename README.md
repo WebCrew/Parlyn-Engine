@@ -45,6 +45,7 @@ The long-term direction includes:
 - transform inspector
 - viewport Move / Rotate / Scale gizmos with W / E / R shortcuts
 - compact command bar with Parlyn SVG icons and separate transform, placement and view controls
+- Frame Selected for single and multiple nodes with the F shortcut
 - live Inspector synchronization during gizmo edits
 - editor camera orbit, pan and zoom
 - undo/redo history foundation
@@ -228,7 +229,7 @@ See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
 Phase 1 acceptance is complete. The current Phase 2 editor candidate uses the
-repeatable [`v0.5.0-beta.17 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.17.md).
+repeatable [`v0.5.0-beta.18 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.18.md).
 
 ### Windows release integrity
 
@@ -249,6 +250,7 @@ status, verification guidance and future controlled signing procedure.
 - **W:** Move tool
 - **E:** Rotate tool
 - **R:** Scale tool
+- **F:** frame the current selection
 - **Right mouse drag:** orbit editor camera
 - **Middle mouse drag:** pan
 - **Mouse wheel:** zoom

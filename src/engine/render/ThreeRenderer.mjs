@@ -267,6 +267,33 @@ export class ThreeRenderer extends RendererBackend {
     return { x:object.position.x, y:object.position.y + groundY - bounds.min.y, z:object.position.z };
   }
 
+  frameSelection(nodeIds = [...this.selectedIds]) {
+    if (!this.camera) return false;
+    const bounds = new THREE.Box3();
+    let hasBounds = false;
+    for (const id of nodeIds) {
+      const object = this.nodeObjects.get(id);
+      if (!object) continue;
+      object.updateWorldMatrix(true, true);
+      const objectBounds = new THREE.Box3().setFromObject(object);
+      if (objectBounds.isEmpty()) continue;
+      bounds.union(objectBounds);
+      hasBounds = true;
+    }
+    if (!hasBounds) return false;
+
+    const sphere = bounds.getBoundingSphere(new THREE.Sphere());
+    if (!Number.isFinite(sphere.radius) || !Number.isFinite(sphere.center.x)) return false;
+    const verticalHalfFov = THREE.MathUtils.degToRad(this.camera.fov) / 2;
+    const horizontalHalfFov = Math.atan(Math.tan(verticalHalfFov) * Math.max(this.camera.aspect, 0.01));
+    const limitingHalfFov = Math.max(Math.min(verticalHalfFov, horizontalHalfFov), THREE.MathUtils.degToRad(1));
+    const fitDistance = sphere.radius > 0 ? sphere.radius / Math.sin(limitingHalfFov) * 1.2 : 2.5;
+    this.cameraTarget.copy(sphere.center);
+    this.orbit.distance = THREE.MathUtils.clamp(fitDistance, 2.5, 40);
+    this.#updateCamera();
+    return true;
+  }
+
   #attachTransformControls() {
     if (!this.transformControls) return;
     this.transformControls.detach();

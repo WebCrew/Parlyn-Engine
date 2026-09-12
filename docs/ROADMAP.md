@@ -64,7 +64,7 @@ Completion evidence:
 - optional Surface/Ground Snap and Grid Snap, including a keyboard command to
   place the current selection on the ground — initial Ground command and End
   shortcut complete; automatic surface placement remains;
-- Frame Selected;
+- Frame Selected — initial single- and multi-selection camera framing complete;
 - optional scene/world bounds independent from viewport size;
 - consistent commands and keyboard behavior.
 
