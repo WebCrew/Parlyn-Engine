@@ -1,11 +1,6 @@
 name: Publish unsigned Windows beta
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/publish-unsigned-preview.yml
   workflow_dispatch:
     inputs:
       preview_tag:
