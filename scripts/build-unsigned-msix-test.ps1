@@ -15,7 +15,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $source "Parlyn Engine.exe"))) {
 }
 
 $kitsRoot = Join-Path \${env:ProgramFiles(x86)} "Windows Kits\10\bin"
-$makeAppx = Get-ChildItem -LiteralPath $kitsRoot -Filter MakeAppx.exe -Recurse -File |
+$makeAppx = Get-ChildItem -LiteralPath $kitsRoot -Filter MakeAppx.exe -Recurse |
   Where-Object { $_.FullName -match '\\x64\\MakeAppx\.exe$' } |
   Sort-Object FullName -Descending | Select-Object -First 1
 if (-not $makeAppx) { throw "MakeAppx.exe was not found in the Windows SDK." }
