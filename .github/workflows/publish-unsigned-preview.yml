@@ -7,12 +7,12 @@ on:
         description: New prerelease tag; an existing release is never overwritten
         required: true
         type: string
-        default: v0.5.0-beta.20
+        default: v0.5.0-beta.21
       preview_title:
         description: Public prerelease title
         required: true
         type: string
-        default: Parlyn Engine v0.5.0 Beta 20 (unsigned)
+        default: Parlyn Engine v0.5.0 Beta 21 (unsigned)
 
 permissions:
   contents: write
@@ -24,8 +24,8 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: false
       GH_TOKEN: ${{ github.token }}
-      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.20' }}
-      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 20 (unsigned)' }}
+      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.21' }}
+      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 21 (unsigned)' }}
 
     steps:
       - name: Checkout
@@ -55,7 +55,7 @@ jobs:
             throw "Expected exactly one Parlyn installer."
           }
 
-          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.20-x64.zip"
+          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.21-x64.zip"
           if (-not (Test-Path -LiteralPath "release/win-unpacked/Parlyn Engine.exe")) {
             throw "Packaged Parlyn executable was not found for the portable build."
           }
@@ -72,14 +72,14 @@ jobs:
         shell: pwsh
         run: |
           @"
-          # Parlyn Engine v0.5.0 Beta 20
+          # Parlyn Engine v0.5.0 Beta 21
 
-          This unsigned Windows beta fixes saved Undo/Redo disappearing after
-          switching project scenes. History is stored independently per scene.
-          It retains Beta 19's optional scene and world authoring bounds.
-          Beta 19 was not accepted due to the history defect; Beta 20 awaits
-          human Windows acceptance. Previously overwritten history cannot be
-          reconstructed. Older editors discard bounds on save.
+          This unsigned Windows beta adds optional Surface placement on Move
+          gizmo release. Meshes and billboards drop to a lower authored mesh
+          surface or the editor ground; one Undo reverses movement and placement.
+          It does not implement runtime physics, slope alignment or imported
+          terrain. Rotate, Scale, Inspector and Ground/End remain unchanged.
+          Beta 20 passed maintainer testing; Beta 21 awaits human acceptance.
           The portable ZIP creates no Windows installation or uninstall entry and
           remains the preferred unsigned test path.
 
@@ -96,7 +96,7 @@ jobs:
           other public certificate provider.
 
           Maintainer acceptance instructions:
-          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.20.md
+          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.21.md
           "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
 
       - name: Publish GitHub pre-release
@@ -114,6 +114,6 @@ jobs:
             --notes-file release/PREVIEW-NOTES.md `
             --prerelease `
             "$($installer[0].FullName)" `
-            "release/Parlyn-Engine-Portable-0.5.0-beta.20-x64.zip" `
+            "release/Parlyn-Engine-Portable-0.5.0-beta.21-x64.zip" `
             "release/latest.yml" `
             "release/SHA256SUMS.txt"

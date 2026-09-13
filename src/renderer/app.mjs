@@ -15,6 +15,7 @@ import { createErrorReport } from "../engine/editor/ErrorReport.mjs";
 import { DEFAULT_TRANSFORM_SNAPPING, normalizeTransformSnapping } from "../engine/editor/TransformSnapping.mjs";
 import { normalizeTransformSpace } from "../engine/editor/TransformSpace.mjs";
 import { normalizeDocumentBounds } from "../engine/core/DocumentBounds.mjs";
+import { placeNodeOnSurface } from "../engine/editor/SurfacePlacement.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
@@ -25,6 +26,8 @@ async function bootstrap() {
   let workspaceLayout = readWorkspaceLayout();
   let transformSnapping = readTransformSnapping();
   let transformSpace = readTransformSpace();
+  let surfacePlacementEnabled = false;
+  try { surfacePlacementEnabled = localStorage.getItem("parlyn.editor.surface-placement") === "true"; } catch { /* Keep the safe default. */ }
   const history = new History({ limit: 100 });
   let scene = createDemoScene();
   let selected = null;
@@ -530,6 +533,10 @@ async function bootstrap() {
     const before = gizmoStartSnapshot;
     gizmoStartSnapshot = null;
     if (node && before && JSON.stringify(before) !== JSON.stringify(sceneSnapshot())) {
+      if (transformMode === "translate" && surfacePlacementEnabled) {
+        placeNodeOnSurface(scene, renderer, id, [...selectedIds]);
+        if (selected?.id === id) populateInspector();
+      }
       pushHistory(before, `${transformModeLabel(transformMode)} ${node.name}`);
       status.textContent = `${transformModeLabel(transformMode)}: ${node.name}`;
     }
@@ -1163,6 +1170,20 @@ async function bootstrap() {
   $("tool-scale").addEventListener("click", () => setTransformMode("scale"));
   $("snap-toggle").addEventListener("click", toggleTransformSnapping);
   $("transform-space").addEventListener("click", toggleTransformSpace);
+  function updateSurfacePlacementButton() {
+    const button = $("surface-placement");
+    button.classList.toggle("active", surfacePlacementEnabled);
+    button.setAttribute("aria-pressed", String(surfacePlacementEnabled));
+    button.title = `Surface placement: ${surfacePlacementEnabled ? "on" : "off"} (on Move release)`;
+  }
+  updateSurfacePlacementButton();
+  $("surface-placement").addEventListener("click", () => {
+    surfacePlacementEnabled = !surfacePlacementEnabled;
+    updateSurfacePlacementButton();
+    try { localStorage.setItem("parlyn.editor.surface-placement", String(surfacePlacementEnabled)); }
+    catch (error) { console.warn("Surface placement preference could not be saved:", error); }
+    status.textContent = `Surface placement ${surfacePlacementEnabled ? "enabled" : "disabled"}; applies on Move release only.`;
+  });
   $("place-on-ground").addEventListener("click", placeSelectionOnGround);
   $("frame-selected").addEventListener("click", frameSelected);
   $("snap-settings").addEventListener("click", openTransformSnapSettings);

@@ -49,7 +49,7 @@ Completion evidence:
 
 - duplication and reparenting — initial editor commands complete;
 - durable, validated local Scene History — initial foundation complete;
-  Beta 20 corrects saved per-scene history isolation; human re-test pending;
+  Beta 20 saved per-scene history isolation passed human re-testing on 2026-09-13;
 - multi-selection where appropriate — initial hierarchy and viewport selection complete;
 - multi-scene project browser — validated listing, switching, creation, rename and move complete;
 - rename and move project assets — initial safe editor workflow complete;
@@ -64,11 +64,25 @@ Completion evidence:
   configurable snapping and explicit Local/World orientation;
 - optional Surface/Ground Snap and Grid Snap, including a keyboard command to
   place the current selection on the ground — initial Ground command and End
-  shortcut complete; automatic surface placement remains;
+  shortcut complete; optional Move-release surface placement implemented in
+  Beta 21, human acceptance pending;
 - Frame Selected — initial single- and multi-selection camera framing complete;
 - optional scene/world bounds independent from viewport size — initial validated
-  world-space authoring guides implemented in Beta 19; human acceptance pending;
+  world-space authoring guides passed human acceptance with Beta 20;
 - consistent commands and keyboard behavior.
+
+Explicitly accepted Phase 2 workspace follow-ups (planned, not parallel work):
+
+1. Optional **Reopen Last Session** after the remaining placement and command
+   checks: reopen the last project/scene's saved state, then restore editor
+   view/camera/selection safely; unavailable files must fall back to normal startup.
+2. Optional autosave to separate drafts, implemented and tested as its own step.
+   Normal Save commits scene data; Discard must discard the draft too. Autosave
+   must not silently overwrite scene files or restore intentionally discarded
+   changes. A minimal offer to reopen an interrupted draft belongs to this
+   design, not a broader recovery subsystem.
+
+These follow-ups were explicitly approved by the maintainer on 2026-09-13.
 
 ## Phase 3 — 2.5D renderer and materials
 

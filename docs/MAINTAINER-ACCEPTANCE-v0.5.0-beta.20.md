@@ -1,6 +1,8 @@
 # Parlyn Engine v0.5.0 Beta 20 — Maintainer Acceptance
 
-Status: pending human Windows acceptance. Beta 19 was not accepted because
+Status: passed human Windows acceptance on 2026-09-13, including saved per-scene
+Undo/Redo, Bounds validation/persistence and additional editor regression tests.
+Beta 19 was not accepted because
 saving a second project scene overwrote the first scene's local history.
 Beta 20 separates saved history by project-relative scene path.
 
