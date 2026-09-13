@@ -100,7 +100,11 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(main, /secureHandle\('parlyn:project:move-asset'/);
   assert.match(main, /secureHandle\('parlyn:project:close'/);
   assert.match(main, /secureHandle\('parlyn:project:delete'/);
-  assert.match(main, /parlyn-scene-history/);
+  const sceneHistoryFiles = await fs.readFile(path.join(__dirname, '../src/main/sceneHistoryFiles.mjs'), 'utf8');
+  assert.match(main, /import\('\.\/sceneHistoryFiles\.mjs'\)/);
+  assert.match(main, /\.loadSceneHistory\(projectRoot, sceneRelativePath, currentScene\)/);
+  assert.match(main, /\.saveSceneHistory\(activeProjectRoot, relativePath, payload\.scene, payload\.history\)/);
+  assert.match(sceneHistoryFiles, /parlyn-scene-history/);
   assert.match(renderer, /history\.exportState\(/);
   assert.match(renderer, /history\.restoreState\(result\.history\)/);
   assert.match(renderer, /normalizeWorkspaceLayout/);

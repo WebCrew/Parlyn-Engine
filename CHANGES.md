@@ -2,6 +2,14 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Beta 20: fixed project scenes overwriting one shared history file. Saved
+  Undo/Redo now uses a separate hashed path per scene, with read-only legacy
+  fallback and unchanged stale-snapshot/size validation.
+- Added a real file-system regression test for A/B switching, same-name scenes
+  in different folders, saved Redo, legacy history and corrupt/stale rejection.
+- Beta 19 remains unaccepted following the maintainer's history defect report;
+  Beta 20 awaits re-testing. Already overwritten history cannot be recovered.
+
 - Beta 19: added optional validated scene/world authoring bounds, independent
   of viewport size, with separate blue/amber guides and explicit world saving.
 - Added scene bounds Undo/Redo and round-trip/validation/helper-lifecycle tests.

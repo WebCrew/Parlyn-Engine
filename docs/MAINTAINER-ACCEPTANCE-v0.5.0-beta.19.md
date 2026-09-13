@@ -3,6 +3,10 @@
 Status: pending human Windows acceptance. Beta 18 passed the maintainer's full
 editor regression test on 2026-09-12.
 
+Beta 19 was not accepted: the maintainer found saved Undo history disappearing
+after switching project scenes. Beta 20 addresses the shared-history-file cause
+and requires the dedicated per-scene history re-test before acceptance.
+
 1. Open an existing project. Bounds are initially absent. Open **Bounds** in
    the View command group; check tooltips, keyboard focus and readable labels.
 2. Enable Current Scene bounds, enter Min (-10,-3,-10), Max (10,8,10), and
