@@ -32,6 +32,32 @@ distinct capabilities at a future planning review.
 This ambition was explicitly reaffirmed by Andreas Holzer on 2026-09-13.
 It does not bypass the scope, review or acceptance rules below.
 
+## Required design review — established engines and Parlyn's advantage
+
+Before implementing each bounded roadmap step, explicitly ask:
+**How do Godot, Unity and Unreal Engine solve this workflow, and can Parlyn
+make it better for its intended developers?**
+
+Compare the relevant behavior, interaction, architecture and limitations using
+current official documentation where available. Record a concise conclusion in
+the step's design notes or pull request: the reference approach, Parlyn's chosen
+approach, any intended improvement and the trade-offs. Do not claim superiority
+without evidence; validate improvements through tests and human acceptance.
+
+Godot's modular, extensible approach is the preferred realistic starting point
+for Parlyn, not a mandatory architecture to copy. Consider optional plugins and
+well-integrated external-tool bridges before adding large specialist subsystems
+to the core. Native tools remain an option where the workflow clearly warrants
+them and an explicit future planning review approves the scope.
+
+“Better” may mean clearer controls, fewer steps, safer persistence, easier setup,
+more accessible defaults or stronger 2.5D/3D consistency; it need not mean more
+features. Use the comparison to improve the active step, not to import unrelated
+features or interrupt the roadmap. The maturity and resources of the reference
+engines are context, not promises of immediate feature parity.
+
+This review rule was requested by Andreas Holzer on 2026-09-13.
+
 ## First stable release rule
 
 The project's primary objective is a first genuinely stable release of the engine. This means a coherent, installable and testable Parlyn baseline rather than a collection of partially implemented ideas.
