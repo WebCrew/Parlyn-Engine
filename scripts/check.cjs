@@ -64,6 +64,9 @@ const required = [
   'scripts/check-transform-space.mjs',
   'scripts/check-frame-selected.mjs',
   'scripts/check-document-bounds.mjs',
+  'scripts/check-scene-history-files.mjs',
+  'src/main/sceneHistoryFiles.mjs',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.20.md',
   'src/engine/core/DocumentBounds.mjs',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.19.md',
   'scripts/check-asset-files.cjs',
@@ -78,7 +81,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.5.0-beta.19') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0-beta.20') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -105,6 +108,7 @@ cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-transform-snap
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-transform-space.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-frame-selected.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-document-bounds.mjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-scene-history-files.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-asset-files.cjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-windows-distribution.cjs')], { stdio: 'inherit' });
 

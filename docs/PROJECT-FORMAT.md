@@ -58,8 +58,13 @@ Contains source assets imported by the developer. External asset formats are not
 ## `.parlyn/`
 
 Reserved for generated caches, import metadata and other project-local internal
-data. Beta 5 stores the validated startup Scene History here as
-`startup-scene.parlyn-history.json`. Developers should not rely on internal
+data. Beta 20 stores validated per-scene History under
+`scene-history/<sha256-of-project-relative-scene-path>.parlyn-history.json`.
+The previous shared `startup-scene.parlyn-history.json` is read-only legacy
+fallback, accepted only for its matching scene and snapshot. New saves never
+overwrite that legacy file. History remains limited to 100 entries and the
+existing size limits. Renamed/moved paths have separate history identities.
+Developers should not rely on internal
 paths as a public API; the history document itself remains explicitly versioned.
 
 ## Compatibility contract v1

@@ -49,6 +49,7 @@ Completion evidence:
 
 - duplication and reparenting — initial editor commands complete;
 - durable, validated local Scene History — initial foundation complete;
+  Beta 20 corrects saved per-scene history isolation; human re-test pending;
 - multi-selection where appropriate — initial hierarchy and viewport selection complete;
 - multi-scene project browser — validated listing, switching, creation, rename and move complete;
 - rename and move project assets — initial safe editor workflow complete;

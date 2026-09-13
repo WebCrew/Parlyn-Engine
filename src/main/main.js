@@ -9,10 +9,9 @@ const { listAssets, moveAsset } = require('./assetFiles');
 
 const persistence = import('../engine/persistence/DocumentPersistence.mjs');
 const documentFiles = import('./documentFiles.mjs');
+const sceneHistoryFiles = import('./sceneHistoryFiles.mjs');
 const EDITOR_FILE = path.join(__dirname, '..', 'renderer', 'index.html');
 const EDITOR_URL = pathToFileURL(EDITOR_FILE).href;
-const STARTUP_HISTORY_PATH = '.parlyn/startup-scene.parlyn-history.json';
-const MAX_HISTORY_FILE_BYTES = 32 * 1024 * 1024;
 const approvedWindowClosures = new WeakSet();
 const readyEditorWindows = new WeakSet();
 
@@ -38,24 +37,7 @@ async function writeDocumentAtomic(filePath, document, expectedFormat, label = '
 }
 
 async function loadSceneHistory(projectRoot, sceneRelativePath, currentScene) {
-  let historyFile;
-  try {
-    historyFile = await resolveExistingProjectPath(projectRoot, STARTUP_HISTORY_PATH, 'Scene history file');
-  } catch (error) {
-    if (error.code === 'ENOENT') return { history:null, warning:null };
-    return { history:null, warning:error.message };
-  }
-  try {
-    const info = await fs.stat(historyFile);
-    if (info.size > MAX_HISTORY_FILE_BYTES) return { history:null, warning:'Saved scene history exceeded the 32 MiB safety limit and was ignored.' };
-    const document = await readDocument(historyFile, 'parlyn-scene-history', 'Parlyn scene history');
-    if (document.scenePath !== sceneRelativePath || JSON.stringify(document.currentScene) !== JSON.stringify(currentScene)) {
-      return { history:null, warning:'Saved scene history did not match the current scene and was safely ignored.' };
-    }
-    return { history:document.history, warning:null };
-  } catch (error) {
-    return { history:null, warning:error.message };
-  }
+  return (await sceneHistoryFiles).loadSceneHistory(projectRoot, sceneRelativePath, currentScene);
 }
 
 const projectSession = new ProjectSession({
@@ -287,10 +269,7 @@ secureHandle('parlyn:project:save-scene', async (payload) => {
   let historyWarning = null;
   if (payload?.history) {
     try {
-      await fs.mkdir(path.join(activeProjectRoot,'.parlyn'), { recursive:true });
-      const historyTarget=await resolveWritableProjectPath(activeProjectRoot,STARTUP_HISTORY_PATH,'Scene history path');
-      const historyDocument={ format:'parlyn-scene-history', version:1, scenePath:relativePath, currentScene:payload.scene, history:payload.history, updatedAt:new Date().toISOString() };
-      await writeDocumentAtomic(historyTarget, historyDocument, 'parlyn-scene-history', 'Parlyn scene history');
+      await (await sceneHistoryFiles).saveSceneHistory(activeProjectRoot, relativePath, payload.scene, payload.history);
     } catch (error) {
       historyWarning=error.message;
     }
