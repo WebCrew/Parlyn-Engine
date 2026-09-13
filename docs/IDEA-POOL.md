@@ -119,6 +119,24 @@ Do not add editor buttons, data formats, dependencies or public feature claims f
   web-account, SSO or Asset Store implementation is authorized during the
   current Editor Foundation phase.
 
+### DLSS 5 / Upscaling Plugin
+
+- **Summary:** Monitor the development of NVIDIA DLSS 5 and evaluate at a
+  later planning review whether an optional Parlyn upscaling plugin would be
+  technically realistic and useful.
+- **Why it may matter:** Optional modern upscaling could improve rendering
+  performance and image quality for projects running on supported hardware,
+  without forcing the engine core or every Parlyn project to depend on a
+  proprietary vendor technology.
+- **Dependencies:** A stable rendering and plugin interface; review of NVIDIA's
+  then-current SDK, licence, hardware and distribution requirements; technical
+  validation against Parlyn's 2.5D-first and 3D rendering paths; and clean,
+  vendor-neutral alternatives for unsupported or non-NVIDIA hardware.
+- **Source/date:** Product idea from Andreas Holzer, 2026-09-12.
+- **Status:** `Unreviewed` — observation and later feasibility review only.
+  No roadmap commitment, NVIDIA dependency in the engine core or public
+  integration claim is authorized.
+
 The named Parlyn Smart Systems are not Idea Pool entries: their direction and initial foundation were already accepted before this policy and are documented in `SMART-SYSTEMS.md`. Their further implementation remains paused until their ordered roadmap phase becomes active.
 
 ## Review gate
