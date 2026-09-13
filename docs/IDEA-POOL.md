@@ -137,6 +137,35 @@ Do not add editor buttons, data formats, dependencies or public feature claims f
   No roadmap commitment, NVIDIA dependency in the engine core or public
   integration claim is authorized.
 
+### Optional 3D Painter / Sculpting Bridge — ArmorPaint or Material Maker
+
+- **Summary:** Evaluate an optional Parlyn plugin or external-tool bridge to
+  [ArmorPaint](https://armorpaint.org/) or
+  [Material Maker](https://github.com/RodZill4/material-maker) for a convenient
+  3D painting and procedural PBR material workflow. Explore sculpting separately
+  where the chosen tool actually supports a suitable, stable workflow.
+- **Why it may matter:** Small teams could author textures and refine assets
+  through established tools without requiring Parlyn to build and maintain a
+  full painter or sculpting application in its engine core.
+- **Possible direction:** Start by assessing explicit export/reimport of meshes,
+  textures and material assignments; consider live-link synchronization only
+  after a reliable file-based round trip is proven. Embedded UI is not assumed.
+- **Dependencies:** Mature Parlyn asset, material and optional-plugin interfaces;
+  validation of exchange formats, UVs, PBR map conventions, scale and material
+  mapping; review of each tool's then-current licence, distribution terms,
+  APIs and Windows support; safe user-controlled external-process execution
+  and protection against accidental asset overwrites. Godot-based Material Maker
+  must not introduce a Godot runtime dependency into the Parlyn engine core.
+- **Scope note:** Texture painting, procedural materials and mesh sculpting are
+  distinct capabilities. ArmorPaint currently labels sculpting as in development;
+  Material Maker's documented painting/material workflow is not a sculpting
+  compatibility guarantee.
+- **Source/date:** Product idea from Andreas Holzer, 2026-09-13; official project
+  pages linked above.
+- **Status:** `Unreviewed` — optional plugin/bridge feasibility review only;
+  no roadmap commitment, bundled third-party application, engine-core dependency
+  or public integration/support promise is authorized.
+
 The named Parlyn Smart Systems are not Idea Pool entries: their direction and initial foundation were already accepted before this policy and are documented in `SMART-SYSTEMS.md`. Their further implementation remains paused until their ordered roadmap phase becomes active.
 
 ## Review gate
