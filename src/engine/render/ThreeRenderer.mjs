@@ -183,6 +183,10 @@ export class ThreeRenderer extends RendererBackend {
     } else return;
 
     object.userData.parlynNodeId = node.id;
+    object.userData.surfaceSupport = node.type === 'Mesh3D';
+    for (let related = node; related; related = related.parent) {
+      if (!related.enabled) object.userData.surfaceSupport = false;
+    }
     this.#applyNodeTransform(node, object);
     this.nodeObjects.set(node.id, object);
     this.scene.add(object);
@@ -296,6 +300,37 @@ export class ThreeRenderer extends RendererBackend {
     const bounds = new THREE.Box3().setFromObject(object);
     if (bounds.isEmpty() || !Number.isFinite(bounds.min.y)) return null;
     return { x:object.position.x, y:object.position.y + groundY - bounds.min.y, z:object.position.z };
+  }
+
+  getSurfacePlacedPosition(nodeId, excludedIds = [], groundY = -1.55) {
+    const object = this.nodeObjects.get(nodeId);
+    if (!object || !Number.isFinite(groundY)) return null;
+    object.updateWorldMatrix(true, true);
+    const bounds = new THREE.Box3().setFromObject(object);
+    if (bounds.isEmpty() || ![bounds.min.y, object.position.x, object.position.y, object.position.z].every(Number.isFinite)) return null;
+    const center = bounds.getCenter(new THREE.Vector3());
+    if (![center.x, center.y, center.z].every(Number.isFinite)) return null;
+    const epsilon = 0.001;
+    const maxDistance = 1000000;
+    const excluded = new Set([nodeId, ...excludedIds]);
+    const candidates = [];
+    for (const [id, candidate] of this.nodeObjects) {
+      if (excluded.has(id) || !candidate.userData.surfaceSupport || !candidate.visible) continue;
+      candidate.updateWorldMatrix(true, true);
+      candidates.push(candidate);
+    }
+    const ray = new THREE.Raycaster(new THREE.Vector3(center.x, bounds.min.y + epsilon, center.z), new THREE.Vector3(0, -1, 0), 0, maxDistance);
+    let supportY = groundY <= bounds.min.y + epsilon && groundY >= bounds.min.y - maxDistance ? groundY : null;
+    for (const hit of ray.intersectObjects(candidates, true)) {
+      if (!hit.face || !Number.isFinite(hit.point.y) || hit.point.y > bounds.min.y + epsilon) continue;
+      const normal = hit.face.normal.clone().applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld));
+      if (normal.y < 0.5) continue;
+      if (supportY === null || hit.point.y > supportY) supportY = hit.point.y;
+    }
+    if (supportY === null) return null;
+    const y = object.position.y + supportY - bounds.min.y;
+    if (!Number.isFinite(y)) return null;
+    return { x:object.position.x, y, z:object.position.z };
   }
 
   frameSelection(nodeIds = [...this.selectedIds]) {

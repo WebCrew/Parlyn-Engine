@@ -66,7 +66,8 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(html, /class="tool-group viewport-tool-group" aria-label="Transform tools"/);
   assert.match(html, /class="tool-group placement-tool-group" aria-label="Placement tools"/);
   assert.match(html, /class="tool-group viewport-view-group" aria-label="Viewport mode"/);
-  assert.equal((html.match(/class="command-icon"/g) || []).length, 8, 'Command Bar must expose eight Parlyn command icons.');
+  assert.equal((html.match(/class="command-icon"/g) || []).length, 9, 'Command Bar must expose nine Parlyn command icons including Surface.');
+  assert.match(html, /id="surface-placement"[^>]*aria-pressed="false"/);
   assert.match(html, /id="tool-select"[^>]+aria-label="Select"/);
   assert.match(html, /id="tool-move"[^>]+aria-label="Move"/);
   assert.match(html, /id="tool-rotate"[^>]+aria-label="Rotate"/);

@@ -2,6 +2,14 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Beta 21: optional persistent Surface toggle places the moved primary node
+  on a lower mesh support or editor ground when the Move gizmo is released.
+- Combined placement and movement into one Undo/Redo step; excluded self,
+  selection and related hierarchy from support targets.
+- Added ray/eligibility and actual editor commit regression tests.
+- Recorded Beta 20 human acceptance and explicitly planned the later session
+  reopening and separate autosave-draft steps, preserving Discard semantics.
+
 - Beta 20: fixed project scenes overwriting one shared history file. Saved
   Undo/Redo now uses a separate hashed path per scene, with read-only legacy
   fallback and unchanged stale-snapshot/size validation.

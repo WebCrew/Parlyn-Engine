@@ -11,6 +11,7 @@ export class RendererBackend {
   setTransformSnapping() { throw new Error('setTransformSnapping() not implemented'); }
   setTransformSpace() { throw new Error('setTransformSpace() not implemented'); }
   getGroundedPosition() { throw new Error('getGroundedPosition() not implemented'); }
+  getSurfacePlacedPosition() { throw new Error('getSurfacePlacedPosition() not implemented'); }
   frameSelection() { throw new Error('frameSelection() not implemented'); }
   setDocumentBounds() { throw new Error('setDocumentBounds() not implemented'); }
   setView() { throw new Error('setView() not implemented'); }
