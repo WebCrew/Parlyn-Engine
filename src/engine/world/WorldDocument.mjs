@@ -1,3 +1,4 @@
+import { normalizeDocumentBounds } from '../core/DocumentBounds.mjs';
 const ID_PATTERN = /^[a-z0-9][a-z0-9._-]*$/;
 const FORMAT = 'parlyn-world';
 const VERSION = 1;
@@ -50,7 +51,8 @@ export class WorldDocument {
     ways = [],
     landmarks = [],
     encounters = [],
-    memory = {}
+    memory = {},
+    bounds = null
   } = {}) {
     this.format = FORMAT;
     this.version = VERSION;
@@ -62,10 +64,12 @@ export class WorldDocument {
     this.landmarks = structuredClone(landmarks);
     this.encounters = structuredClone(encounters);
     this.memory = structuredClone(memory);
+    this.bounds = normalizeDocumentBounds(bounds);
     this.validate();
   }
 
   validate() {
+    this.bounds = normalizeDocumentBounds(this.bounds);
     const capsuleIds = uniqueById(this.capsules, 'Scene Capsule');
     const wayIds = uniqueById(this.ways, 'Parlyn Way');
     uniqueById(this.landmarks, 'landmark');
@@ -121,7 +125,9 @@ export class WorldDocument {
   }
 
   toJSON() {
+    const bounds = normalizeDocumentBounds(this.bounds);
     return {
+      ...(bounds ? { bounds } : {}),
       format:this.format,
       version:this.version,
       name:this.name,

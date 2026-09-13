@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { RendererBackend } from './RendererBackend.mjs';
+import { normalizeDocumentBounds } from '../core/DocumentBounds.mjs';
 
 export class ThreeRenderer extends RendererBackend {
   constructor(container, callbacks = {}) {
@@ -24,6 +25,8 @@ export class ThreeRenderer extends RendererBackend {
     this.cameraTarget = new THREE.Vector3(0, 0.7, 0);
     this.orbit = { yaw:-0.55, pitch:0.42, distance:11 };
     this.drag = null;
+    this.boundsHelpers = new Map();
+    this.boundsKeys = new Map();
   }
 
   async initialize(sceneDocument) {
@@ -72,11 +75,13 @@ export class ThreeRenderer extends RendererBackend {
     });
 
     sceneDocument.root.walk((node) => this.#createObjectForNode(node));
+    this.setDocumentBounds('scene', sceneDocument.bounds);
     this.#installInteraction();
     this.resize();
   }
 
   rebuild(sceneDocument) {
+    this.setDocumentBounds('scene', sceneDocument.bounds);
     this.transformControls?.detach();
     for (const [id, object] of this.nodeObjects) this.#disposeNodeObject(id, object);
     this.nodeObjects.clear();
@@ -85,6 +90,32 @@ export class ThreeRenderer extends RendererBackend {
   }
 
   addNode(node) { this.#createObjectForNode(node); }
+
+  setDocumentBounds(kind, value) {
+    if (!['scene', 'world'].includes(kind)) throw new Error('Unknown bounds kind.');
+    const bounds = normalizeDocumentBounds(value);
+    if (!this.scene) return;
+    const key = JSON.stringify(bounds);
+    if (this.boundsKeys.get(kind) === key) return;
+    const old = this.boundsHelpers.get(kind);
+    if (old) {
+      this.scene.remove(old);
+      old.geometry.dispose();
+      old.material.dispose();
+      this.boundsHelpers.delete(kind);
+    }
+    this.boundsKeys.set(kind, key);
+    if (!bounds) return;
+    const box = new THREE.Box3(
+      new THREE.Vector3(bounds.min.x, bounds.min.y, bounds.min.z),
+      new THREE.Vector3(bounds.max.x, bounds.max.y, bounds.max.z));
+    const helper = new THREE.Box3Helper(box, kind === 'scene' ? 0x60bfff : 0xffbd69);
+    helper.material.depthTest = false;
+    helper.material.fog = false;
+    helper.renderOrder = 10;
+    this.boundsHelpers.set(kind, helper);
+    this.scene.add(helper);
+  }
 
   removeNode(nodeId) {
     const object = this.nodeObjects.get(nodeId);

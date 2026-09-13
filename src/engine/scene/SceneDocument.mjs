@@ -3,6 +3,7 @@ import { Node2_5D } from '../core/Node2_5D.mjs';
 import { Node3D } from '../core/Node3D.mjs';
 import { Camera3D } from '../core/Camera3D.mjs';
 import { Light3D } from '../core/Light3D.mjs';
+import { normalizeDocumentBounds } from '../core/DocumentBounds.mjs';
 
 const FORMAT = 'parlyn-scene';
 const VERSION = 2;
@@ -155,6 +156,7 @@ export class SceneDocument {
     this.version = VERSION;
     this.name = name.trim();
     this.root = new Node({ name:this.name, type:'SceneRoot' });
+    this.bounds = null;
   }
 
   findById(id) {
@@ -191,7 +193,8 @@ export class SceneDocument {
   }
 
   toJSON() {
-    return { format:this.format, version:VERSION, name:this.name, root:this.root.toJSON() };
+    const bounds = normalizeDocumentBounds(this.bounds);
+    return { format:this.format, version:VERSION, name:this.name, root:this.root.toJSON(), ...(bounds ? { bounds } : {}) };
   }
 
   static fromJSON(data) {
@@ -202,6 +205,7 @@ export class SceneDocument {
     const sourceVersion = data.version;
     if (!SUPPORTED_VERSIONS.has(sourceVersion)) throw new Error(`Unsupported Parlyn scene version: ${data.version}`);
     const scene = new SceneDocument(data.name);
+    scene.bounds = normalizeDocumentBounds(data.bounds);
     const rootData = sourceVersion === 1 ? migrateNodeV1(data.root) : data.root;
     scene.root = nodeFromJSON(rootData, { ids:new Set(), count:0 });
     if (scene.root.type !== 'SceneRoot') throw new Error('Parlyn scene root must use type SceneRoot.');

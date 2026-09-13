@@ -6,6 +6,12 @@
 
 # Parlyn Engine
 
+Beta 19 adds optional scene/world bounds through **Bounds** in the View command
+group: blue scene guides and amber world guides in world coordinates. They do
+not restrict camera movement, objects or physics. Scene edits use Undo/Redo and
+normal Save; world edits use explicit Save World Bounds. Human Beta 19 Windows
+acceptance is pending. Beta 18 passed the full maintainer editor regression test.
+
 **Parlyn Engine** is a free and open-source game engine designed primarily for **modern 2.5D development**, while keeping real 3D available wherever a project benefits from it.
 
 Parlyn treats sprites, billboards, layered depth, lighting and real 3D geometry as parts of the same scene workflow. 2.5D is not a secondary editor mode: it is a first-class engine concept.
@@ -229,7 +235,7 @@ See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
 Phase 1 acceptance is complete. The current Phase 2 editor candidate uses the
-repeatable [`v0.5.0-beta.18 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.18.md).
+repeatable [`v0.5.0-beta.19 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.19.md).
 
 ### Windows release integrity
 
