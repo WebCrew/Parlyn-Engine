@@ -65,7 +65,8 @@ Completion evidence:
   place the current selection on the ground — initial Ground command and End
   shortcut complete; automatic surface placement remains;
 - Frame Selected — initial single- and multi-selection camera framing complete;
-- optional scene/world bounds independent from viewport size;
+- optional scene/world bounds independent from viewport size — initial validated
+  world-space authoring guides implemented in Beta 19; human acceptance pending;
 - consistent commands and keyboard behavior.
 
 ## Phase 3 — 2.5D renderer and materials

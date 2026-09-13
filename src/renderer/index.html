@@ -103,6 +103,7 @@
           <button id="frame-selected" class="tool-button command-icon-button" type="button" title="Frame Selected (F)" aria-label="Frame Selected" disabled>
             <svg class="command-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5v2H6v3H4zm11-5h5v5h-2V6h-3V4zM4 15h2v3h3v2H4v-5zm14 0h2v5h-5v-2h3v-3z"/><path d="M9 9h6v6H9z"/></svg>
           </button>
+          <button id="document-bounds" class="tool-button" type="button" title="Configure scene and world bounds" aria-label="Configure scene and world bounds">Bounds</button>
           <button id="view-25" class="tool-button active" title="2.5D View">2.5D</button>
           <button id="view-3d" class="tool-button" title="3D View">3D</button>
         </div>
@@ -164,6 +165,21 @@
       <button id="add-camera" class="node-option"><span>▣</span><strong>3D Camera</strong><small>Scene camera foundation</small></button>
     </div>
     <div class="dialog-actions"><button id="cancel-add">Cancel</button></div>
+  </dialog>
+
+  <dialog id="bounds-dialog" class="node-dialog small-dialog" aria-labelledby="bounds-title">
+    <div class="dialog-head"><strong id="bounds-title">Scene / World Bounds</strong><span>World-space authoring guides, independent of viewport size.</span></div>
+    <div class="dialog-body">
+      <label>Document<select id="bounds-target"><option value="scene">Current Scene — blue</option><option value="world">Project World — amber</option></select></label>
+      <label><input id="bounds-enabled" type="checkbox"> Enable bounds</label>
+      <fieldset id="bounds-coordinates"><legend>Minimum / Maximum (units)</legend>
+        <div class="vector-row three"><label>Min X<input id="bounds-min-x" type="number" step="any" min="-1000000" max="1000000" required></label><label>Min Y<input id="bounds-min-y" type="number" step="any" min="-1000000" max="1000000" required></label><label>Min Z<input id="bounds-min-z" type="number" step="any" min="-1000000" max="1000000" required></label></div>
+        <div class="vector-row three"><label>Max X<input id="bounds-max-x" type="number" step="any" min="-1000000" max="1000000" required></label><label>Max Y<input id="bounds-max-y" type="number" step="any" min="-1000000" max="1000000" required></label><label>Max Z<input id="bounds-max-z" type="number" step="any" min="-1000000" max="1000000" required></label></div>
+      </fieldset>
+      <p>Guides only: objects and the camera may leave these bounds. Scene edits use Undo/Redo and normal Save. World edits are saved explicitly and do not use scene Undo/Redo.</p>
+      <p id="bounds-error" role="alert"></p>
+    </div>
+    <div class="dialog-actions"><button id="cancel-bounds">Cancel</button><button id="apply-bounds" class="primary">Apply Scene Bounds</button></div>
   </dialog>
 
   <dialog id="snap-settings-dialog" class="node-dialog small-dialog" aria-labelledby="snap-settings-title">

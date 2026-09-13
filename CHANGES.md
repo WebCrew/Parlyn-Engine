@@ -2,6 +2,12 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Beta 19: added optional validated scene/world authoring bounds, independent
+  of viewport size, with separate blue/amber guides and explicit world saving.
+- Added scene bounds Undo/Redo and round-trip/validation/helper-lifecycle tests.
+- Recorded the full successful Beta 18 maintainer regression test; Beta 19
+  awaits human Windows acceptance.
+
 - Added Frame Selected for single and multiple nodes through the Command Bar and F shortcut.
 - Preserved the current viewing angle while fitting the selection's visible bounds with a safe margin.
 - Recorded the successful Beta 17 maintainer acceptance of the Command Bar and regression scope.

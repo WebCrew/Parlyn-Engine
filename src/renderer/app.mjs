@@ -14,6 +14,7 @@ import { DEFAULT_WORKSPACE_LAYOUT, normalizeWorkspaceLayout } from "../engine/ed
 import { createErrorReport } from "../engine/editor/ErrorReport.mjs";
 import { DEFAULT_TRANSFORM_SNAPPING, normalizeTransformSnapping } from "../engine/editor/TransformSnapping.mjs";
 import { normalizeTransformSpace } from "../engine/editor/TransformSpace.mjs";
+import { normalizeDocumentBounds } from "../engine/core/DocumentBounds.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
@@ -291,6 +292,7 @@ async function bootstrap() {
     return { Mesh3D: "\u25C6", Sprite2_5D: "\u25B1", Billboard2_5D: "\u25E9", Light3D: "\u263C", Camera3D: "\u25A3" }[node.type] ?? "\u25C7";
   }
   function renderHierarchy() {
+    renderer.setDocumentBounds("world", currentWorld?.bounds ?? null);
     const root = $("hierarchy");
     root.replaceChildren();
     visibleHierarchyIds = [];
@@ -1064,6 +1066,79 @@ async function bootstrap() {
   function shortPath(filePath) {
     return filePath ? filePath.split(/[\\/]/).slice(-2).join("/") : "";
   }
+  let savingBounds = false;
+  function populateBoundsDialog() {
+    const isWorld = $("bounds-target").value === "world";
+    const bounds = (isWorld ? currentWorld : scene)?.bounds;
+    $("bounds-enabled").checked = Boolean(bounds);
+    $("bounds-coordinates").disabled = !bounds;
+    for (const end of ["min", "max"]) for (const axis of ["x", "y", "z"]) {
+      $("bounds-" + end + "-" + axis).value = bounds?.[end][axis] ?? (end === "min" ? -10 : 10);
+    }
+    $("apply-bounds").textContent = isWorld ? "Save World Bounds" : "Apply Scene Bounds";
+    $("bounds-error").textContent = "";
+  }
+  async function applyBounds() {
+    if (savingBounds) return;
+    try {
+      let value = null;
+      if ($("bounds-enabled").checked) {
+        value = { min:{}, max:{} };
+        for (const end of ["min", "max"]) for (const axis of ["x", "y", "z"]) {
+          const input = $("bounds-" + end + "-" + axis);
+          if (!input.reportValidity()) return;
+          value[end][axis] = input.valueAsNumber;
+        }
+        value = normalizeDocumentBounds(value);
+      }
+      if ($("bounds-target").value === "world") {
+        if (!currentProject || !currentWorld) throw new Error("Open a project with a world document first.");
+        const worldBefore = currentWorld;
+        const projectBefore = currentProject;
+        const candidate = WorldDocument.fromJSON(currentWorld.toJSON());
+        candidate.bounds = value;
+        savingBounds = true;
+        $("apply-bounds").disabled = true;
+        $("cancel-bounds").disabled = true;
+        $("bounds-target").disabled = true;
+        const result = await host.saveProjectWorld({ relativePath:currentProject.world, world:candidate.toJSON() });
+        if (!result.ok) throw new Error("World bounds could not be saved.");
+        if (currentWorld === worldBefore && currentProject === projectBefore) {
+          currentWorld = candidate;
+          renderer.setDocumentBounds("world", candidate.bounds);
+        }
+        status.textContent = "World bounds saved.";
+      } else {
+        const before = sceneSnapshot();
+        if (JSON.stringify(normalizeDocumentBounds(scene.bounds)) !== JSON.stringify(value)) {
+          scene.bounds = value;
+          pushHistory(before, "Change Scene Bounds");
+          renderer.setDocumentBounds("scene", value);
+        }
+        status.textContent = "Scene bounds applied.";
+      }
+      $("bounds-dialog").close();
+    } catch (error) {
+      $("bounds-error").textContent = error.message;
+    } finally {
+      savingBounds = false;
+      $("apply-bounds").disabled = false;
+      $("cancel-bounds").disabled = false;
+      $("bounds-target").disabled = false;
+    }
+  }
+  $("document-bounds").addEventListener("click", () => {
+    $("bounds-target").value = "scene";
+    $("bounds-target").querySelector('option[value="world"]').disabled = !currentProject || !currentWorld;
+    populateBoundsDialog();
+    $("bounds-dialog").showModal();
+  });
+  $("bounds-target").addEventListener("change", populateBoundsDialog);
+  $("bounds-enabled").addEventListener("change", () => { $("bounds-coordinates").disabled = !$("bounds-enabled").checked; });
+  $("cancel-bounds").addEventListener("click", () => $("bounds-dialog").close());
+  $("bounds-dialog").addEventListener("cancel", (event) => { if (savingBounds) event.preventDefault(); });
+  $("apply-bounds").addEventListener("click", applyBounds);
+
   function undo() {
     const entry = history.undo(sceneSnapshot());
     if (!entry) return;

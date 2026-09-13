@@ -1,5 +1,21 @@
 # Parlyn Project Format
 
+## Optional authoring bounds (Beta 19)
+
+Scene v2 and World v1 documents may carry an optional `bounds` object with
+`min` and `max` vectors containing finite `x`, `y`, `z` coordinates within
+±1000000 units. Each minimum must be strictly below its maximum. Omitted or
+null bounds mean disabled; disabled bounds are omitted on serialization.
+These additive authoring fields do not alter runtime behavior. They define a
+world-space axis-aligned guide, never a viewport size, camera clamp or collision
+wall. Scene and World guides are independent and may overlap.
+
+Scene bounds use scene saving and local Undo/Redo. World bounds use explicit
+world saving and are not part of scene history. Beta 19 validates them on load
+and save; use Beta 19 or later when editing these documents. Older editors may
+discard the optional bounds field on save. Documents without bounds retain
+their existing serialized shape.
+
 Parlyn v0.4 introduces the first project-folder convention.
 
 ```text

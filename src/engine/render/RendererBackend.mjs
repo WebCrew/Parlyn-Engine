@@ -12,6 +12,7 @@ export class RendererBackend {
   setTransformSpace() { throw new Error('setTransformSpace() not implemented'); }
   getGroundedPosition() { throw new Error('getGroundedPosition() not implemented'); }
   frameSelection() { throw new Error('frameSelection() not implemented'); }
+  setDocumentBounds() { throw new Error('setDocumentBounds() not implemented'); }
   setView() { throw new Error('setView() not implemented'); }
   dispose() {}
 }
