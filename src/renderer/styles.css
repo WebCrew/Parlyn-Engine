@@ -44,3 +44,4 @@
 #bounds-dialog input[type=checkbox] { width:auto; justify-self:start; }
 #bounds-dialog p { color:var(--parlyn-muted); font-size:11px; line-height:1.5; }
 #bounds-dialog #bounds-error { color:#ffbd69; }
+.shortcut-list{display:grid;padding:10px 16px 14px}.shortcut-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:8px 0;border-bottom:1px solid var(--parlyn-border);font-size:12px}.shortcut-row:last-child{border-bottom:0}.shortcut-row kbd{min-width:92px;text-align:center;border:1px solid #41536a;border-bottom-width:2px;border-radius:4px;background:var(--parlyn-input);padding:3px 7px;color:#dbe9f8;font:10px Consolas,monospace}

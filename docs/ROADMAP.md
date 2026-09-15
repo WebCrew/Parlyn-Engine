@@ -65,11 +65,13 @@ Completion evidence:
 - optional Surface/Ground Snap and Grid Snap, including a keyboard command to
   place the current selection on the ground — initial Ground command and End
   shortcut complete; optional Move-release surface placement implemented in
-  Beta 21, human acceptance pending;
+  Beta 21, passed human acceptance on 2026-09-15;
 - Frame Selected — initial single- and multi-selection camera framing complete;
 - optional scene/world bounds independent from viewport size — initial validated
   world-space authoring guides passed human acceptance with Beta 20;
-- consistent commands and keyboard behavior.
+- consistent commands and keyboard behavior — centralized conflict-safe command
+  routing, Delete selection and a visible shortcut reference implemented in
+  Beta 22, human acceptance pending.
 
 Explicitly accepted Phase 2 workspace follow-ups (planned, not parallel work):
 

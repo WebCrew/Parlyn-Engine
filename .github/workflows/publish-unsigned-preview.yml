@@ -7,12 +7,12 @@ on:
         description: New prerelease tag; an existing release is never overwritten
         required: true
         type: string
-        default: v0.5.0-beta.21
+        default: v0.5.0-beta.22
       preview_title:
         description: Public prerelease title
         required: true
         type: string
-        default: Parlyn Engine v0.5.0 Beta 21 (unsigned)
+        default: Parlyn Engine v0.5.0 Beta 22 (unsigned)
 
 permissions:
   contents: write
@@ -24,8 +24,8 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: false
       GH_TOKEN: ${{ github.token }}
-      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.21' }}
-      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 21 (unsigned)' }}
+      PREVIEW_TAG: ${{ inputs.preview_tag || 'v0.5.0-beta.22' }}
+      PREVIEW_TITLE: ${{ inputs.preview_title || 'Parlyn Engine v0.5.0 Beta 22 (unsigned)' }}
 
     steps:
       - name: Checkout
@@ -55,7 +55,7 @@ jobs:
             throw "Expected exactly one Parlyn installer."
           }
 
-          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.21-x64.zip"
+          $portable = "release/Parlyn-Engine-Portable-0.5.0-beta.22-x64.zip"
           if (-not (Test-Path -LiteralPath "release/win-unpacked/Parlyn Engine.exe")) {
             throw "Packaged Parlyn executable was not found for the portable build."
           }
@@ -72,14 +72,14 @@ jobs:
         shell: pwsh
         run: |
           @"
-          # Parlyn Engine v0.5.0 Beta 21
+          # Parlyn Engine v0.5.0 Beta 22
 
-          This unsigned Windows beta adds optional Surface placement on Move
-          gizmo release. Meshes and billboards drop to a lower authored mesh
-          surface or the editor ground; one Undo reverses movement and placement.
-          It does not implement runtime physics, slope alignment or imported
-          terrain. Rotate, Scale, Inspector and Ground/End remain unchanged.
-          Beta 20 passed maintainer testing; Beta 21 awaits human acceptance.
+          This unsigned Windows beta completes the Phase 2 editor command and
+          keyboard audit. It centralizes shortcut routing, adds Delete selection
+          and provides a read-only shortcut reference under View. Text fields,
+          modal dialogs, key repeat and Alt/AltGr input are protected from
+          accidental editor commands. Beta 21 passed maintainer testing; Beta 22
+          awaits human acceptance.
           The portable ZIP creates no Windows installation or uninstall entry and
           remains the preferred unsigned test path.
 
@@ -96,7 +96,7 @@ jobs:
           other public certificate provider.
 
           Maintainer acceptance instructions:
-          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.21.md
+          https://github.com/WebCrew/Parlyn-Engine/blob/main/docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.22.md
           "@ | Set-Content -LiteralPath release/PREVIEW-NOTES.md -Encoding utf8
 
       - name: Publish GitHub pre-release
@@ -114,6 +114,6 @@ jobs:
             --notes-file release/PREVIEW-NOTES.md `
             --prerelease `
             "$($installer[0].FullName)" `
-            "release/Parlyn-Engine-Portable-0.5.0-beta.21-x64.zip" `
+            "release/Parlyn-Engine-Portable-0.5.0-beta.22-x64.zip" `
             "release/latest.yml" `
             "release/SHA256SUMS.txt"

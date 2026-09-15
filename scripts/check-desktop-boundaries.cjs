@@ -74,6 +74,9 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(html, /id="tool-scale"[^>]+aria-label="Scale"/);
   assert.match(html, /id="place-on-ground"[^>]+aria-label="Place selection on ground"/);
   assert.match(html, /id="frame-selected"[^>]+aria-label="Frame Selected"[^>]+disabled/);
+  assert.match(html, /id="shortcuts-dialog"/);
+  assert.match(html, /id="show-shortcuts"/);
+  assert.match(html, /id="delete-node"[^>]+title="Delete selected nodes \(Delete\)"/);
   assert.match(html, /id="snap-translation"[^>]+min="0\.01"[^>]+max="100"/);
   assert.match(html, /id="snap-rotation"[^>]+min="1"[^>]+max="180"/);
   assert.match(html, /id="snap-scale"[^>]+min="0\.01"[^>]+max="10"/);
@@ -122,9 +125,9 @@ const { resolveExistingProjectPath, resolveWritableProjectPath, resolveWritableP
   assert.match(renderer, /parlyn\.editor\.transform-space/);
   assert.match(renderer, /querySelector\("\.command-label"\)\.textContent/);
   assert.match(renderer, /placeSelectionOnGround/);
-  assert.match(renderer, /key === "end"/);
   assert.match(renderer, /renderer\.frameSelection\(\[\.\.\.selectedIds\]\)/);
-  assert.match(renderer, /key === "f"/);
+  assert.match(renderer, /resolveEditorShortcut\(event/);
+  assert.match(renderer, /dialog\[open\]/);
   assert.match(threeRenderer, /setTransformSpace\(space\)/);
   assert.match(threeRenderer, /this\.transformMode === 'scale' \? 'local' : this\.transformSpace/);
   assert.match(threeRenderer, /getGroundedPosition\(nodeId, groundY = -1\.55\)/);
