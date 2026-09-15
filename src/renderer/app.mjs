@@ -49,6 +49,7 @@ async function bootstrap() {
   let currentErrorReport = null;
   let gizmoStartSnapshot = null;
   let transformMode = "select";
+  let currentViewMode = "2.5d";
   const moduleEvents = new EventTarget();
   const modules = new ModuleRegistry({ events: moduleEvents, log: (message) => {
     console.info(`[Parlyn Module] ${message}`);
@@ -395,8 +396,88 @@ async function bootstrap() {
       status.textContent = "Application close canceled.";
       return;
     }
+    try { await rememberCurrentSession(); }
+    catch (error) { console.warn("Last session could not be remembered:",error); }
     try { await host.confirmAppClose(); }
     catch (error) { showError("Application close failed", error); }
+  }
+
+  function currentEditorViewState() {
+    return { mode:currentViewMode, camera:renderer.getEditorCameraState(), selectionIds:[...selectedIds] };
+  }
+
+  async function rememberCurrentSession() {
+    try {
+      if (currentProject) return await host.rememberLastSession({ kind:'project', scenePath:currentSceneRelativePath || currentProject.startupScene, view:currentEditorViewState() });
+      if (currentFilePath) return await host.rememberLastSession({ kind:'scene', filePath:currentFilePath, view:currentEditorViewState() });
+      return await host.clearLastSession();
+    } catch (error) {
+      console.warn('Last session could not be remembered:',error);
+      return { ok:false };
+    }
+  }
+
+  function restoreEditorView(view) {
+    currentViewMode=view?.mode === '3d' ? '3d' : '2.5d';
+    $("view-25").classList.toggle("active",currentViewMode === '2.5d');
+    $("view-3d").classList.toggle("active",currentViewMode === '3d');
+    renderer.restoreEditorCameraState(view?.camera);
+    const validIds=(view?.selectionIds ?? []).filter((id) => scene.findById(id));
+    if (!validIds.length) {
+      clearSelection();
+      return;
+    }
+    selectedIds=new Set(validIds);
+    selectionAnchorId=validIds[0];
+    selected=scene.findById(validIds[0]);
+    renderer.setSelection(validIds,selected.id);
+    renderHierarchy();
+    if (validIds.length === 1) populateInspector();
+    else {
+      $("inspector-empty").hidden=false;
+      $("inspector").hidden=true;
+    }
+    $("selected-type").textContent=validIds.length === 1 ? selected.type : `${validIds.length} selected`;
+    $("delete-node").disabled=false;
+    $("duplicate-node").disabled=validIds.length !== 1;
+    $("reparent-node").disabled=validIds.length !== 1;
+    $("frame-selected").disabled=false;
+  }
+
+  async function restoreLastSession() {
+    const result=await host.restoreLastSession();
+    if (!result.restored) return { restored:false, message:result.warning || null };
+    if (result.kind === 'project') {
+      currentProject=ProjectDocument.fromJSON(result.project);
+      currentWorld=result.world ? WorldDocument.fromJSON(result.world) : null;
+      currentProjectRoot=result.projectRoot;
+      currentSceneRelativePath=result.scenePath;
+      currentFilePath=null;
+      assets=result.assets ?? [];
+      projectScenes=result.scenes ?? [];
+    } else {
+      currentProject=null;
+      currentWorld=null;
+      currentProjectRoot=null;
+      currentSceneRelativePath=null;
+      currentFilePath=result.filePath;
+      assets=[];
+      projectScenes=[];
+    }
+    scene=SceneDocument.fromJSON(result.scene);
+    if (result.history) {
+      try { history.restoreState(result.history); }
+      catch (error) { console.warn('Saved scene history was ignored:',error); history.clear(); }
+    } else history.clear();
+    renderer.rebuild(scene);
+    restoreEditorView(result.view);
+    updateHistoryButtons();
+    updateProjectUI();
+    renderAssets();
+    renderProjectScenes();
+    setDirty(false);
+    const label=result.kind === 'project' ? `${currentProject.name} · ${currentSceneRelativePath}` : shortPath(currentFilePath);
+    return { restored:true, message:result.historyWarning ? `Last session reopened without local history: ${result.historyWarning}` : `Last session reopened: ${label}` };
   }
   async function leaveProjectForLooseScene() {
     if (!currentProject) return true;
@@ -779,6 +860,7 @@ async function bootstrap() {
       clearSelection();
       updateHistoryButtons();
       setDirty(true);
+      await rememberCurrentSession();
       status.textContent = "New untitled scene";
     } catch (error) {
       showError("New scene failed", error);
@@ -796,6 +878,7 @@ async function bootstrap() {
           return false;
         }
         setDirty(false);
+        await rememberCurrentSession();
         status.textContent = `Saved project scene: ${currentSceneRelativePath || currentProject.startupScene}`;
         return true;
       }
@@ -806,6 +889,7 @@ async function bootstrap() {
       }
       currentFilePath = result.filePath;
       setDirty(false);
+      await rememberCurrentSession();
       status.textContent = `Saved: ${shortPath(currentFilePath)}`;
       return true;
     } catch (error) {
@@ -827,6 +911,7 @@ async function bootstrap() {
       clearSelection();
       updateHistoryButtons();
       setDirty(false);
+      await rememberCurrentSession();
       status.textContent = `Opened: ${shortPath(currentFilePath)}`;
     } catch (error) {
       showError("Scene open failed", error);
@@ -857,6 +942,7 @@ async function bootstrap() {
       renderAssets();
       renderProjectScenes();
       setDirty(false);
+      await rememberCurrentSession();
       status.textContent = `Project created: ${currentProject.name}`;
     } catch (error) {
       showError("Project creation failed", error);
@@ -889,6 +975,7 @@ async function bootstrap() {
       renderAssets();
       renderProjectScenes();
       setDirty(false);
+      await rememberCurrentSession();
       status.textContent = result.historyWarning
         ? `Project opened without local history: ${result.historyWarning}`
         : `Project opened: ${currentProject.name}`;
@@ -1010,6 +1097,7 @@ async function bootstrap() {
       updateHistoryButtons();
       renderProjectScenes();
       setDirty(false);
+      await rememberCurrentSession();
       status.textContent = result.historyWarning ? `Scene opened without local history: ${result.historyWarning}` : `Opened project scene: ${relativePath}`;
     } catch (error) {
       showError("Project scene open failed", error);
@@ -1033,6 +1121,7 @@ async function bootstrap() {
       updateProjectUI();
       renderProjectScenes();
       setDirty(false);
+      await rememberCurrentSession();
       $("create-scene-dialog").close();
       status.textContent = `Scene created: ${result.relativePath}`;
     } catch (error) {
@@ -1055,6 +1144,7 @@ async function bootstrap() {
       updateProjectUI();
       renderProjectScenes();
       setDirty(false);
+      await rememberCurrentSession();
       $("move-scene-dialog").close();
       status.textContent = `Scene moved: ${result.relativePath}`;
     } catch (error) {
@@ -1249,12 +1339,14 @@ async function bootstrap() {
   host.onAppCloseRequested(handleAppCloseRequest);
   moduleEvents.addEventListener("module-changed", renderModules);
   $("view-25").addEventListener("click", () => {
+    currentViewMode = "2.5d";
     renderer.setView("2.5d");
     $("view-25").classList.add("active");
     $("view-3d").classList.remove("active");
     status.textContent = "2.5D editor view";
   });
   $("view-3d").addEventListener("click", () => {
+    currentViewMode = "3d";
     renderer.setView("3d");
     $("view-3d").classList.add("active");
     $("view-25").classList.remove("active");
@@ -1336,7 +1428,10 @@ async function bootstrap() {
   renderAssets();
   renderProjectScenes();
   updateProjectUI();
-  selectById(scene.root.children[1].id);
+  let startupResult={ restored:false, message:null };
+  try { startupResult=await restoreLastSession(); }
+  catch (error) { console.warn('Last session could not be restored:',error); startupResult={ restored:false, message:'Last session could not be restored; normal startup was used.' }; }
+  if (!startupResult.restored) selectById(scene.root.children[1].id);
   updateHistoryButtons();
   setDirty(false);
   let appVersion = "unknown";
@@ -1348,7 +1443,7 @@ async function bootstrap() {
   }
   $("brand-version").textContent = `${appVersion} GitHub Preview`;
   $("footer-version").textContent = `v${appVersion}`;
-  status.textContent = `Ready \xB7 Parlyn ${appVersion} \xB7 THREE renderer backend`;
+  status.textContent = startupResult.message || `Ready \xB7 Parlyn ${appVersion} \xB7 THREE renderer backend`;
   await host.editorReady();
 }
 bootstrap().catch((error) => {

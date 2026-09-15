@@ -10,10 +10,12 @@ const { listAssets, moveAsset } = require('./assetFiles');
 const persistence = import('../engine/persistence/DocumentPersistence.mjs');
 const documentFiles = import('./documentFiles.mjs');
 const sceneHistoryFiles = import('./sceneHistoryFiles.mjs');
+const lastSessionFiles = import('./lastSessionFiles.mjs');
 const EDITOR_FILE = path.join(__dirname, '..', 'renderer', 'index.html');
 const EDITOR_URL = pathToFileURL(EDITOR_FILE).href;
 const approvedWindowClosures = new WeakSet();
 const readyEditorWindows = new WeakSet();
+let activeLooseScenePath = null;
 
 app.setAppUserModelId('org.parlyn.engine');
 
@@ -86,6 +88,19 @@ function requireScenePath(value) {
   return value;
 }
 
+function lastSessionPath() {
+  return path.join(app.getPath('userData'), 'editor', 'last-session.json');
+}
+
+async function clearRememberedSession() {
+  await (await lastSessionFiles).clearLastSession(lastSessionPath());
+}
+
+async function clearRememberedSessionSafely() {
+  try { await clearRememberedSession(); }
+  catch (error) { console.warn('Last-session state could not be cleared:',error); }
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width:1500,
@@ -154,14 +169,16 @@ secureHandle('parlyn:scene:save-as', async (payload) => {
   const result = await dialog.showSaveDialog({ title:'Save Parlyn Scene', defaultPath:defaultName, filters:[{ name:'Parlyn Scene', extensions:['json'] }] });
   if (result.canceled || !result.filePath) return { canceled:true };
   await writeDocumentAtomic(result.filePath, payload?.scene, 'parlyn-scene', 'Parlyn scene');
-  return { canceled:false, filePath:result.filePath };
+  activeLooseScenePath = await fs.realpath(result.filePath);
+  return { canceled:false, filePath:activeLooseScenePath };
 }, { payload:true });
 
 secureHandle('parlyn:scene:open', async () => {
   const result = await dialog.showOpenDialog({ title:'Open Parlyn Scene', properties:['openFile'], filters:[{ name:'Parlyn Scene', extensions:['json'] }] });
   if (result.canceled || !result.filePaths[0]) return { canceled:true };
   const filePath=result.filePaths[0];
-  return { canceled:false, filePath, scene:await readDocument(filePath, 'parlyn-scene', 'Parlyn scene') };
+  activeLooseScenePath=await fs.realpath(filePath);
+  return { canceled:false, filePath:activeLooseScenePath, scene:await readDocument(activeLooseScenePath, 'parlyn-scene', 'Parlyn scene') };
 });
 
 secureHandle('parlyn:project:create', async (payload) => {
@@ -194,6 +211,7 @@ secureHandle('parlyn:project:create', async (payload) => {
     throw error;
   }
   const activeProjectRoot=projectSession.activate(await fs.realpath(projectRoot));
+  activeLooseScenePath=null;
   return { canceled:false, projectRoot:activeProjectRoot, project, world, assets:await listAssets(activeProjectRoot), scenes:await listProjectScenes(activeProjectRoot) };
 }, { payload:true });
 
@@ -209,6 +227,7 @@ secureHandle('parlyn:project:open', async () => {
   const world=await readDocument(worldPath, 'parlyn-world', 'World document');
   const sceneHistory=await loadSceneHistory(projectRoot, project.startupScene, scene);
   projectSession.activate(projectRoot);
+  activeLooseScenePath=null;
   return { canceled:false, projectRoot, project, scene, world, assets:await listAssets(projectRoot), scenes:await listProjectScenes(projectRoot), history:sceneHistory.history, historyWarning:sceneHistory.warning };
 });
 
@@ -256,9 +275,78 @@ secureHandle('parlyn:project:move-scene', async (payload) => {
   return { ok:true, relativePath:targetPath, project, scene, scenes:await listProjectScenes(activeProjectRoot) };
 }, { payload:true });
 
-secureHandle('parlyn:project:close', async () => projectSession.close());
+secureHandle('parlyn:project:close', async () => {
+  const result=projectSession.close();
+  if (result.ok) await clearRememberedSessionSafely();
+  return result;
+});
 
-secureHandle('parlyn:project:delete', async (payload) => projectSession.moveToTrash(payload?.confirmationName), { payload:true });
+secureHandle('parlyn:session:remember', async (payload) => {
+  let candidate;
+  if (payload?.kind === 'project') {
+    const projectRoot=projectSession.activeProjectRoot;
+    if (!projectRoot) throw new Error('No active project can be remembered.');
+    const scenePath=requireScenePath(payload.scenePath);
+    await resolveExistingProjectPath(projectRoot,scenePath,'Remembered project scene');
+    candidate={ version:1, kind:'project', projectRoot, scenePath, view:payload.view };
+  } else if (payload?.kind === 'scene') {
+    if (!activeLooseScenePath || payload.filePath !== activeLooseScenePath) throw new Error('Only the active saved scene can be remembered.');
+    candidate={ version:1, kind:'scene', filePath:activeLooseScenePath, view:payload.view };
+  } else {
+    await clearRememberedSession();
+    return { ok:true, cleared:true };
+  }
+  await (await lastSessionFiles).writeLastSession(lastSessionPath(),candidate);
+  return { ok:true };
+}, { payload:true });
+
+secureHandle('parlyn:session:clear', async () => {
+  await clearRememberedSession();
+  return { ok:true };
+});
+
+secureHandle('parlyn:session:restore', async () => {
+  let remembered;
+  try {
+    remembered=await (await lastSessionFiles).readLastSession(lastSessionPath());
+  } catch (error) {
+    return { restored:false, warning:`Saved session settings were invalid and have been reset: ${error.message}` };
+  }
+  if (!remembered) return { restored:false };
+  try {
+    if (remembered.kind === 'scene') {
+      if (!path.isAbsolute(remembered.filePath)) throw new Error('Remembered scene path is not absolute.');
+      const filePath=await fs.realpath(remembered.filePath);
+      const scene=await readDocument(filePath,'parlyn-scene','Remembered Parlyn scene');
+      projectSession.close();
+      activeLooseScenePath=filePath;
+      return { restored:true, kind:'scene', filePath, scene, view:remembered.view };
+    }
+    if (!path.isAbsolute(remembered.projectRoot)) throw new Error('Remembered project path is not absolute.');
+    const projectRoot=await fs.realpath(remembered.projectRoot);
+    const projectFile=await resolveExistingProjectPath(projectRoot,'parlyn.project.json','Remembered project file');
+    const project=await readDocument(projectFile,'parlyn-project','Remembered project file');
+    const scenePath=await resolveExistingProjectPath(projectRoot,remembered.scenePath,'Remembered project scene');
+    const worldPath=await resolveExistingProjectPath(projectRoot,project.world,'Remembered world document');
+    const scene=await readDocument(scenePath,'parlyn-scene','Remembered project scene');
+    const world=await readDocument(worldPath,'parlyn-world','Remembered world document');
+    const sceneHistory=await loadSceneHistory(projectRoot,remembered.scenePath,scene);
+    projectSession.activate(projectRoot);
+    activeLooseScenePath=null;
+    return { restored:true, kind:'project', projectRoot, project, scene, world, scenePath:remembered.scenePath, assets:await listAssets(projectRoot), scenes:await listProjectScenes(projectRoot), history:sceneHistory.history, historyWarning:sceneHistory.warning, view:remembered.view };
+  } catch (error) {
+    projectSession.close();
+    activeLooseScenePath=null;
+    await clearRememberedSession();
+    return { restored:false, warning:`The last session is unavailable; normal startup was used. ${error.message}` };
+  }
+});
+
+secureHandle('parlyn:project:delete', async (payload) => {
+  const result=await projectSession.moveToTrash(payload?.confirmationName);
+  if (result.ok) await clearRememberedSessionSafely();
+  return result;
+}, { payload:true });
 
 secureHandle('parlyn:project:save-scene', async (payload) => {
   const activeProjectRoot=projectSession.activeProjectRoot;
