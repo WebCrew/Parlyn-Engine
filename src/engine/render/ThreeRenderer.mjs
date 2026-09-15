@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { RendererBackend } from './RendererBackend.mjs';
 import { normalizeDocumentBounds } from '../core/DocumentBounds.mjs';
+import { normalizeEditorViewState } from '../editor/EditorSessionState.mjs';
 
 export class ThreeRenderer extends RendererBackend {
   constructor(container, callbacks = {}) {
@@ -411,6 +412,20 @@ export class ThreeRenderer extends RendererBackend {
       this.orbit = { yaw:-0.72, pitch:0.48, distance:11.5 };
       this.cameraTarget.set(0,0.3,0);
     }
+    this.#updateCamera();
+  }
+
+  getEditorCameraState() {
+    return {
+      target:{ x:this.cameraTarget.x, y:this.cameraTarget.y, z:this.cameraTarget.z },
+      orbit:{ ...this.orbit }
+    };
+  }
+
+  restoreEditorCameraState(camera) {
+    const normalized=normalizeEditorViewState({ camera }).camera;
+    this.cameraTarget.set(normalized.target.x,normalized.target.y,normalized.target.z);
+    this.orbit={ ...normalized.orbit };
     this.#updateCamera();
   }
 

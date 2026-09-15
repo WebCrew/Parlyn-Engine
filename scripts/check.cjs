@@ -69,9 +69,14 @@ const required = [
   'src/engine/editor/SurfacePlacement.mjs',
   'scripts/check-editor-shortcuts.mjs',
   'src/engine/editor/EditorShortcuts.mjs',
+  'src/engine/editor/EditorSessionState.mjs',
+  'src/main/lastSessionFiles.mjs',
+  'scripts/check-editor-session.mjs',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.21.md',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.22.md',
   'docs/EDITOR-COMMANDS.md',
+  'docs/EDITOR-SESSION.md',
+  'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.23.md',
   'src/main/sceneHistoryFiles.mjs',
   'docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.20.md',
   'src/engine/core/DocumentBounds.mjs',
@@ -88,7 +93,7 @@ for (const rel of required) {
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (pkg.name !== 'parlyn-engine') throw new Error('Unexpected package name.');
-if (pkg.version !== '0.5.0-beta.22') throw new Error(`Unexpected package version: ${pkg.version}`);
+if (pkg.version !== '0.5.0-beta.23') throw new Error(`Unexpected package version: ${pkg.version}`);
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -118,6 +123,7 @@ cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-document-bound
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-scene-history-files.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-surface-placement.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-editor-shortcuts.mjs')], { stdio: 'inherit' });
+cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-editor-session.mjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-asset-files.cjs')], { stdio: 'inherit' });
 cp.execFileSync(process.execPath, [path.join(root, 'scripts/check-windows-distribution.cjs')], { stdio: 'inherit' });
 

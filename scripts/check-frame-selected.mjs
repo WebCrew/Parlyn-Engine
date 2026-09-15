@@ -24,4 +24,7 @@ assert.equal(renderer.frameSelection(["left", "right"]), true);
 assert.deepEqual(renderer.cameraTarget.toArray().map((value) => Number(value.toFixed(6))), [0, 3, 0]);
 assert.ok(renderer.orbit.distance > 5, "Multiple separated nodes should require a wider frame.");
 
+renderer.restoreEditorCameraState({ target:{ x:7, y:8, z:9 }, orbit:{ yaw:0.8, pitch:0.4, distance:14 } });
+assert.deepEqual(renderer.getEditorCameraState(), { target:{ x:7, y:8, z:9 }, orbit:{ yaw:0.8, pitch:0.4, distance:14 } });
+
 console.log("Frame Selected camera contract check passed.");

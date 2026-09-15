@@ -71,13 +71,14 @@ Completion evidence:
   world-space authoring guides passed human acceptance with Beta 20;
 - consistent commands and keyboard behavior — centralized conflict-safe command
   routing, Delete selection and a visible shortcut reference implemented in
-  Beta 22, human acceptance pending.
+  Beta 22, passed human acceptance on 2026-09-15.
 
 Explicitly accepted Phase 2 workspace follow-ups (planned, not parallel work):
 
 1. Optional **Reopen Last Session** after the remaining placement and command
    checks: reopen the last project/scene's saved state, then restore editor
-   view/camera/selection safely; unavailable files must fall back to normal startup.
+   view/camera/selection safely; unavailable files must fall back to normal
+   startup. Implemented in Beta 23; human acceptance pending.
 2. Optional autosave to separate drafts, implemented and tested as its own step.
    Normal Save commits scene data; Discard must discard the draft too. Autosave
    must not silently overwrite scene files or restore intentionally discarded

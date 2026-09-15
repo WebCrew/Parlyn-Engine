@@ -2,6 +2,14 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Beta 23: reopen the last saved project scene or standalone scene after a
+  normal application close, including camera, 2.5D/3D view and valid selection.
+- Store only a small validated local session descriptor; unavailable or invalid
+  files fall back to normal startup and clear the stale entry.
+- Preserve Save/Discard/Cancel semantics and keep unsaved recovery outside this
+  step. Explicitly closing or deleting a project prevents automatic reopening.
+- Recorded successful Beta 22 human Windows acceptance.
+
 - Beta 22: centralized editor keyboard routing, added Delete selection and a
   visible read-only shortcut reference under View.
 - Protected text editing, modal dialogs, key repeat, composition and Alt/AltGr

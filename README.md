@@ -6,11 +6,17 @@
 
 # Parlyn Engine
 
-Beta 22 completes the Phase 2 command/keyboard audit with centralized shortcut
+Beta 23 safely reopens the last saved project scene or standalone scene after a
+normal application close. It restores the saved scene, project context, camera,
+2.5D/3D view and valid selection while falling back to normal startup if files
+were moved or removed. It never restores unsaved edits; separate autosave drafts
+remain the final Phase 2 follow-up. Beta 23 awaits human Windows acceptance.
+
+Beta 22 completed the Phase 2 command/keyboard audit with centralized shortcut
 routing, Delete selection and a visible reference under **View → Keyboard
 Shortcuts**. Text entry, dialogs, key repeat and Alt/AltGr combinations are
-protected from accidental editor commands. Beta 22 awaits human Windows
-acceptance.
+protected from accidental editor commands. Beta 22 passed human Windows
+acceptance on 2026-09-15.
 
 Beta 21 added an optional **Surface** toggle in the Placement group: on Move
 release, a mesh or billboard drops onto the nearest suitable lower Mesh3D face
@@ -68,6 +74,7 @@ The long-term direction includes:
 - Frame Selected for single and multiple nodes with the F shortcut
 - live Inspector synchronization during gizmo edits
 - editor camera orbit, pan and zoom
+- safe reopening of the last saved project scene or standalone scene
 - undo/redo history foundation
 - cycle-safe scene hierarchy and isolated, bounded Undo/Redo snapshots
 - native scene open/save dialogs
@@ -252,7 +259,7 @@ See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
 Phase 1 acceptance is complete. The current Phase 2 editor candidate uses the
-repeatable [`v0.5.0-beta.22 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.22.md).
+repeatable [`v0.5.0-beta.23 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.23.md).
 
 ### Windows release integrity
 

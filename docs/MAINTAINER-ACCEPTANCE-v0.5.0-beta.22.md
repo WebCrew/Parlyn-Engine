@@ -1,7 +1,7 @@
 # Parlyn Engine v0.5.0 Beta 22 — Maintainer Acceptance
 
-Status: pending human Windows acceptance. Beta 21 passed maintainer testing on
-2026-09-15.
+Status: passed human Windows acceptance on 2026-09-15. Beta 21 passed maintainer
+testing on 2026-09-15.
 
 Scope: final Phase 2 command and keyboard consistency audit. This release adds
 Delete for the current selection, centralizes existing shortcuts and displays a
