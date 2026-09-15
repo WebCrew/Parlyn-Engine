@@ -1,7 +1,7 @@
 # Parlyn Engine v0.5.0 Beta 21 — Maintainer Acceptance
 
-Status: pending human Windows acceptance. Beta 20 passed the maintainer's
-full Bounds/history re-test and additional editor regression tests on 2026-09-13.
+Status: passed human Windows acceptance on 2026-09-15. Surface placement and
+the wider editor regression scope completed without a reported defect.
 
 Scope: optional downward authoring placement on Move-gizmo release only.
 No collision/physics, slope alignment, Inspector snap or asset-import changes.

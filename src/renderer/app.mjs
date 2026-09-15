@@ -16,6 +16,7 @@ import { DEFAULT_TRANSFORM_SNAPPING, normalizeTransformSnapping } from "../engin
 import { normalizeTransformSpace } from "../engine/editor/TransformSpace.mjs";
 import { normalizeDocumentBounds } from "../engine/core/DocumentBounds.mjs";
 import { placeNodeOnSurface } from "../engine/editor/SurfacePlacement.mjs";
+import { EDITOR_SHORTCUTS, isTextEditingTarget, resolveEditorShortcut } from "../engine/editor/EditorShortcuts.mjs";
 async function bootstrap() {
   const $ = (id) => document.getElementById(id);
   const status = $("status");
@@ -214,6 +215,10 @@ async function bootstrap() {
       closeViewMenu();
       status.textContent = "Workspace layout reset to default.";
     });
+    $("show-shortcuts").addEventListener("click", () => {
+      closeViewMenu();
+      $("shortcuts-dialog").showModal();
+    });
     for (const resizer of document.querySelectorAll("[data-resize-panel]")) {
       resizer.addEventListener("pointerdown", (event) => beginPanelResize(event, resizer));
       resizer.addEventListener("keydown", (event) => {
@@ -226,6 +231,21 @@ async function bootstrap() {
       });
     }
   }
+  function renderShortcutReference() {
+    const list = $("shortcut-list");
+    list.replaceChildren();
+    for (const shortcut of EDITOR_SHORTCUTS) {
+      const row = document.createElement("div");
+      row.className = "shortcut-row";
+      const label = document.createElement("span");
+      label.textContent = shortcut.label;
+      const keys = document.createElement("kbd");
+      keys.textContent = shortcut.keys;
+      row.append(label, keys);
+      list.appendChild(row);
+    }
+  }
+  renderShortcutReference();
   function beginPanelResize(event, resizer) {
     if (event.button !== 0) return;
     const panel = resizer.dataset.resizePanel;
@@ -1188,6 +1208,7 @@ async function bootstrap() {
   $("frame-selected").addEventListener("click", frameSelected);
   $("snap-settings").addEventListener("click", openTransformSnapSettings);
   $("cancel-snap-settings").addEventListener("click", () => $("snap-settings-dialog").close());
+  $("close-shortcuts").addEventListener("click", () => $("shortcuts-dialog").close());
   $("save-snap-settings").addEventListener("click", saveTransformSnapSettings);
   $("reset-snap-settings").addEventListener("click", resetTransformSnapSettings);
   $("modules").addEventListener("click", () => {
@@ -1280,65 +1301,29 @@ async function bootstrap() {
   $("cancel-move-asset").addEventListener("click", () => $("move-asset-dialog").close());
   $("confirm-move-asset").addEventListener("click", moveProjectAsset);
   window.addEventListener("keydown", (event) => {
-    const tag = document.activeElement?.tagName?.toLowerCase();
-    const editing = tag === "input" || tag === "select" || tag === "textarea";
-    const key = event.key.toLowerCase();
-    if (!editing && !(event.ctrlKey || event.metaKey)) {
-      if (key === "escape" || key === "q") {
-        event.preventDefault();
-        setTransformMode("select");
-        return;
-      }
-      if (key === "w") {
-        event.preventDefault();
-        setTransformMode("translate");
-        return;
-      }
-      if (key === "e") {
-        event.preventDefault();
-        setTransformMode("rotate");
-        return;
-      }
-      if (key === "r") {
-        event.preventDefault();
-        setTransformMode("scale");
-        return;
-      }
-      if (key === "end") {
-        event.preventDefault();
-        placeSelectionOnGround();
-        return;
-      }
-      if (key === "f") {
-        event.preventDefault();
-        frameSelected();
-        return;
-      }
-    }
-    if (!(event.ctrlKey || event.metaKey)) return;
-    if (key === "d" && !editing) {
-      event.preventDefault();
-      duplicateSelected();
-    }
-    if (key === "s") {
-      event.preventDefault();
-      saveScene();
-    }
-    if (key === "o" && event.shiftKey) {
-      event.preventDefault();
-      openProject();
-    } else if (key === "o") {
-      event.preventDefault();
-      openScene();
-    }
-    if (key === "z" && !event.shiftKey) {
-      event.preventDefault();
-      undo();
-    }
-    if (key === "y" || key === "z" && event.shiftKey) {
-      event.preventDefault();
-      redo();
-    }
+    const editing = isTextEditingTarget(document.activeElement);
+    const command = resolveEditorShortcut(event, {
+      editing,
+      modalOpen:Boolean(document.querySelector("dialog[open]"))
+    });
+    if (!command) return;
+    event.preventDefault();
+    if (editing) document.activeElement?.blur?.();
+    ({
+      select:() => setTransformMode("select"),
+      move:() => setTransformMode("translate"),
+      rotate:() => setTransformMode("rotate"),
+      scale:() => setTransformMode("scale"),
+      ground:placeSelectionOnGround,
+      frame:frameSelected,
+      delete:deleteSelected,
+      duplicate:duplicateSelected,
+      save:saveScene,
+      "open-scene":openScene,
+      "open-project":openProject,
+      undo,
+      redo
+    })[command]?.();
   });
   const resizeObserver = new ResizeObserver(() => renderer.resize());
   resizeObserver.observe($("viewport"));

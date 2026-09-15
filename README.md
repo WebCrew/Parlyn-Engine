@@ -6,11 +6,17 @@
 
 # Parlyn Engine
 
-Beta 21 adds an optional **Surface** toggle in the Placement group: on Move
+Beta 22 completes the Phase 2 command/keyboard audit with centralized shortcut
+routing, Delete selection and a visible reference under **View → Keyboard
+Shortcuts**. Text entry, dialogs, key repeat and Alt/AltGr combinations are
+protected from accidental editor commands. Beta 22 awaits human Windows
+acceptance.
+
+Beta 21 added an optional **Surface** toggle in the Placement group: on Move
 release, a mesh or billboard drops onto the nearest suitable lower Mesh3D face
 or the existing editor ground. Movement plus placement is one Undo step. It
 does not affect Rotate, Scale or Inspector edits and is not physics/collision.
-Beta 21 awaits human Windows acceptance; Beta 20 passed maintainer testing.
+Beta 21 passed maintainer Windows acceptance on 2026-09-15.
 
 Beta 20 fixes saved per-scene Undo/Redo history after a scene switch. It retains
 Beta 19's optional scene/world bounds through **Bounds** in the View command
@@ -150,6 +156,9 @@ This boundary is intentional: future renderer work should remain possible withou
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
+Current editor bindings and their context rules are documented in
+[`docs/EDITOR-COMMANDS.md`](docs/EDITOR-COMMANDS.md).
+
 ## 2.5D-first philosophy
 
 Parlyn does not define 2.5D as "fake 3D". It treats it as a flexible production approach.
@@ -243,7 +252,7 @@ See [`docs/WINDOWS-DISTRIBUTION.md`](docs/WINDOWS-DISTRIBUTION.md) for signing,
 verification and the maintainer acceptance test.
 
 Phase 1 acceptance is complete. The current Phase 2 editor candidate uses the
-repeatable [`v0.5.0-beta.21 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.21.md).
+repeatable [`v0.5.0-beta.22 maintainer checklist`](docs/MAINTAINER-ACCEPTANCE-v0.5.0-beta.22.md).
 
 ### Windows release integrity
 

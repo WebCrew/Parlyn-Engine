@@ -15,14 +15,14 @@
     </div>
     <nav class="top-actions">
       <button id="new-project">New Project</button>
-      <button id="open-project">Open Project</button>
+      <button id="open-project" title="Open Project (Ctrl+Shift+O)">Open Project</button>
       <span class="toolbar-divider"></span>
       <button id="new-scene">New Scene</button>
-      <button id="open-scene">Open Scene</button>
-      <button id="save-scene">Save</button>
+      <button id="open-scene" title="Open Scene (Ctrl+O)">Open Scene</button>
+      <button id="save-scene" title="Save Scene (Ctrl+S)">Save</button>
       <span class="toolbar-divider"></span>
       <button id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
-      <button id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
+      <button id="redo" title="Redo (Ctrl+Y / Ctrl+Shift+Z)">↷ Redo</button>
       <div class="view-menu-wrap">
         <button id="view-menu-button" aria-haspopup="true" aria-expanded="false">View</button>
         <div id="view-menu" class="view-menu" hidden>
@@ -31,6 +31,7 @@
           <label><input id="show-inspector" type="checkbox"> Inspector</label>
           <label><input id="show-assets" type="checkbox"> Assets</label>
           <button id="reset-layout">Reset Layout</button>
+          <button id="show-shortcuts">Keyboard Shortcuts</button>
         </div>
       </div>
       <button id="smart-systems" title="Parlyn Smart Systems">World</button>
@@ -55,7 +56,7 @@
         <div class="panel-actions">
           <button id="reparent-node" class="icon-button" title="Move selected node to another parent" disabled>↳</button>
           <button id="duplicate-node" class="icon-button" title="Duplicate selected node (Ctrl+D)" disabled>⧉</button>
-          <button id="delete-node" class="icon-button" title="Delete selected node" disabled>−</button>
+          <button id="delete-node" class="icon-button" title="Delete selected nodes (Delete)" disabled>−</button>
           <button id="add-node" class="icon-button" title="Add node">+</button>
           <button class="icon-button panel-close" data-close-panel="hierarchy" title="Hide Hierarchy and Scenes" aria-label="Hide Hierarchy and Scenes">×</button>
         </div>
@@ -194,6 +195,12 @@
       <p>These settings affect viewport gizmos only. Inspector values remain unrestricted.</p>
     </div>
     <div class="dialog-actions"><button id="reset-snap-settings">Reset Defaults</button><span class="dialog-spacer"></span><button id="cancel-snap-settings">Cancel</button><button id="save-snap-settings" class="primary">Apply</button></div>
+  </dialog>
+
+  <dialog id="shortcuts-dialog" class="node-dialog small-dialog" aria-labelledby="shortcuts-title">
+    <div class="dialog-head"><strong id="shortcuts-title">Keyboard Shortcuts</strong><span>Current editor commands. Shortcuts pause while a dialog is open.</span></div>
+    <div id="shortcut-list" class="shortcut-list"></div>
+    <div class="dialog-actions"><button id="close-shortcuts" class="primary">Close</button></div>
   </dialog>
 
   <dialog id="reparent-dialog" class="node-dialog small-dialog" aria-labelledby="reparent-title">

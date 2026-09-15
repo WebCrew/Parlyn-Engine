@@ -2,6 +2,12 @@
 
 ## Unreleased — Foundation Stabilization
 
+- Beta 22: centralized editor keyboard routing, added Delete selection and a
+  visible read-only shortcut reference under View.
+- Protected text editing, modal dialogs, key repeat, composition and Alt/AltGr
+  input from accidental editor commands while preserving Ctrl+S save.
+- Recorded successful Beta 21 human Windows acceptance.
+
 - Beta 21: optional persistent Surface toggle places the moved primary node
   on a lower mesh support or editor ground when the Move gizmo is released.
 - Combined placement and movement into one Undo/Redo step; excluded self,
