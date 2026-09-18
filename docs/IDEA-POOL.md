@@ -167,25 +167,6 @@ Do not add editor buttons, data formats, dependencies or public feature claims f
   or public integration/support promise is authorized.
 
 
-### Sculptris Alpha 6 — Sculpting Workflow Reference
-
-- **Summary:** Preserve [Sculptris Alpha 6](https://www.zbrushcentral.com/t/sculptris-alpha-6-its-here/301536)
-  as a reference for an accessible, clay-like sculpting workflow and evaluate
-  whether selected interaction ideas could inform a future Parlyn sculpting
-  bridge or separately designed tool.
-- **Why it may matter:** Sculptris demonstrated a notably approachable workflow
-  based on dynamic local mesh tessellation and direct 3D texture painting.
-  Studying that simplicity could help Parlyn offer beginner-friendly asset
-  refinement without recreating a large professional sculpting suite.
-- **Dependencies:** Confirm the software's present availability, compatibility
-  and complete licence terms; do not bundle, redistribute, modify or embed the
-  proprietary application without explicit written permission. Prefer modern,
-  maintained and openly licensed implementations for any Parlyn functionality.
-- **Source/date:** Tool suggestion from Andreas Holzer, 2026-09-18; Alpha 6 was
-  announced by Pixologic in 2011.
-- **Status:** `Unreviewed` — workflow reference only; no dependency,
-  redistribution, integration or compatibility claim is authorized.
-
 ### MakeHuman / MPFB Character Foundation
 
 - **Summary:** Evaluate [MakeHuman Community](https://static.makehumancommunity.org/)
@@ -207,26 +188,35 @@ Do not add editor buttons, data formats, dependencies or public feature claims f
 - **Status:** `Unreviewed` — promising optional character-workflow candidate;
   no engine-core dependency or public compatibility promise is authorized.
 
-### AccuRIG 2 Auto-Rigging Bridge
 
-- **Summary:** Evaluate [ActorCore AccuRIG 2](https://actorcore.reallusion.com/auto-rig/accurig)
-  as an optional external-tool bridge for automatically rigging user-owned 3D
-  characters and returning standard exported rigs to Parlyn.
-- **Why it may matter:** A guided auto-rigging round trip could make animated
-  character prototypes much more accessible to small teams without requiring
-  Parlyn to build a production-grade automatic rigging system immediately.
-- **Dependencies:** Reallusion states that AccuRIG is free for personal and
-  commercial project use, but that does not by itself authorize bundling,
-  redistribution, embedding, automation or branding it as a Parlyn component.
-  Obtain written clarification or suitable SDK/API terms before anything beyond
-  a user-installed external bridge. Keep ActorCore motions and other Reallusion
-  content under their separate content licences, and validate supported export
-  formats, skeleton mapping, offline behavior and account requirements.
-- **Source/date:** Tool suggestion from Andreas Holzer, 2026-09-18; official
-  ActorCore product and licensing information.
-- **Status:** `Unreviewed` — external workflow candidate pending written
-  integration and redistribution clarification; no bundled dependency or
-  public support claim is authorized.
+### Blender Sculpting and Asset Round-Trip Bridge
+
+- **Summary:** Evaluate a user-installed
+  [Blender](https://www.blender.org/features/sculpting/) bridge for sculpting,
+  retopology, rigging and other advanced asset work, with an explicit
+  export-edit-reimport round trip between Parlyn and Blender.
+- **Why it may matter:** Blender is a mature, actively maintained free and open
+  source 3D suite with professional sculpting and broad pipeline capabilities.
+  A focused bridge could give Parlyn users powerful asset-authoring tools while
+  keeping the engine itself compact and avoiding an immature built-in sculpting
+  subsystem.
+- **Possible direction:** Begin with reliable glTF/GLB export and reimport,
+  deterministic scale, transforms, materials, skeletons and asset identity.
+  Later evaluate an optional Blender add-on or user-triggered automation only
+  where it provides a clear usability advantage. Blender remains separately
+  installed and is not embedded into the Parlyn engine core.
+- **Dependencies:** Stable Parlyn asset and material formats; lossless-enough
+  round-trip validation; safe handling of file ownership and overwrites;
+  compatibility tests across supported Blender versions; and legal review of
+  any distributed add-on. Blender is GPL-3.0, so copied or linked Blender code
+  must not be placed inside Parlyn's MIT-licensed core without a deliberately
+  compatible architecture and licence review.
+- **Source/date:** Modern replacement considered after a Sculptris suggestion
+  from Andreas Holzer, 2026-09-18; official Blender project and licence
+  information.
+- **Status:** `Unreviewed` — preferred mature sculpting bridge candidate; no
+  bundled Blender distribution, engine-core dependency or public compatibility
+  promise is authorized.
 
 The named Parlyn Smart Systems are not Idea Pool entries: their direction and initial foundation were already accepted before this policy and are documented in `SMART-SYSTEMS.md`. Their further implementation remains paused until their ordered roadmap phase becomes active.
 
