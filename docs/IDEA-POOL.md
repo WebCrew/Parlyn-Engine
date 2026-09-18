@@ -166,6 +166,58 @@ Do not add editor buttons, data formats, dependencies or public feature claims f
   no roadmap commitment, bundled third-party application, engine-core dependency
   or public integration/support promise is authorized.
 
+
+### MakeHuman / MPFB Character Foundation
+
+- **Summary:** Evaluate [MakeHuman Community](https://static.makehumancommunity.org/)
+  and MPFB as an optional foundation or reference for a future Parlyn character
+  generator, including reusable base meshes, morph targets, skins, rigs and
+  export workflows.
+- **Why it may matter:** MakeHuman's human-generation workflow and CC0 core
+  assets could provide a legally clear, vendor-neutral starting point for rapid
+  character prototyping. The project explicitly permits reuse of its core assets
+  in another character generator and documents related Godot workflows.
+- **Dependencies:** Separate the licensing layers: core assets are CC0, MPFB
+  source code is GPL and MakeHuman source code is AGPL. Decide whether Parlyn
+  should reuse only CC0 assets and formats, communicate with an external tool,
+  or place compatible code in a clearly isolated optional component. Validate
+  topology, morphs, skeletons, animations, materials, performance, attribution
+  records for non-core community assets and import/export quality.
+- **Source/date:** Tool suggestion from Andreas Holzer, 2026-09-18; official
+  MakeHuman Community licensing and character-generator guidance.
+- **Status:** `Unreviewed` — promising optional character-workflow candidate;
+  no engine-core dependency or public compatibility promise is authorized.
+
+
+### Blender Sculpting and Asset Round-Trip Bridge
+
+- **Summary:** Evaluate a user-installed
+  [Blender](https://www.blender.org/features/sculpting/) bridge for sculpting,
+  retopology, rigging and other advanced asset work, with an explicit
+  export-edit-reimport round trip between Parlyn and Blender.
+- **Why it may matter:** Blender is a mature, actively maintained free and open
+  source 3D suite with professional sculpting and broad pipeline capabilities.
+  A focused bridge could give Parlyn users powerful asset-authoring tools while
+  keeping the engine itself compact and avoiding an immature built-in sculpting
+  subsystem.
+- **Possible direction:** Begin with reliable glTF/GLB export and reimport,
+  deterministic scale, transforms, materials, skeletons and asset identity.
+  Later evaluate an optional Blender add-on or user-triggered automation only
+  where it provides a clear usability advantage. Blender remains separately
+  installed and is not embedded into the Parlyn engine core.
+- **Dependencies:** Stable Parlyn asset and material formats; lossless-enough
+  round-trip validation; safe handling of file ownership and overwrites;
+  compatibility tests across supported Blender versions; and legal review of
+  any distributed add-on. Blender is GPL-3.0, so copied or linked Blender code
+  must not be placed inside Parlyn's MIT-licensed core without a deliberately
+  compatible architecture and licence review.
+- **Source/date:** Modern replacement considered after a Sculptris suggestion
+  from Andreas Holzer, 2026-09-18; official Blender project and licence
+  information.
+- **Status:** `Unreviewed` — preferred mature sculpting bridge candidate; no
+  bundled Blender distribution, engine-core dependency or public compatibility
+  promise is authorized.
+
 The named Parlyn Smart Systems are not Idea Pool entries: their direction and initial foundation were already accepted before this policy and are documented in `SMART-SYSTEMS.md`. Their further implementation remains paused until their ordered roadmap phase becomes active.
 
 ## Review gate
