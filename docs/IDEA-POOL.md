@@ -166,6 +166,68 @@ Do not add editor buttons, data formats, dependencies or public feature claims f
   no roadmap commitment, bundled third-party application, engine-core dependency
   or public integration/support promise is authorized.
 
+
+### Sculptris Alpha 6 — Sculpting Workflow Reference
+
+- **Summary:** Preserve [Sculptris Alpha 6](https://www.zbrushcentral.com/t/sculptris-alpha-6-its-here/301536)
+  as a reference for an accessible, clay-like sculpting workflow and evaluate
+  whether selected interaction ideas could inform a future Parlyn sculpting
+  bridge or separately designed tool.
+- **Why it may matter:** Sculptris demonstrated a notably approachable workflow
+  based on dynamic local mesh tessellation and direct 3D texture painting.
+  Studying that simplicity could help Parlyn offer beginner-friendly asset
+  refinement without recreating a large professional sculpting suite.
+- **Dependencies:** Confirm the software's present availability, compatibility
+  and complete licence terms; do not bundle, redistribute, modify or embed the
+  proprietary application without explicit written permission. Prefer modern,
+  maintained and openly licensed implementations for any Parlyn functionality.
+- **Source/date:** Tool suggestion from Andreas Holzer, 2026-09-18; Alpha 6 was
+  announced by Pixologic in 2011.
+- **Status:** `Unreviewed` — workflow reference only; no dependency,
+  redistribution, integration or compatibility claim is authorized.
+
+### MakeHuman / MPFB Character Foundation
+
+- **Summary:** Evaluate [MakeHuman Community](https://static.makehumancommunity.org/)
+  and MPFB as an optional foundation or reference for a future Parlyn character
+  generator, including reusable base meshes, morph targets, skins, rigs and
+  export workflows.
+- **Why it may matter:** MakeHuman's human-generation workflow and CC0 core
+  assets could provide a legally clear, vendor-neutral starting point for rapid
+  character prototyping. The project explicitly permits reuse of its core assets
+  in another character generator and documents related Godot workflows.
+- **Dependencies:** Separate the licensing layers: core assets are CC0, MPFB
+  source code is GPL and MakeHuman source code is AGPL. Decide whether Parlyn
+  should reuse only CC0 assets and formats, communicate with an external tool,
+  or place compatible code in a clearly isolated optional component. Validate
+  topology, morphs, skeletons, animations, materials, performance, attribution
+  records for non-core community assets and import/export quality.
+- **Source/date:** Tool suggestion from Andreas Holzer, 2026-09-18; official
+  MakeHuman Community licensing and character-generator guidance.
+- **Status:** `Unreviewed` — promising optional character-workflow candidate;
+  no engine-core dependency or public compatibility promise is authorized.
+
+### AccuRIG 2 Auto-Rigging Bridge
+
+- **Summary:** Evaluate [ActorCore AccuRIG 2](https://actorcore.reallusion.com/auto-rig/accurig)
+  as an optional external-tool bridge for automatically rigging user-owned 3D
+  characters and returning standard exported rigs to Parlyn.
+- **Why it may matter:** A guided auto-rigging round trip could make animated
+  character prototypes much more accessible to small teams without requiring
+  Parlyn to build a production-grade automatic rigging system immediately.
+- **Dependencies:** Reallusion states that AccuRIG is free for personal and
+  commercial project use, but that does not by itself authorize bundling,
+  redistribution, embedding, automation or branding it as a Parlyn component.
+  Obtain written clarification or suitable SDK/API terms before anything beyond
+  a user-installed external bridge. Keep ActorCore motions and other Reallusion
+  content under their separate content licences, and validate supported export
+  formats, skeleton mapping, offline behavior and account requirements.
+- **Source/date:** Tool suggestion from Andreas Holzer, 2026-09-18; official
+  ActorCore product and licensing information.
+- **Status:** `Unreviewed` — external workflow candidate pending written
+  integration and redistribution clarification; no bundled dependency or
+  public support claim is authorized.
+
 The named Parlyn Smart Systems are not Idea Pool entries: their direction and initial foundation were already accepted before this policy and are documented in `SMART-SYSTEMS.md`. Their further implementation remains paused until their ordered roadmap phase becomes active.
 
 ## Review gate
